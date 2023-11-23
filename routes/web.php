@@ -1,12 +1,13 @@
 <?php
 
-use App\Models\data_access;
-use App\Http\Controllers\ViewController;
-use App\Http\Controllers\AuthController;
-use App\Http\Controllers\RegisterController;
-use App\Http\Controllers\JsondataController ;
+use App\Http\Controllers\GeneralController;
+use App\Http\Controllers\InvoiceController;
+use App\Http\Controllers\JsonDataController;
+use App\Models\MenusAccess;
 use Illuminate\Support\Facades\Route;
-
+use App\Http\Controllers\AuthController;
+use App\Http\Controllers\GenerateController;
+use Illuminate\Support\Facades\Session;
 
 /*
 |--------------------------------------------------------------------------
@@ -19,52 +20,42 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
-// VIEW / HALAMAN
-    Route::get('/', function () {
-        return view('pages.landingpage.guest');
-    })->name('guest');
-    Route::get('/kostan', function () {
-        return view('pages.landingpage.kostan');
-    })->name('kostan');
-    Route::get('/contact', function () {
-        return view('pages.landingpage.layouts');
-    })->name('contact');
-    Route::get('/booking', function () {
-        return view('pages.landingpage.booking');
-    })->name('booking');
-    
-    Route::get('/login', [AuthController::class, 'index'])->name('login')->middleware('guest');
-    Route::get('/register', [RegisterController::class, 'index'])->name('register')->middleware('guest');
-    // Route::middleware(['auth'])->group(function () {
-    // Route::get('/based', [ViewController::class, 'based']);
+Route::get('/login', [AuthController::class, 'index'])->name('login');
+// Rute untuk melakukan proses login
+Route::post('/login', [AuthController::class, 'login']);
+Route::get('/sign-up', [AuthController::class, 'signup'])->name('sign-up');
+Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 
-    // Route::middleware(['role:Superadmin'])->group(function () {
-    //     Route::post('/generate', [GenerateController::class, 'generate'])->name('generate');
-    // });
-    
-    $allowedRoutes = data_access::all();
-    foreach ($allowedRoutes as $routeData) {
-        
-        $class  = $routeData->class ; 
-        $url    = '/'.$class ; 
-        Route::get($url, [ViewController::class, $class])->name($class);
-        // ->middleware('auth');
+Route::get('/generateview', [GenerateController::class, 'generateview']);
+Route::get('/gendataview', [GenerateController::class, 'gendataview']);
+
+Route::get('/invoicepengadaan', [InvoiceController::class, 'invoicePengadaan']);
+
+Route::middleware(['auth'])->group(function () {
+    Route::get('/', [GeneralController::class, 'based']);
+
+    Route::middleware(['role:Superadmin'])->group(function () {
+        Route::post('/generate', [GenerateController::class, 'generate'])->name('generate');
+    });
+
+    if(Session::get('menu')){
+        $allowedRoutes = Session::get('menu');
+    }else{
+       Session::put('menu', MenusAccess::all());
+       $allowedRoutes = Session::get('menu');
+    //    dd($allowedRoutes);
     }
-
-// });
-
-// ACTION / CONTROLL
-    Route::post('/login', [AuthController::class, 'authenticate'])->name('authenticate');
-    Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
-    Route::post('/store', [RegisterController::class, 'store'])->name('store');
-    Route::post('/getlistuser', [JsonDataController::class, 'getlistuser'])->name('getlistuser');
-    Route::post('/getlistpenghuni', [JsonDataController::class, 'getlistpenghuni'])->name('getlistpenghuni');
-    Route::post('/getlistkamar', [JsonDataController::class, 'getlistkamar'])->name('getlistkamar');
-    Route::post('/getlisttransaksi', [JsonDataController::class, 'getlisttransaksi'])->name('getlisttransaksi');
-    Route::post('/getlistmenu', [JsonDataController::class, 'getlistmenu'])->name('getlistmenu');
-    Route::post('/getrole', [JsonDataController::class, 'getrole'])->name('getrole');
-    Route::post('/saveUser', [JsonDataController::class, 'saveUser'])->name('saveUser');
-    Route::post('/saveMenu', [JsonDataController::class, 'saveMenu'])->name('saveMenu');
-    Route::post('/changestatususer', [JsonDataController::class, 'changestatususer'])->name('changestatususer');
-    Route::post('/deleteMenu', [JsonDataController::class, 'deleteMenu'])->name('deleteMenu');
-
+   
+    if($allowedRoutes) {
+        foreach ($allowedRoutes as $routeData) {
+            // Route::middleware(['role:' . $routeData->role])->group(function () use ($routeData) {
+                // Anda dapat menggunakan $routeData->id untuk mengidentifikasi setiap entri secara unik
+                if ($routeData->param_type == "VIEW"){
+                    Route::get($routeData->url, [GeneralController::class, $routeData->method])->name($routeData->name);
+                }else{
+                    Route::post($routeData->url, [JsonDataController::class, $routeData->method])->name($routeData->name);
+                }
+            // });
+        }
+    }
+});

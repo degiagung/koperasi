@@ -17,16 +17,14 @@ class User extends Authenticatable
      *
      * @var array<int, string>
      */
-
     protected $fillable = [
         'name',
         'email',
         'password',
-        'role',
-        'status',
+        'role_id',
+        'is_active'
     ];
 
-    // protected $guarded = ['iduser'];
     /**
      * The attributes that should be hidden for serialization.
      *
@@ -43,6 +41,17 @@ class User extends Authenticatable
      * @var array<string, string>
      */
     protected $casts = [
+        'email_verified_at' => 'datetime',
         'password' => 'hashed',
     ];
+
+    public function hasAnyRole($roles)
+    {
+        return $this->roles()->whereIn('role_name', $roles)->exists();
+    }
+    
+    public function roles()
+    {
+        return $this->hasMany(UsersRole::class, 'id', 'role_id');
+    }
 }
