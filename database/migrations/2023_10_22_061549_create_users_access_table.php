@@ -17,6 +17,7 @@ return new class extends Migration
             
             $table->unsignedBigInteger('user_id'); 
             
+            $table->string('handphone', 20);
             $table->integer('i_create')->default(0);
             $table->integer('i_update')->default(0);
             $table->integer('i_delete')->default(0);

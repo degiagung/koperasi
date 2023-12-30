@@ -43,14 +43,25 @@ function getListView() {
                 // loaderPage(false);
             },
         },
+        autoWidth: false,
+        dom: '<"datatable-header"lfB><"datatable-scroll-wrap"t><"datatable-footer"ip>',
         language: {
-            oPaginate: {
-                sFirst: "First",
-                sLast: "Last",
-                sNext: ">",
-                sPrevious: "<",
-            },
+            search      : '_INPUT_',
+            lengthMenu  : '_MENU_',
+            paginate    : { 'first': 'First', 'last': 'Last', 'next': '&rarr;', 'previous': '&larr;' }
         },
+        buttons: [
+            
+            { text: '', extend: 'pdfHtml5',  className: 'btndownload iconpdf',  title:'List Akses', exportOptions: {columns:[':not(.notdown)']}},
+            { text: '', extend: 'excel',  className: 'btndownload iconexcel',  title:'List Akses', exportOptions: {columns:[':not(.notdown)']}},
+            { 
+                className: 'btnreload',
+                text: '<i class="bi bi-arrow-clockwise" ></li>',
+                action: function ( e, dt, node, config ) {     
+                    $('#table-list').DataTable().ajax.reload();
+                }
+            },
+        ],
         columns: [
             {
                 data: "id",
@@ -257,13 +268,13 @@ function loadRoleMenu(rowData) {
                 ArrCheckPermission = data;
                 loadRole(rowData);
             } else {
-                sweetAlert("Oops...", response.info, "error");
+                sweetAlert("Oops...", response.info, "ERROR");
             }
         },
         error: function (xhr, status, error) {
             // Handle error response
-            console.log(xhr.responseText);
-            sweetAlert("Oops...", xhr.responseText, "error");
+            console.log("ERROR");
+            sweetAlert("Oops...", "ERROR", "ERROR");
         },
     });
 }
@@ -341,13 +352,13 @@ function loadRole(rowData) {
                 $("#base-form").html(el);
                 $("#modal-data").modal("show");
             } else {
-                sweetAlert("Oops...", response.info, "error");
+                sweetAlert("Oops...", response.info, "ERROR");
             }
         },
         error: function (xhr, status, error) {
             // Handle error response
-            console.log(xhr.responseText);
-            sweetAlert("Oops...", xhr.responseText, "error");
+            console.log("ERROR");
+            sweetAlert("Oops...", "ERROR", "ERROR");
         },
     });
 }
@@ -397,13 +408,13 @@ function savePermission() {
                     location.reload();
                 });
             } else {
-                sweetAlert("Oops...", response.info, "error");
+                sweetAlert("Oops...", response.info, "ERROR");
             }
         },
         error: function (xhr, status, error) {
             // Handle error response
-            console.log(xhr.responseText);
-            sweetAlert("Oops...", xhr.responseText, "error");
+            console.log("ERROR");
+            sweetAlert("Oops...", "ERROR", "ERROR");
         },
     });
 }
@@ -440,13 +451,13 @@ function updateDataMenu() {
                     location.reload();
                 });
             } else {
-                sweetAlert("Oops...", response.info, "error");
+                sweetAlert("Oops...", response.info, "ERROR");
             }
         },
         error: function (xhr, status, error) {
             // Handle error response
-            console.log(xhr.responseText);
-            sweetAlert("Oops...", xhr.responseText, "error");
+            console.log("ERROR");
+            sweetAlert("Oops...", "ERROR", "ERROR");
         },
     });
 }
@@ -471,7 +482,7 @@ function saveConfirm(params) {
                 updateDataMenu()
             }
         } else {
-            swal("Cancelled !!", "Okey, Cancelled !!", "error");
+            swal("Cancelled !!", "Okey, Cancelled !!", "ERROR");
         }
     });
 }
@@ -503,6 +514,6 @@ function saveConfirm(params) {
 //             dropdownParent: $("#modal-data"),
 //         });
 //     } catch (error) {
-//         sweetAlert("Oops...", error.responseText, "error");
+//         sweetAlert("Oops...", error.responseText, "ERROR");
 //     }
 // }

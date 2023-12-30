@@ -1,180 +1,88 @@
-<!DOCTYPE html>
-<html lang="en" class="h-100">
-@include('includes.style')
 
-<head>
-    <meta charset="utf-8">
-	<meta http-equiv="X-UA-Compatible" content="IE=edge">
-	<meta name="keywords" content="">
-	<meta name="author" content="">
-	<meta name="robots" content="">
-	<meta name="viewport" content="width=device-width, initial-scale=1">
-	<meta name="description" content="Yashadmin:Sales Management System Admin Bootstrap 5 Template">
-	<meta property="og:title" content="Yashadmin:Sales Management System Admin Bootstrap 5 Template">
-	<meta property="og:description" content="Yashadmin:Sales Management System Admin Bootstrap 5 Template">
-	<meta property="og:image" content="https:/yashadmin.dexignzone.com/xhtml/social-image.png">
-	<meta name="format-detection" content="telephone=no">
-	
-	<!-- PAGE TITLE HERE -->
-	<title>POINTCUT</title>
-	
-	<!-- FAVICONS ICON -->
-	<link rel="shortcut icon" type="image/png" href="images/favicon.png">
-    <link href="./css/style.css" rel="stylesheet">
+@extends('layouts.user_type.guest')
 
-</head>
-
-<body class="vh-100" style="background-image:url('images/bg.png'); background-position:center;>
-    <div class="authincation h-100">
-        <div class="container h-100">
-            <div class="row justify-content-center h-100 align-items-center">
-                <div class="col-md-6">
-                    <div class="authincation-content">
-                        <div class="row no-gutters">
-                            <div class="col-xl-12">
-                                <div class="auth-form">
-									<div class="text-center mb-3">
-										<a href="index.html"><img src="{{asset('template/admin/images/logoapps.png')}}" alt=""></a>
-									</div>
-                                    <h4 class="text-center mb-4">Sign up your account</h4>
-                                    <form action="index.html">
-                                        <div class="mb-3">
-                                            <label class="mb-1"><strong>Name</strong></label>
-                                            <input type="text" id="form-name" class="form-control" placeholder="Name">
-                                        </div>
-                                        <div class="mb-3">
-                                            <label class="mb-1"><strong>Phone</strong></label>
-                                            <input type="number" id="form-phone" class="form-control" placeholder="08***" value="">
-                                        </div>
-                                        <div class="mb-3">
-                                            <label class="mb-1"><strong>Email</strong></label>
-                                            <input type="email" id="form-email" class="form-control" placeholder="hello@example.com">
-                                        </div>
-                                        <div class="mb-3">
-                                            <label class="mb-1"><strong>Password</strong></label>
-                                            <input type="password" id="form-password" class="form-control" placeholder="Example123" value="">
-                                        </div>
-                                        <div class="text-center mt-4">
-                                            <button type="submit" id="save-btn" class="btn btn-primary btn-block">Sign me up</button>
-                                        </div>
-
-                                    </form>
-                                    <div class="new-account mt-3">
-                                        <p>Already have an account? <a class="text-primary" href="{{route('login')}}">Sign in</a></p>
-                                    </div>
-                                </div>
-                            </div>
+@section('content')
+    <meta name="csrf-token" content="{{ csrf_token() }}">
+    <main class="main-content  mt-0">
+        <section class="min-vh-100 mb-8">
+        <div class="page-header align-items-start min-vh-50 pt-5 pb-11 mx-3 border-radius-lg" style="background-image: url('../assets/img/registerbg.jpg');">
+            <span class="mask bg-gradient-dark opacity-6"></span>
+            <div class="container">
+            <div class="row justify-content-center">
+                <div class="col-lg-5 text-center mx-auto">
+                <h1 class="text-white mb-2 mt-5">Selamat Datang!</h1>
+                <p class="text-lead text-white">Silahkan mengisi data berikut.</p>
+                </div>
+            </div>
+            </div>
+        </div>
+        <div class="container">
+            <div class="row mt-lg-n10 mt-md-n11 mt-n10">
+            <div class="col-xl-4 col-lg-5 col-md-7 mx-auto">
+                <div class="card z-index-0">
+                    <div class="card-body">
+                        {{-- <form action="index.html">
+                        @csrf --}}
+                        <div class="mb-3">
+                            <input type="text" class="form-control" placeholder="Name" name="name" id="form-name" aria-label="Name" aria-describedby="name" value="{{ old('name') }}">
+                            @error('name')
+                            <p class="text-danger text-xs mt-2">{{ $message }}</p>
+                            @enderror
                         </div>
+                        <div class="mb-3">
+                            <input type="text" class="form-control" placeholder="081xxxxxx" name="handphone" id="form-phone" aria-label="Phone" aria-describedby="phone" value="{{ old('phone') }}">
+                            @error('phone')
+                            <p class="text-danger text-xs mt-2">{{ $message }}</p>
+                            @enderror
+                        </div>
+                        <div class="mb-3">
+                            <input type="email" class="form-control" placeholder="Email" name="email" id="form-email" aria-label="Email" aria-describedby="email-addon" value="{{ old('email') }}">
+                            @error('email')
+                            <p class="text-danger text-xs mt-2">{{ $message }}</p>
+                            @enderror
+                        </div>
+                        <div class="mb-3">
+                            <input type="password" class="form-control" placeholder="Password" name="password" id="form-password" aria-label="Password" aria-describedby="password-addon">
+                            @error('password')
+                            <p class="text-danger text-xs mt-2">{{ $message }}</p>
+                            @enderror
+                        </div>
+                        {{-- <div class="form-check form-check-info text-left">
+                            <input class="form-check-input" type="checkbox" name="agreement" id="flexCheckDefault" checked>
+                            <label class="form-check-label" for="flexCheckDefault">
+                            I agree the <a href="javascript:;" class="text-dark font-weight-bolder">Terms and Conditions</a>
+                            </label>
+                            @error('agreement')
+                            <p class="text-danger text-xs mt-2">First, agree to the Terms and Conditions, then try register again.</p>
+                            @enderror
+                        </div> --}}
+                        <div class="text-center">
+                            <button type="submit" id="save-btn" class="btn bg-gradient-dark w-100 my-4 mb-2">Simpan</button>
+                        </div>
+                        <p class="text-sm mt-3 mb-0">Sudah Punya Akun? <a href="{{ route('login') }}" class="text-dark font-weight-bolder">Sign in</a></p>
+                        {{-- </form> --}}
                     </div>
                 </div>
             </div>
+            </div>
         </div>
-    </div>
+        </section>
+    </main>
 
 <!--**********************************
-	Scripts
+    Scripts
 ***********************************-->
 <!-- Required vendors -->
-<script src="./vendor/global/global.min.js"></script>
-<script src="./js/custom.js"></script>
-<script src="./js/deznav-init.js"></script>
-@include('includes.script')
-<script>
+
+    @include('includes.script')
+    <script> 
+        @foreach ($varJs as $varjsi)
+            {!! $varjsi !!}
+        @endforeach
+    </script>
+    @foreach ($javascriptFiles as $file)
+        <script src="{{ $file }}"></script>
+    @endforeach
+@endsection
     
-var baseUrl = window.location.origin;
-
-$("#save-btn").on("click", function (e) {
-    e.preventDefault();
-    checkValidation();
-});
-
-let isObject={}
-
-function saveData() {
-    console.log(isObject);
-    var csrfToken = $('meta[name="csrf-token"]').attr("content");
-
-    url = baseUrl + "/ajax-createcustomer";
-
-    $.ajax({
-        url: url,
-        type: "POST",
-        data: JSON.stringify(isObject),
-        dataType: "json",
-        contentType: "application/json",
-        headers: {
-            "X-CSRF-TOKEN": csrfToken, // Sertakan CSRF token dalam headers permintaan
-        },
-        beforeSend: function () {
-            Swal.fire({
-                title: "Loading",
-                text: "Please wait...",
-            });
-        },
-        complete: function () {},
-        success: function (response) {
-            // Handle response sukses
-            if (response.code == 0) {
-                swal("Saved !", response.message, "success").then(function () {
-                    location.href(baseUrl+"/login");
-                });
-                // Reset form
-            } else {
-                sweetAlert("Oops...", response.message, "error");
-            }
-        },
-        error: function (xhr, status, error) {
-            // Handle error response
-            // console.log(xhr.responseText);
-            sweetAlert("Oops...", xhr.responseText, "error");
-        },
-    });
-}
-
-function checkValidation() {
-    // console.log($el);
-    if (
-        validationSwalFailed(
-            (isObject["name"] = $("#form-name").val()),
-            "Full Name field cannot be empty."
-        )
-    )
-        return false;
-    if (
-        validationSwalFailed(
-            (isObject["phone"] = $("#form-phone").val()),
-            "Phone field cannot be empty."
-        )
-    )
-        return false;
-
-    if (
-        validationSwalFailed(
-            (isObject["email"] = $("#form-email").val()),
-            "Email field cannot be empty."
-        )
-    )
-        return false;
-        if (
-    validationSwalFailed(
-            (isObject["password"] = $("#form-password").val()),
-            "Email field cannot be empty."
-        )
-    )
-        return false;
-    // isObject["desc"] = $("#form-desc").val();
-
-    saveData();
-}
-
-function validationSwalFailed(param, isText) {
-    // console.log(param);
-    if (param == "" || param == null) {
-        sweetAlert("Oops...", isText, "warning");
-
-        return 1;
-    }
-}
-</script>
-</body>
-</html>
+    

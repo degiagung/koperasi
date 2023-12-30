@@ -24,13 +24,13 @@ function saveGenerate() {
                 });
                 // Reset form
             } else {
-                sweetAlert("Oops...", response.info, "error");
+                sweetAlert("Oops...", response.info, "ERROR");
             }
         },
         error: function (xhr, status, error) {
             // Handle error response
-            console.log(xhr.responseText);
-            sweetAlert("Oops...", xhr.responseText, "error");
+            console.log("ERROR");
+            sweetAlert("Oops...", "ERROR", "ERROR");
         },
     });
 }

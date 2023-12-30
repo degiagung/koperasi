@@ -20,19 +20,31 @@ use Illuminate\Support\Facades\Session;
 |
 */
 
-Route::get('/login', [AuthController::class, 'index'])->name('login');
+Route::get('/login', [AuthController::class, 'index'])->name('login')->middleware('guest');
 // Rute untuk melakukan proses login
 Route::post('/login', [AuthController::class, 'login']);
-Route::get('/sign-up', [AuthController::class, 'signup'])->name('sign-up');
+Route::get('/sign-up', [AuthController::class, 'signup'])->name('sign-up')->middleware('guest');
 Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
+Route::post('/createaccount', [AuthController::class, 'createaccount'])->name('createaccount');
 
 Route::get('/generateview', [GenerateController::class, 'generateview']);
 Route::get('/gendataview', [GenerateController::class, 'gendataview']);
 
-Route::get('/invoicepengadaan', [InvoiceController::class, 'invoicePengadaan']);
+Route::get('/', function () {
+    return view('pages.landingpage.guest');
+})->name('guest');
+Route::get('/kostan', [GeneralController::class, 'kostan'])->name('kostan');
+Route::post('/tipeKamar', [JsonDataController::class, 'tipeKamar'])->name('tipeKamar');
+Route::post('/listkamaravailable', [JsonDataController::class, 'listkamaravailable'])->name('listkamaravailable');
+Route::get('/contact', function () {
+    return view('pages.landingpage.layouts');
+})->name('contact');
 
-Route::middleware(['auth'])->group(function () {
-    Route::get('/', [GeneralController::class, 'based']);
+Route::middleware(['auth'])->group(function () { // harus login terlebih dahulu
+    Route::get('/details/{id}', [GeneralController::class, 'details'])->name('details/{id}');
+    Route::get('/booking', [GeneralController::class, 'booking'])->name('booking');
+    Route::post('/saveBooking', [JsonDataController::class, 'saveBooking'])->name('saveBooking');
+    Route::post('/cekdatakamar', [JsonDataController::class, 'cekdatakamar'])->name('cekdatakamar');
 
     Route::middleware(['role:Superadmin'])->group(function () {
         Route::post('/generate', [GenerateController::class, 'generate'])->name('generate');

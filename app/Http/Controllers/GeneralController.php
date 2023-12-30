@@ -5,6 +5,10 @@ namespace App\Http\Controllers;
 use App\Helpers\Master;
 use App\Models\Pengadaan;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Session;
+use Illuminate\Support\Facades\DB;
+
 
 class GeneralController extends Controller
 {
@@ -27,12 +31,12 @@ class GeneralController extends Controller
         $MasterClass = new Master();
 
         $checkAuth = $MasterClass->AuthenticatedView($request->route()->uri());
-        
+
         if($checkAuth['code'] == $MasterClass::CODE_SUCCESS){
            
             $javascriptFiles = [
                 asset('action-js/global/global-action.js'),
-                // asset('action-js/generate/generate-action.js'),
+                // asset('action-js/dashboard-action.js'),
             ];
         
             $cssFiles = [
@@ -40,14 +44,19 @@ class GeneralController extends Controller
                 // asset('css/custom.css'),
             ];
             $baseURL = url('/');
+            $rolename = strtolower($MasterClass->getSession('role_name'))  ;
             $varJs = [
                 'const baseURL = "' . $baseURL . '"',
-            ];
+                'const role = "' . $rolename . '"',
 
+            ];
+            
+            
             $data = [
                 'javascriptFiles' => $javascriptFiles,
                 'cssFiles' => $cssFiles,
-                'varJs'=> $varJs
+                'varJs'=> $varJs,
+                'role'=> $rolename,
                 // Menambahkan base URL ke dalam array
             ];
         
@@ -94,7 +103,6 @@ class GeneralController extends Controller
 
         
     }
-
     public function userrole(Request $request){
 
         $MasterClass = new Master();
@@ -133,8 +141,7 @@ class GeneralController extends Controller
     
         
     }
-
-    public function pengadaan(Request $request){
+    public function userpenghuni(Request $request){
 
         $MasterClass = new Master();
 
@@ -144,7 +151,7 @@ class GeneralController extends Controller
             $javascriptFiles = [
                 asset('action-js/global/global-action.js'),
                 // asset('action-js/generate/generate-action.js'),
-                asset('action-js/pengadaan/pengadaanlist-action.js'),
+                asset('action-js/user/userpenghuni-action.js'),
             ];
         
             $cssFiles = [
@@ -163,15 +170,14 @@ class GeneralController extends Controller
                  // Menambahkan base URL ke dalam array
             ];
         
-            return view('pages.admin.pengadaan.pengadaanlist')
+            return view('pages.admin.users.userpenghuni')
                 ->with($data);
         }else{
             return redirect('/login');
         }
         
     }
-
-    public function penerimaan(Request $request){
+    public function listkamar(Request $request){
 
         $MasterClass = new Master();
 
@@ -181,7 +187,45 @@ class GeneralController extends Controller
             $javascriptFiles = [
                 asset('action-js/global/global-action.js'),
                 // asset('action-js/generate/generate-action.js'),
-                asset('action-js/penerimaan/penerimaanlist-action.js'),
+                asset('action-js/property/listkamar-action.js'),
+            ];
+        
+            $cssFiles = [
+                // asset('css/main.css'),
+                // asset('css/custom.css'),
+            ];
+            $baseURL = url('/');
+            $rolename = strtolower($MasterClass->getSession('role_name'))  ;
+            $varJs = [
+                'const baseURL = "' . $baseURL . '"',
+                'const role = "' . $rolename .'"',
+
+            ];
+            $data = [
+                'javascriptFiles' => $javascriptFiles,
+                'cssFiles' => $cssFiles,
+                'varJs'=> $varJs,
+                 // Menambahkan base URL ke dalam array
+            ];
+        
+            return view('pages.admin.property.listkamar')
+                ->with($data);
+        }else{
+            return redirect('/login');
+        }
+        
+    }
+    public function listfasilitas(Request $request){
+
+        $MasterClass = new Master();
+
+        $checkAuth = $MasterClass->AuthenticatedView($request->route()->uri());
+        
+        if($checkAuth['code'] == $MasterClass::CODE_SUCCESS){
+            $javascriptFiles = [
+                asset('action-js/global/global-action.js'),
+                // asset('action-js/generate/generate-action.js'),
+                asset('action-js/property/listfasilitas-action.js'),
             ];
         
             $cssFiles = [
@@ -200,15 +244,14 @@ class GeneralController extends Controller
                  // Menambahkan base URL ke dalam array
             ];
         
-            return view('pages.admin.penerimaan.penerimaanlist')
+            return view('pages.admin.property.listfasilitas')
                 ->with($data);
         }else{
             return redirect('/login');
         }
         
     }
-
-    public function checkingpenerimaan(Request $request){
+    public function mappingfasilitas(Request $request){
 
         $MasterClass = new Master();
 
@@ -218,7 +261,7 @@ class GeneralController extends Controller
             $javascriptFiles = [
                 asset('action-js/global/global-action.js'),
                 // asset('action-js/generate/generate-action.js'),
-                asset('action-js/user/userlist-action.js'),
+                asset('action-js/management/mappingfasilitas-action.js'),
             ];
         
             $cssFiles = [
@@ -237,15 +280,14 @@ class GeneralController extends Controller
                  // Menambahkan base URL ke dalam array
             ];
         
-            return view('pages.admin.users.userlist')
+            return view('pages.admin.management.mappingfasilitas')
                 ->with($data);
         }else{
             return redirect('/login');
         }
         
     }
-
-    public function laporaninventori(Request $request){
+    public function listTipeKamar(Request $request){
 
         $MasterClass = new Master();
 
@@ -255,7 +297,7 @@ class GeneralController extends Controller
             $javascriptFiles = [
                 asset('action-js/global/global-action.js'),
                 // asset('action-js/generate/generate-action.js'),
-                asset('action-js/user/userlist-action.js'),
+                asset('action-js/property/listtipekamar-action.js'),
             ];
         
             $cssFiles = [
@@ -274,15 +316,14 @@ class GeneralController extends Controller
                  // Menambahkan base URL ke dalam array
             ];
         
-            return view('pages.admin.users.userlist')
+            return view('pages.admin.property.listtipekamar')
                 ->with($data);
         }else{
             return redirect('/login');
         }
         
     }
-
-    public function penjualanobat(Request $request){
+    public function listtransaksi(Request $request){
 
         $MasterClass = new Master();
 
@@ -292,7 +333,7 @@ class GeneralController extends Controller
             $javascriptFiles = [
                 asset('action-js/global/global-action.js'),
                 // asset('action-js/generate/generate-action.js'),
-                asset('action-js/penjualan/penjualanobat-action.js'),
+                asset('action-js/property/listtransaksi-action.js'),
             ];
         
             $cssFiles = [
@@ -311,25 +352,20 @@ class GeneralController extends Controller
                  // Menambahkan base URL ke dalam array
             ];
         
-            return view('pages.admin.penjualan.penjualanobat')
+            return view('pages.admin.property.listtransaksi')
                 ->with($data);
         }else{
             return redirect('/login');
         }
         
     }
-
-    public function satuanlist(Request $request){
+    public function booking(Request $request){
 
         $MasterClass = new Master();
 
-        $checkAuth = $MasterClass->AuthenticatedView($request->route()->uri());
-        
-        if($checkAuth['code'] == $MasterClass::CODE_SUCCESS){
+        if(Auth::check()){
             $javascriptFiles = [
-                asset('action-js/global/global-action.js'),
-                // asset('action-js/generate/generate-action.js'),
-                asset('action-js/satuan/satuanlist-action.js'),
+                asset('action-js/property/booking-action.js'),
             ];
         
             $cssFiles = [
@@ -337,37 +373,32 @@ class GeneralController extends Controller
                 // asset('css/custom.css'),
             ];
             $baseURL = url('/');
+            $rolename = strtolower($MasterClass->getSession('role_name'))  ;
             $varJs = [
                 'const baseURL = "' . $baseURL . '"',
+                'const role = "' . $rolename .'"',
+
             ];
-    
             $data = [
                 'javascriptFiles' => $javascriptFiles,
                 'cssFiles' => $cssFiles,
-                'varJs'=> $varJs
+                'varJs'=> $varJs,
                  // Menambahkan base URL ke dalam array
             ];
         
-            return view('pages.admin.satuan.satuanlist')
+            return view('pages.landingpage.booking')
                 ->with($data);
         }else{
             return redirect('/login');
         }
-
         
     }
-
-    public function obatlist(Request $request){
-
+    public function details($id){
         $MasterClass = new Master();
 
-        $checkAuth = $MasterClass->AuthenticatedView($request->route()->uri());
-        
-        if($checkAuth['code'] == $MasterClass::CODE_SUCCESS){
+        if(Auth::check()){
             $javascriptFiles = [
-                asset('action-js/global/global-action.js'),
-                // asset('action-js/generate/generate-action.js'),
-                asset('action-js/obat/obatlist-action.js'),
+                asset('action-js/property/details.js'),
             ];
         
             $cssFiles = [
@@ -375,145 +406,55 @@ class GeneralController extends Controller
                 // asset('css/custom.css'),
             ];
             $baseURL = url('/');
+            $rolename = strtolower($MasterClass->getSession('role_name'))  ;
             $varJs = [
                 'const baseURL = "' . $baseURL . '"',
+                'const role = "' . $rolename .'"',
+                'const idkamar = "' . $id .'"',
+
             ];
-    
             $data = [
                 'javascriptFiles' => $javascriptFiles,
                 'cssFiles' => $cssFiles,
-                'varJs'=> $varJs
+                'varJs'=> $varJs,
                  // Menambahkan base URL ke dalam array
             ];
         
-            return view('pages.admin.obat.obatlist')
-                ->with($data);
-        }else{
-            return redirect('/login');
-        }
-
-        
-    }
-    public function supplierlist(Request $request){
-
-        $MasterClass = new Master();
-
-        $checkAuth = $MasterClass->AuthenticatedView($request->route()->uri());
-        
-        if($checkAuth['code'] == $MasterClass::CODE_SUCCESS){
-            $javascriptFiles = [
-                asset('action-js/global/global-action.js'),
-                // asset('action-js/generate/generate-action.js'),
-                asset('action-js/supplier/supplierlist-action.js'),
-            ];
-        
-            $cssFiles = [
-                // asset('css/main.css'),
-                // asset('css/custom.css'),
-            ];
-            $baseURL = url('/');
-            $varJs = [
-                'const baseURL = "' . $baseURL . '"',
-            ];
-    
-            $data = [
-                'javascriptFiles' => $javascriptFiles,
-                'cssFiles' => $cssFiles,
-                'varJs'=> $varJs
-                 // Menambahkan base URL ke dalam array
-            ];
-        
-            return view('pages.admin.supplier.supplierlist')
-                ->with($data);
-        }else{
-            return redirect('/login');
-        }
-
-        
-    }
-    
-    public function tambahpengadaan(Request $request){
-
-        $MasterClass = new Master();
-
-        $checkAuth = $MasterClass->AuthenticatedView($request->route()->uri());
-        
-        if($checkAuth['code'] == $MasterClass::CODE_SUCCESS){
-            $javascriptFiles = [
-                asset('action-js/global/global-action.js'),
-                // asset('action-js/generate/generate-action.js'),
-                asset('action-js/pengadaan/tambahpengadaan-action.js'),
-            ];
-        
-            $cssFiles = [
-                // asset('css/main.css'),
-                // asset('css/custom.css'),
-            ];
-
-            $nowdate = now()->format('Y-m-d H:i:s');
-            $nopengadaan = Pengadaan::generateNoPengadaan($nowdate);
-
-            $tglpengadaan = now()->format('m/d/Y');
-
-            $baseURL = url('/');
-            $varJs = [
-                'const baseURL = "' . $baseURL . '"',
-                'const no_pengadaan = "' . $nopengadaan . '"',
-                'const tgl_pengadaan = "' . $tglpengadaan . '"',
-            ];
-    
-            $data = [
-                'javascriptFiles' => $javascriptFiles,
-                'cssFiles' => $cssFiles,
-                'varJs'=> $varJs
-                 // Menambahkan base URL ke dalam array
-            ];
-        
-            return view('pages.admin.pengadaan.tambahpengadaan')
-                ->with($data);
-        }else{
-            return redirect('/login');
-        }
-
-        
-    }
-
-    public function test(Request $request){
-
-        $MasterClass = new Master();
-
-        $checkAuth = $MasterClass->AuthenticatedView($request->route()->uri());
-        
-        if($checkAuth['code'] == $MasterClass::CODE_SUCCESS){
-            $javascriptFiles = [
-                asset('action-js/global/global-action.js'),
-                // asset('action-js/generate/generate-action.js'),
-                asset('action-js/pengadaan/pengadaanlist-action.js'),
-            ];
-        
-            $cssFiles = [
-                // asset('css/main.css'),
-                // asset('css/custom.css'),
-            ];
-            $baseURL = url('/');
-            $varJs = [
-                'const baseURL = "' . $baseURL . '"',
-            ];
-    
-            $data = [
-                'javascriptFiles' => $javascriptFiles,
-                'cssFiles' => $cssFiles,
-                'varJs'=> $varJs
-                 // Menambahkan base URL ke dalam array
-            ];
-        
-            return view('pages.admin.pengadaan.pengadaanlist')
+            return view('pages.landingpage.property-details')
                 ->with($data);
         }else{
             return redirect('/login');
         }
         
     }
+    public function kostan(Request $request){
+
+        
+        $javascriptFiles = [
+            asset('action-js/property/kostan.js'),
+        ];
+    
+        $cssFiles = [
+            // asset('css/main.css'),
+            // asset('css/custom.css'),
+        ];
+        $baseURL = url('/');
+        $varJs = [
+            'const baseURL = "' . $baseURL . '"',
+
+        ];
+        $data = [
+            'javascriptFiles' => $javascriptFiles,
+            'cssFiles' => $cssFiles,
+            'varJs'=> $varJs,
+                // Menambahkan base URL ke dalam array
+        ];
+    
+        return view('pages.landingpage.kostan')
+            ->with($data);
+        
+    }
+    
 }
 
 

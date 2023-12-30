@@ -28,14 +28,25 @@ function getListData() {
                 // loaderPage(false);
             },
         },
+        autoWidth: false,
+        dom: '<"datatable-header"lfB><"datatable-scroll-wrap"t><"datatable-footer"ip>',
         language: {
-            oPaginate: {
-                sFirst: "First",
-                sLast: "Last",
-                sNext: ">",
-                sPrevious: "<",
-            },
+            search      : '_INPUT_',
+            lengthMenu  : '_MENU_',
+            paginate    : { 'first': 'First', 'last': 'Last', 'next': '&rarr;', 'previous': '&larr;' }
         },
+        buttons: [
+            
+            { 
+                className: 'btnreload',
+                text: '<i class="bi bi-arrow-clockwise" ></li>',
+                action: function ( e, dt, node, config ) {     
+                    $('#table-list').DataTable().ajax.reload();
+                }
+            },
+            { text: ' ', extend: 'pdfHtml5',  className: 'btndownload iconpdf',  title:'List User', exportOptions: {columns:[':not(.notdown)']}},
+            { text: ' ', extend: 'excel',  className: 'btndownload iconexcel',  title:'List User', exportOptions: {columns:[':not(.notdown)']}},
+        ],
         columns: [
             {
                 data: "id",
@@ -46,48 +57,14 @@ function getListData() {
             { data: "name" },
             { data: "email" },
             { data: "role_name" },
-            { data: "is_active" },
-            { data: "id" },
-        ],
-        columnDefs: [
-            {
-                mRender: function (data, type, row) {
-                    // var $rowData = '<button class="btn btn-sm btn-icon isEdit i_update"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-edit font-medium-2 text-info"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg></button>';
-                    // $rowData += `<button class="btn btn-sm btn-icon delete-record i_delete"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-trash font-medium-2 text-danger"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg></button>`;
-                    $rowData =
-                        ` <span class="badge badge-dark">` +
-                        row.role_name +
-                        `</span>`;
-                    return $rowData;
-                },
-                visible: true,
-                targets: 3,
-                className: "text-center",
-            },
-            {
-                mRender: function (data, type, row) {
-                    // var $rowData = '<button class="btn btn-sm btn-icon isEdit i_update"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-edit font-medium-2 text-info"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg></button>';
-                    // $rowData += `<button class="btn btn-sm btn-icon delete-record i_delete"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-trash font-medium-2 text-danger"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg></button>`;
-                    $rowData = ` <span class="badge badge-danger">Inactive</span>`;
-                    if (row.is_active == 1) {
-                        $rowData = `<span class="badge badge-success">Active</span>`;
-                    }
-                    return $rowData;
-                },
-                visible: true,
-                targets: 4,
-                className: "text-center",
-            },
-            {
+            { data: "status_name" },
+            { 
                 mRender: function (data, type, row) {
                     var $rowData = `<button type="button" class="btn btn-primary btn-icon-sm mx-2 edit-btn"><i class="bi bi-pencil-square"></i></button>`;
                     $rowData += `<button type="button" class="btn btn-danger btn-icon-sm delete-btn"><i class="bi bi-x-square"></i></button>`;
                     return $rowData;
                 },
-                visible: true,
-                targets: 5,
-                className: "text-center",
-            },
+                className: "text-center notdown action"},
         ],
         drawCallback: function (settings) {
             var api = this.api();
@@ -222,20 +199,20 @@ function deleteData(data) {
                             }
                         );
                     } else {
-                        sweetAlert("Oops...", response.message, "error");
+                        sweetAlert("Oops...", response.message, "ERROR");
                     }
                 },
                 error: function (xhr, status, error) {
                     // Handle error response
-                    // console.log(xhr.responseText);
-                    sweetAlert("Oops...", xhr.responseText, "error");
+                    // console.log("ERROR");
+                    sweetAlert("Oops...", "ERROR", "ERROR");
                 },
             });
         } else {
             swal(
                 "Cancelled !!",
                 "Hey, your imaginary file is safe !!",
-                "error"
+                "ERROR"
             );
         }
     });
@@ -264,13 +241,13 @@ function saveData() {
                 });
                 // Reset form
             } else {
-                sweetAlert("Oops...", response.message, "error");
+                sweetAlert("Oops...", response.message, "ERROR");
             }
         },
         error: function (xhr, status, error) {
             // Handle error response
-            // console.log(xhr.responseText);
-            sweetAlert("Oops...", xhr.responseText, "error");
+            // console.log("ERROR");
+            sweetAlert("Oops...", "ERROR", "ERROR");
         },
     });
 }
@@ -302,6 +279,6 @@ async function loadRole() {
             dropdownParent: $("#modal-data"),
         });
     } catch (error) {
-        sweetAlert("Oops...", error.responseText, "error");
+        sweetAlert("Oops...", error.responseText, "ERROR");
     }
 }

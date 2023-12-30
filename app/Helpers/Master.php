@@ -63,7 +63,7 @@ class Master
         if(Auth::check()){
             $route = str_replace('//', '/', $route);
             
-            if($route == "/"){
+            if($route == "/dashboard"){
                 
                 $status=[
                     'code'=> self::CODE_SUCCESS,
@@ -168,6 +168,8 @@ class Master
                 $seskey = Session::get('name');
             }else if($param == "role_id"){
                 $seskey = Session::get('role_id');
+            }else if($param == "role_name"){
+                $seskey = Session::get('role_name');
             }else if($param == "menu"){
                 $seskey = Session::get('menu');
             } 
@@ -193,5 +195,171 @@ class Master
         }
         return $isData;
     }
+
+    public function selectGlobal($kolom = '',$table,$where = null){
+        $query = "
+            SELECT
+                $kolom
+            FROM
+                $table
+        ";
+        if($where != null){
+            $query .= "
+                WHERE $where
+            ";
+        }
+
+        // dd($query);die;
+        $select = DB::select($query);
+        $select = $this->checkErrorModel($select);
+
+        if ($select['code'] == '0') {
+            $results = [
+                'code' => self::CODE_SUCCESS,
+                'info' => self::INFO_SUCCESS,
+                'data' => $select['data'] // balikin id
+            ];
+        } else {
+            $results = [
+                'code' => self::FAILED,
+                'info' => self::INFO_FAILED,
+                'data' => null
+            ];
+        }
+
+        return $results;
+    }
+
+    public function saveGlobal($table,$atribut){
+        foreach ($atribut as $key => $value) {
+            // if ((strpos($value, '<') !== false) or (strpos($value, '>') !== false))
+            if (preg_match('/[\`><>]/', $value))
+            {
+                $result->code = 1;
+                return $result;
+            }
+        }
+        
+        $saved = DB::table($table)->insertGetId(
+            $atribut
+        );
+        
+        if ($saved != null) {
+            $results = [
+                'code' => self::CODE_SUCCESS,
+                'info' => self::INFO_SUCCESS,
+                'data' => $saved // balikin id
+            ];
+        } else {
+            $results = [
+                'code' => self::FAILED,
+                'info' => self::INFO_FAILED,
+                'data' => null
+            ];
+        }
+
+        return $results;
+    }
+
+    public function updateGlobal($table,$atribut,$where){
+        foreach ($atribut as $key => $value) {
+            // if ((strpos($value, '<') !== false) or (strpos($value, '>') !== false))
+            if (preg_match('/[\`><>]/', $value))
+            {
+                $result->code = 1;
+                return $result;
+            }
+        }
+        
+        $saved = DB::table($table)
+        ->where($where)
+        ->update($atribut);
+
+        // dd($saved);
+        if ($saved) {
+            $results = [
+                'code' => self::CODE_SUCCESS,
+                'info' => self::INFO_SUCCESS,
+            ];
+        } else {
+            $results = [
+                'code' => self::CODE_FAILED,
+                'info' => self::INFO_FAILED,
+            ];
+        }
+
+        return $results;
+    }
+
+    public function getIncrement($table){
+        
+        $id=DB::select("SHOW TABLE STATUS LIKE '$table'");
+        $next_id=$id[0]->Auto_increment;
+        if ($next_id) {
+            $results = [
+                'code' => self::CODE_SUCCESS,
+                'info' => self::INFO_SUCCESS,
+                'data' => $next_id // balikin id
+            ];
+        } else {
+            $results = [
+                'code' => self::CODE_FAILED,
+                'info' => self::INFO_FAILED,
+            ];
+        }
+
+        return $results;
+    }
+
+    public function deleteGlobal($table,$where){
+        foreach ($where as $key => $value) {
+            // if ((strpos($value, '<') !== false) or (strpos($value, '>') !== false))
+            if (preg_match('/[\`><>]/', $value))
+            {
+                $result->code = 1;
+                return $result;
+            }
+        }
+        
+        $query = DB::table($table);
+        foreach($where as $field => $value) {
+            $query->where($field, $value);
+        }
+        $deleted = $query->delete();
+        if ($deleted) {
+            $results = [
+                'code' => self::CODE_SUCCESS,
+                'info' => self::INFO_SUCCESS,
+            ];
+        } else {
+            $results = [
+                'code' => self::CODE_FAILED,
+                'info' => self::INFO_FAILED,
+            ];
+        }
+
+        return $results;
+    }
+    
+    public function compressImage($source_image = null, $compress_image = null, $quality = null) {
+
+        if ($quality == null){
+            $quality = 10;
+        }
+
+		$image_info = getimagesize($source_image);	
+		if ($image_info['mime'] == 'image/jpeg') { 
+			$source_image = imagecreatefromjpeg($source_image);
+			$image = imagejpeg($source_image, $compress_image, $quality);
+		} elseif ($image_info['mime'] == 'image/gif') {
+			$source_image = imagecreatefromgif($source_image);
+			$image = imagegif($source_image, $compress_image, $quality);
+		} elseif ($image_info['mime'] == 'image/png') {
+			$source_image = imagecreatefrompng($source_image);
+			$image = imagepng($source_image, $compress_image, $quality);
+		}	   
+		return $compress_image;
+        
+	}
 }
 
