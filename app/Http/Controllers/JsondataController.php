@@ -159,7 +159,7 @@ class JsonDataController extends Controller
                 
                         $status = [];
     
-                        $saved = DB::select('SELECT * FROM users_roles ur');
+                        $saved = DB::select("SELECT * FROM users_roles ur WHERE role_name not like '%admin%'");
                         $saved = $MasterClass->checkErrorModel($saved);
                         
                         $status = $saved;
@@ -438,24 +438,33 @@ class JsonDataController extends Controller
                         $status = [];
                         
                         $select = "
-                            us.id,
-                            us.name,
-                            us.email,
-                            us.handphone,
-                                case 
-                                    when us.is_active = '1' then 'ACTIVE' 
-                                    when us.is_active = '2' then 'INACTIVE' 
-                                end status_name,
-                            us.is_active,
-                            us.role_id,
-                            ur.role_name 
+                            us.*,
+                            case 
+                                when us.is_active = '1' then 'ACTIVE' 
+                                when us.is_active = '2' then 'INACTIVE' 
+                                when us.is_active = '3' then 'DELETE' 
+                            end status_name,
+                            ur.role_name,
+                            CASE 
+                                WHEN us.tgl_dinas > current_date THEN 'PENSIUN'
+                                WHEN us.tgl_dinas is null THEN 'TGL DINAS KOSONG'
+                                ELSE
+                                    CASE 
+                                        WHEN lower(status) != 'pindah' THEN 'AKTIF'
+                                    ELSE 'PINDAH'
+                                END
+                            END keanggotaan
                         ";
                         
                         $table = '
                             users us
                             LEFT JOIN users_roles ur ON us.role_id = ur.id
                         ';
-                        $result = $MasterClass->selectGlobal($select,$table);
+                        
+                        $where = "
+                            ur.role_name not like '%admin%'
+                        ";
+                        $result = $MasterClass->selectGlobal($select,$table,$where);
                         
                         $results = [
                             'code'  => $result['code'],
@@ -1465,20 +1474,26 @@ class JsonDataController extends Controller
                         DB::beginTransaction();     
 
                         $data = json_decode($request->getContent());
-                
+                        $now    = date('Y-m-d H:i:s');
                         $status = [];
                         if ($data->password){
-                            
                             $saved = User::updateOrCreate(
                                 [
                                     'id' => $data->id,
                                 ], 
                                 [
                                     'name' => $data->name,
-                                    'email'=> $data->email,
+                                    'no_anggota'=> $data->noanggota,
+                                    'pangkat'=> $data->pangkat,
+                                    'nrp'=> $data->nrp,
+                                    'alamat'=> $data->alamat,
+                                    'handphone'=> $data->handphone,
+                                    'tgl_dinas'=> $data->tgldinas,
+                                    'status'=> $data->status,
                                     'role_id' => $data->role_id,
                                     'password' => Hash::make($data->password),
-                                    'is_active' => $data->is_active,
+                                    'is_active' => '1',
+                                    'updated_at' => $now,
                                 ] // Kolom yang akan diisi
                             );
 
@@ -1490,9 +1505,15 @@ class JsonDataController extends Controller
                                 ], 
                                 [
                                     'name' => $data->name,
-                                    'email'=> $data->email,
+                                    'no_anggota'=> $data->noanggota,
+                                    'pangkat'=> $data->pangkat,
+                                    'nrp'=> $data->nrp,
+                                    'alamat'=> $data->alamat,
+                                    'handphone'=> $data->handphone,
+                                    'tgl_dinas'=> $data->tgldinas,
+                                    'status'=> $data->status,
                                     'role_id' => $data->role_id,
-                                    'is_active' => $data->is_active,
+                                    'is_active' => '1',
                                 ] // Kolom yang akan diisi
                             );
                             
@@ -1559,10 +1580,13 @@ class JsonDataController extends Controller
                         
                         $status = [];
 
-                        $saved = User::where('id', $data->id)->delete();
-                        
-                        $saved = $MasterClass->checkerrorModelUpdate($saved);
-                        
+                        $attributes     = [
+                            'is_active' => '2'
+                        ];
+                        $where     = [
+                            'id' => $data->id
+                        ];
+                        $saved      = $MasterClass->updateGlobal('users', $attributes,$where );
                         $status = $saved;
     
                         if($status['code'] == $MasterClass::CODE_SUCCESS){
@@ -1574,7 +1598,6 @@ class JsonDataController extends Controller
                         $results = [
                             'code' => $status['code'],
                             'info'  => $status['info'],
-                            'data'  =>  $status['data'],
                         ];
                             
             

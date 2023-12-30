@@ -37798,17 +37798,17 @@ h6 {
     border-radius: 10px;
 }
 thead{
-  background   : linear-gradient(268deg, #E34848 -4.36%, #E45D79 103.01%) ;
+  background   : linear-gradient(268deg, #6484b5 -4.36%, #79accb 103.01%) ;
   color        : #fff ;   
   color: #fff;
 }
 #header{
-  background   : linear-gradient(268deg, #E34848 -4.36%, #E45D79 103.01%) ;
+  background   : linear-gradient(268deg, #6484b5 -4.36%, #79accb 103.01%) ;
   color        : #fff !important;   
 }
 .btn-sgn{
   color: #ffffff !important;
-  background: linear-gradient(268deg, #E34848 -4.36%, #E45D79 103.01%) !important;
+  background: linear-gradient(268deg, #6484b5 -4.36%, #79accb 103.01%) !important;
   box-shadow: 0px 6px 16px rgba(229, 88, 108, 0.16);
   border-radius : 5px;
   /* width : 15% ; */
@@ -37825,7 +37825,7 @@ thead{
 }
 
 .headermodal {
-  background: linear-gradient(268deg, #E34848 -4.36%, #E45D79 103.01%) !important;
+  background: linear-gradient(268deg, #6484b5 -4.36%, #79accb 103.01%) !important;
   color: #fff !important;
   
 }

@@ -12,7 +12,8 @@
 
 .with{
     color: #ffffff;
-    /* background: linear-gradient(268deg, #E34848 -4.36%, #E45D79 103.01%); */
+    /* background: linear-gradient(268deg, #6484b5 -4.36%, #79accb 103.01%)
+ */
     margin-bottom : 1%;
     /*width : 90% ;*/
     /*left  : 10px*/
@@ -20,7 +21,8 @@
 
 .with:hover {
     color: #ffffff !important;
-     background: linear-gradient(268deg, #E34848 -4.36%, #E45D79 103.01%);
+     background: linear-gradient(268deg, #6484b5 -4.36%, #79accb 103.01%)
+
 }
 
 .btndownload {

@@ -15,36 +15,36 @@
                 <div class="card-body">
                   <form role="form" method="POST" action="{{ route('login') }}">
                     @csrf
-                    <label>Email</label>
+                    <label>No Anggota</label>
                     <div class="mb-3">
-                      <input type="email" class="form-control" name="email" id="email" placeholder="Email" aria-label="Email" aria-describedby="email-addon">
-                      @error('email')
+                      <input type="text" class="form-control" name="no_anggota" id="no_anggota" placeholder="No Anggota" aria-label="Email" aria-describedby="no_anggota-addon">
+                      {{-- @error('no_anggota')
                         <p class="text-danger text-xs mt-2">{{ $message }}</p>
-                      @enderror
+                      @enderror --}}
                     </div>
                     <label>Password</label>
                     <div class="mb-3">
                       <input type="password" class="form-control" name="password" id="password" placeholder="Password" aria-label="Password" aria-describedby="password-addon">
-                      @error('password')
+                      {{-- @error('password')
                         <p class="text-danger text-xs mt-2">{{ $message }}</p>
-                      @enderror
+                      @enderror --}}
                     </div>
-                    @if ($errors->has('email'))
-						<div class="form-group mb-3">
-							<span class="badge bg-danger mb-2">{{ $errors->first('email') }}</span>
-						</div>
-					@endif
+                    @if ($errors->has('no_anggota'))
+                      <div class="form-group mb-3">
+                        <span class="badge bg-danger mb-2">{{ $errors->first('no_anggota') }}</span>
+                      </div>
+                    @endif
                     <div class="text-center">
                       <button type="submit" class="btn bg-gradient-info w-100 mt-4 mb-0">Sign in</button>
                     </div>
                   </form>
                 </div>
-                <div class="card-footer text-center pt-0 px-lg-2 px-1">
+                {{-- <div class="card-footer text-center pt-0 px-lg-2 px-1">
                   <p class="mb-4 text-sm mx-auto">
                     Belum punya akun?
                     <a href="{{ route('sign-up') }}" class="text-info text-gradient font-weight-bold">Sign up</a>
                   </p>
-                </div>
+                </div> --}}
               </div>
             </div>
             <div class="col-md-6">

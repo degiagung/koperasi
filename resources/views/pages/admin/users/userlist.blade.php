@@ -26,10 +26,15 @@
                                 <thead>
                                     <tr>
                                         <th>No</th>
-                                        <th>Name</th>
-                                        <th>Email Address</th>
-                                        <th>Role</th>
-                                        <th>Status</th>
+                                        <th>No Anggota</th>
+                                        <th>Nama Anggota</th>
+                                        <th>Pangkat Anggota</th>
+                                        <th>NRP Anggota</th>
+                                        <th>Tgl Berdinasi</th>
+                                        <th>Handphone</th>
+                                        <th>Keanggotaan</th>
+                                        <th>Role User</th>
+                                        <th>Status Login</th>
                                         <th>Action</th>
                                     </tr>
                                 </thead>
@@ -53,15 +58,55 @@
                         <div class="basic-form">
                             <form>
                                 <div class="mb-3 row">
-                                    <label class="col-sm-3 col-form-label">Name</label>
+                                    <label class="col-sm-3 col-form-label">No Aggota</label>
                                     <div class="col-sm-9">
-                                        <input id="form-name" type="text" class="form-control" placeholder="Name">
+                                        <input id="form-noanggota" type="text" class="form-control" placeholder="No Anggota">
                                     </div>
                                 </div>
                                 <div class="mb-3 row">
-                                    <label class="col-sm-3 col-form-label">Email</label>
+                                    <label class="col-sm-3 col-form-label">Nama</label>
                                     <div class="col-sm-9">
-                                        <input id="form-email" type="email" class="form-control" placeholder="Email">
+                                        <input id="form-name" type="text" class="form-control" placeholder="Nama">
+                                    </div>
+                                </div>
+                                <div class="mb-3 row">
+                                    <label class="col-sm-3 col-form-label">Pangkat</label>
+                                    <div class="col-sm-9">
+                                        <input id="form-pangkat" type="text" class="form-control" placeholder="Pangkat">
+                                    </div>
+                                </div>
+                                <div class="mb-3 row">
+                                    <label class="col-sm-3 col-form-label">nrp</label>
+                                    <div class="col-sm-9">
+                                        <input id="form-nrp" type="text" class="form-control" placeholder="NRP">
+                                    </div>
+                                </div>
+                                <div class="mb-3 row">
+                                    <label class="col-sm-3 col-form-label">Alamat</label>
+                                    <div class="col-sm-9">
+                                        <textarea id="form-alamat" class="form-control" placeholder="Alamat"></textarea>
+                                    </div>
+                                </div>
+                                 <div class="mb-3 row">
+                                    <label class="col-sm-3 col-form-label">Handphone</label>
+                                    <div class="col-sm-9">
+                                        <input type="number" min='0' id="form-handphone" class="form-control" placeholder="Handphone">
+                                    </div>
+                                </div>
+                                 <div class="mb-3 row">
+                                    <label class="col-sm-3 col-form-label">Tgl Dinas</label>
+                                    <div class="col-sm-9">
+                                        <input type="date" id="form-tgldinas" class="form-control">
+                                    </div>
+                                </div>
+                                <div class="mb-3 row">
+                                    <label class="col-sm-3 col-form-label">Keanggotaan</label>
+                                    <div class="col-sm-9">
+                                        <select id="form-status" name="form-status" class="select2add">
+                                            <option value="">Semua Status</option>
+                                            <option value="1">AKTIF</option>
+                                            <option value="2">PINDAH</option>
+                                        </select>
                                     </div>
                                 </div>
                                 <div class="mb-3 row">
@@ -70,27 +115,6 @@
                                         <input id="form-password" type="password" class="form-control" placeholder="Password">
                                     </div>
                                 </div>
-                                <fieldset class="mb-3">
-                                    <div class="row">
-                                        <label class="col-form-label col-sm-3 pt-0">Status</label>
-                                        <div class="col-sm-9">
-                                            <div class="form-check">
-                                                <input class="form-check-input" type="radio" name="form-status"
-                                                    value="1">
-                                                <label class="form-check-label">
-                                                    Active
-                                                </label>
-                                            </div>
-                                            <div class="form-check">
-                                                <input class="form-check-input" type="radio" name="form-status"
-                                                    value="0">
-                                                <label class="form-check-label">
-                                                    Inactive
-                                                </label>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </fieldset>
                                 <div class="mb-3 row">
                                     <label class="col-sm-3 col-form-label">Role</label>
                                     <div class="col-sm-9">

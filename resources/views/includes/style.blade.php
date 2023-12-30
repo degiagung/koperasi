@@ -13,7 +13,7 @@
     <meta name="csrf-token" content="{{ csrf_token() }}">
 
     <!-- PAGE TITLE HERE -->
-    <title>KOS 27 BANDUNG</title>
+    <title>PRIMKOPAU</title>
     <!-- FAVICONS ICON -->
     {{-- <link rel="shortcut icon" type="image/png" href="images/favicon.png"> --}}
     <link href="../assets2/img/favicon.png" rel="icon">
