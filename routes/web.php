@@ -20,13 +20,15 @@ use Illuminate\Support\Facades\Session;
 |
 */
 
-Route::get('/login', [AuthController::class, 'index'])->name('login')->middleware('guest');
 // Rute untuk melakukan proses login
+Route::get('/login', [AuthController::class, 'index'])->name('login')->middleware('guest');
 Route::post('/login', [AuthController::class, 'login']);
-// Route::get('/sign-up', [AuthController::class, 'signup'])->name('sign-up')->middleware('guest');
 Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
+// Route::get('/sign-up', [AuthController::class, 'signup'])->name('sign-up')->middleware('guest');
 // Route::post('/createaccount', [AuthController::class, 'createaccount'])->name('createaccount');
-;
+
+Route::get('/generateview', [GenerateController::class, 'generateview']);
+Route::get('/gendataview', [GenerateController::class, 'gendataview']);
 
 Route::middleware(['auth'])->group(function () { // harus login terlebih dahulu
 

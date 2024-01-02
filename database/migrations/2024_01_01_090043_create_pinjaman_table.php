@@ -11,20 +11,20 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('history_transaksi', function (Blueprint $table) {
+        Schema::create('pinjaman', function (Blueprint $table) {
             $table->id();
-            $table->string('id_transaksi')->unique();
-            $table->unsignedBigInteger('user_id');
-            $table->string('nrp');
-            $table->string('norek');
-            $table->string('pemilik_rek');
+            $table->unsignedBigInteger('user_id')->nullable();
+            $table->string('id_transaksi')->nullable();
             $table->decimal('amount', $precision = 18, $scale = 2)->default(0.00);
+            $table->string('status');
+            $table->string('jenis');
             $table->timestamps();
 
             $table->foreign('user_id')
                ->references('id')
                ->on('users')
                ->onDelete('cascade');
+
         });
     }
 
@@ -33,6 +33,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('history_transaksi');
+        Schema::dropIfExists('pinjaman');
     }
 };

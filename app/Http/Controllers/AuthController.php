@@ -46,7 +46,7 @@ class AuthController extends Controller
     // Fungsi untuk melakukan proses login
     public function login(Request $request)
     {
-        $credentials = $request->only('no_anggota', 'password');
+        $credentials = $request->only('nrp', 'password');
         // $field = filter_var($login, FILTER_VALIDATE_EMAIL) ? 'email' : 'phone';
 
         // $credentials = [
@@ -58,7 +58,7 @@ class AuthController extends Controller
 
             if(Auth::user()->is_active != '1'){
                 Auth::logout();
-                return redirect()->back()->withErrors(['no_anggota' => 'Akun anda tidak aktif']);
+                return redirect()->back()->withErrors(['errormessage' => 'Akun anda tidak aktif']);
 
             }
             Session::put('user_id', Auth::user()->id);
@@ -73,7 +73,7 @@ class AuthController extends Controller
 
         } else {
             // Jika autentikasi gagal, kembali ke halaman login dengan pesan error
-            return redirect()->back()->withErrors(['no_anggota' => 'Akun tidak diketahui']);
+            return redirect()->back()->withErrors(['errormessage' => 'Akun tidak diketahui']);
         }
     }
     public function logout(Request $request)

@@ -8,18 +8,13 @@
 
     <section class="section dashboard">
          <div class="row">
-            <h2>List User</h2>
+            <h2>List Anggota</h2>
             <br>
             <div class="col-lg-12">
                  <div class="card-filter">
                     <label style="font-size:18px;">Filter</label>
                     <hr>
                     <div class="row">
-                        <div class="col-sm-3">
-                            <label>Role User</label>
-                            <select id="filter-role" name="filter-role" class="select2 ">
-                            </select>
-                        </div>
                         <div class="col-sm-3">
                             <label>Status Login</label>
                             <select id="filter-status" name="filter-status" class="select2 ">
@@ -93,7 +88,13 @@
                     </div>
                     <div class="modal-body">
                         <div class="basic-form">
-                            <form>
+                            <form id="form">
+                                <div class="mb-3 row">
+                                    <label class="col-sm-3 col-form-label">Limit Pinjaman</label>
+                                    <div class="col-sm-9">
+                                        <input id="form-limit" type="number" class="form-control" placeholder="Limit Pinjaman">
+                                    </div>
+                                </div>
                                 <div class="mb-3 row">
                                     <label class="col-sm-3 col-form-label">No Aggota</label>
                                     <div class="col-sm-9">

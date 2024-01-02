@@ -84,8 +84,11 @@ class GeneralController extends Controller
                 // asset('css/custom.css'),
             ];
             $baseURL = url('/');
+            $rolename = strtolower($MasterClass->getSession('role_name'))  ;
             $varJs = [
                 'const baseURL = "' . $baseURL . '"',
+                'const role = "' . $rolename .'"',
+
             ];
     
             $data = [
@@ -141,7 +144,7 @@ class GeneralController extends Controller
     
         
     }
-    public function userpenghuni(Request $request){
+    public function listanggota(Request $request){
 
         $MasterClass = new Master();
 
@@ -151,7 +154,7 @@ class GeneralController extends Controller
             $javascriptFiles = [
                 asset('action-js/global/global-action.js'),
                 // asset('action-js/generate/generate-action.js'),
-                asset('action-js/user/userpenghuni-action.js'),
+                asset('action-js/user/listanggota-action.js'),
             ];
         
             $cssFiles = [
@@ -159,8 +162,11 @@ class GeneralController extends Controller
                 // asset('css/custom.css'),
             ];
             $baseURL = url('/');
+            $rolename = strtolower($MasterClass->getSession('role_name'))  ;
             $varJs = [
                 'const baseURL = "' . $baseURL . '"',
+                'const role = "' . $rolename .'"',
+
             ];
     
             $data = [
@@ -170,14 +176,14 @@ class GeneralController extends Controller
                  // Menambahkan base URL ke dalam array
             ];
         
-            return view('pages.admin.users.userpenghuni')
+            return view('pages.admin.users.listanggota')
                 ->with($data);
         }else{
             return redirect('/login');
         }
         
     }
-    public function listkamar(Request $request){
+    public function listsimpanan(Request $request){
 
         $MasterClass = new Master();
 
@@ -187,7 +193,7 @@ class GeneralController extends Controller
             $javascriptFiles = [
                 asset('action-js/global/global-action.js'),
                 // asset('action-js/generate/generate-action.js'),
-                asset('action-js/property/listkamar-action.js'),
+                asset('action-js/transaksi/listsimpanan.js'),
             ];
         
             $cssFiles = [
@@ -208,14 +214,14 @@ class GeneralController extends Controller
                  // Menambahkan base URL ke dalam array
             ];
         
-            return view('pages.admin.property.listkamar')
+            return view('pages.admin.transaksi.listsimpanan')
                 ->with($data);
         }else{
             return redirect('/login');
         }
         
     }
-    public function listfasilitas(Request $request){
+    public function listpinjaman(Request $request){
 
         $MasterClass = new Master();
 
@@ -225,147 +231,7 @@ class GeneralController extends Controller
             $javascriptFiles = [
                 asset('action-js/global/global-action.js'),
                 // asset('action-js/generate/generate-action.js'),
-                asset('action-js/property/listfasilitas-action.js'),
-            ];
-        
-            $cssFiles = [
-                // asset('css/main.css'),
-                // asset('css/custom.css'),
-            ];
-            $baseURL = url('/');
-            $varJs = [
-                'const baseURL = "' . $baseURL . '"',
-            ];
-    
-            $data = [
-                'javascriptFiles' => $javascriptFiles,
-                'cssFiles' => $cssFiles,
-                'varJs'=> $varJs
-                 // Menambahkan base URL ke dalam array
-            ];
-        
-            return view('pages.admin.property.listfasilitas')
-                ->with($data);
-        }else{
-            return redirect('/login');
-        }
-        
-    }
-    public function mappingfasilitas(Request $request){
-
-        $MasterClass = new Master();
-
-        $checkAuth = $MasterClass->AuthenticatedView($request->route()->uri());
-        
-        if($checkAuth['code'] == $MasterClass::CODE_SUCCESS){
-            $javascriptFiles = [
-                asset('action-js/global/global-action.js'),
-                // asset('action-js/generate/generate-action.js'),
-                asset('action-js/management/mappingfasilitas-action.js'),
-            ];
-        
-            $cssFiles = [
-                // asset('css/main.css'),
-                // asset('css/custom.css'),
-            ];
-            $baseURL = url('/');
-            $varJs = [
-                'const baseURL = "' . $baseURL . '"',
-            ];
-    
-            $data = [
-                'javascriptFiles' => $javascriptFiles,
-                'cssFiles' => $cssFiles,
-                'varJs'=> $varJs
-                 // Menambahkan base URL ke dalam array
-            ];
-        
-            return view('pages.admin.management.mappingfasilitas')
-                ->with($data);
-        }else{
-            return redirect('/login');
-        }
-        
-    }
-    public function listTipeKamar(Request $request){
-
-        $MasterClass = new Master();
-
-        $checkAuth = $MasterClass->AuthenticatedView($request->route()->uri());
-        
-        if($checkAuth['code'] == $MasterClass::CODE_SUCCESS){
-            $javascriptFiles = [
-                asset('action-js/global/global-action.js'),
-                // asset('action-js/generate/generate-action.js'),
-                asset('action-js/property/listtipekamar-action.js'),
-            ];
-        
-            $cssFiles = [
-                // asset('css/main.css'),
-                // asset('css/custom.css'),
-            ];
-            $baseURL = url('/');
-            $varJs = [
-                'const baseURL = "' . $baseURL . '"',
-            ];
-    
-            $data = [
-                'javascriptFiles' => $javascriptFiles,
-                'cssFiles' => $cssFiles,
-                'varJs'=> $varJs
-                 // Menambahkan base URL ke dalam array
-            ];
-        
-            return view('pages.admin.property.listtipekamar')
-                ->with($data);
-        }else{
-            return redirect('/login');
-        }
-        
-    }
-    public function listtransaksi(Request $request){
-
-        $MasterClass = new Master();
-
-        $checkAuth = $MasterClass->AuthenticatedView($request->route()->uri());
-        
-        if($checkAuth['code'] == $MasterClass::CODE_SUCCESS){
-            $javascriptFiles = [
-                asset('action-js/global/global-action.js'),
-                // asset('action-js/generate/generate-action.js'),
-                asset('action-js/property/listtransaksi-action.js'),
-            ];
-        
-            $cssFiles = [
-                // asset('css/main.css'),
-                // asset('css/custom.css'),
-            ];
-            $baseURL = url('/');
-            $varJs = [
-                'const baseURL = "' . $baseURL . '"',
-            ];
-    
-            $data = [
-                'javascriptFiles' => $javascriptFiles,
-                'cssFiles' => $cssFiles,
-                'varJs'=> $varJs
-                 // Menambahkan base URL ke dalam array
-            ];
-        
-            return view('pages.admin.property.listtransaksi')
-                ->with($data);
-        }else{
-            return redirect('/login');
-        }
-        
-    }
-    public function booking(Request $request){
-
-        $MasterClass = new Master();
-
-        if(Auth::check()){
-            $javascriptFiles = [
-                asset('action-js/property/booking-action.js'),
+                asset('action-js/transaksi/listpinjaman.js'),
             ];
         
             $cssFiles = [
@@ -386,19 +252,24 @@ class GeneralController extends Controller
                  // Menambahkan base URL ke dalam array
             ];
         
-            return view('pages.landingpage.booking')
+            return view('pages.admin.transaksi.listpinjaman')
                 ->with($data);
         }else{
             return redirect('/login');
         }
         
     }
-    public function details($id){
+    public function laporansimpanpinjam(Request $request){
+
         $MasterClass = new Master();
 
-        if(Auth::check()){
+        $checkAuth = $MasterClass->AuthenticatedView($request->route()->uri());
+        
+        if($checkAuth['code'] == $MasterClass::CODE_SUCCESS){
             $javascriptFiles = [
-                asset('action-js/property/details.js'),
+                asset('action-js/global/global-action.js'),
+                // asset('action-js/generate/generate-action.js'),
+                asset('action-js/transaksi/laporansimpanpinjam.js'),
             ];
         
             $cssFiles = [
@@ -410,7 +281,6 @@ class GeneralController extends Controller
             $varJs = [
                 'const baseURL = "' . $baseURL . '"',
                 'const role = "' . $rolename .'"',
-                'const idkamar = "' . $id .'"',
 
             ];
             $data = [
@@ -420,38 +290,11 @@ class GeneralController extends Controller
                  // Menambahkan base URL ke dalam array
             ];
         
-            return view('pages.landingpage.property-details')
+            return view('pages.admin.transaksi.laporansimpanpinjam')
                 ->with($data);
         }else{
             return redirect('/login');
         }
-        
-    }
-    public function kostan(Request $request){
-
-        
-        $javascriptFiles = [
-            asset('action-js/property/kostan.js'),
-        ];
-    
-        $cssFiles = [
-            // asset('css/main.css'),
-            // asset('css/custom.css'),
-        ];
-        $baseURL = url('/');
-        $varJs = [
-            'const baseURL = "' . $baseURL . '"',
-
-        ];
-        $data = [
-            'javascriptFiles' => $javascriptFiles,
-            'cssFiles' => $cssFiles,
-            'varJs'=> $varJs,
-                // Menambahkan base URL ke dalam array
-        ];
-    
-        return view('pages.landingpage.kostan')
-            ->with($data);
         
     }
     

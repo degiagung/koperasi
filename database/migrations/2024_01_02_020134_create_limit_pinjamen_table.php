@@ -11,19 +11,14 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('bukti_transaksi', function (Blueprint $table) {
+        Schema::create('limit_pinjaman', function (Blueprint $table) {
             $table->id();
             $table->unsignedBigInteger('user_id')->nullable();
-            $table->timestamp('tgl_awal')->nullable();
-            $table->timestamp('tgl_akhir')->nullable();
-            $table->string('file');
-            $table->string('alamat');
-            $table->string('size');
-            $table->string('tipe');
-            $table->string('jenis');
+            $table->decimal('amount', $precision = 18, $scale = 2)->default(0.00);
+
             $table->timestamps();
 
-            $table->foreign('user_id')
+             $table->foreign('user_id')
                ->references('id')
                ->on('users')
                ->onDelete('cascade');
@@ -35,6 +30,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('bukti_transaksi');
+        Schema::dropIfExists('limit_pinjaman');
     }
 };

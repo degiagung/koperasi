@@ -20,6 +20,8 @@ return new class extends Migration
             $table->string('alamat')->nullable();
             $table->string('handphone')->nullable();
             $table->string('status')->nullable();
+            $table->string('norek')->nullable();
+            $table->string('pemilik_rekening')->nullable();
             $table->unsignedBigInteger('role_id'); 
             $table->string('password');
             $table->rememberToken();

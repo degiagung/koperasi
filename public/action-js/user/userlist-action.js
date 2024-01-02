@@ -4,6 +4,7 @@ let dtpr;
 
 $(document).ready(function () {
     loadRole();
+    loadRoleFilter();
     getListData();
 });
 
@@ -11,11 +12,28 @@ $(".select2").select2();
 $(".select2add").select2({
     dropdownParent: $("#modal-data"),
 });
+
+$("#filter-btn").on('click',function(e){
+    $('#table-list').dataTable().fnClearTable();
+    $('#table-list').dataTable().fnDraw();
+    $('#table-list').dataTable().fnDestroy();
+    getListData();
+    
+});
+let isObject = {};
+
 function getListData() {
+
     dtpr = $("#table-list").DataTable({
         ajax: {
             url: baseURL + "/getUserList",
             type: "POST",
+            dataType: "json",
+            data    : {
+                'role'          :$('#filter-role').val(),
+                'status'        :$('#filter-status').val(),
+                'keanggotaan'   :$('#filter-keanggotaan').val()
+            },
             dataSrc: function (response) {
                 if (response.code == 0) {
                     es = response.data;
@@ -68,7 +86,7 @@ function getListData() {
             { data: "role_name" },
             { data: "status_name" },
             { 
-                mRender: function (data, type, row) {
+                visible:false,mRender: function (data, type, row) {
                     var $rowData = `<button type="button" class="btn btn-primary btn-icon-sm mx-2 edit-btn"><i class="bi bi-pencil-square"></i></button>`;
                     $rowData += `<button type="button" class="btn btn-danger btn-icon-sm delete-btn"><i class="bi bi-x-square"></i></button>`;
                     return $rowData;
@@ -96,9 +114,11 @@ function getListData() {
                 });
         },
     });
+    var action    = dtpr.columns(".action");
+    if(role == 'sekertaris koperasi' || role == 'superadmin' ){
+        action.visible(true);
+    }
 }
-
-let isObject = {};
 
 function editdata(rowData) {
     isObject = rowData;
@@ -283,6 +303,7 @@ function saveData() {
         },
         complete: function () {
             $('#table-list').DataTable().ajax.reload();
+            $("#modal-data").modal("hide");
 
         },
         success: function (response) {
@@ -328,6 +349,33 @@ async function loadRole() {
             placeholder: "Please choose an option",
             dropdownParent: $("#modal-data"),
         });
+    } catch (error) {
+        sweetAlert("Oops...", error.responseText, "ERROR");
+    }
+}
+
+async function loadRoleFilter() {
+    try {
+        const response = await $.ajax({
+            url: baseURL + "/getRole",
+            type: "POST",
+            dataType: "json",
+            beforeSend: function () {
+                // Swal.fire({
+                //     title: "Loading",
+                //     text: "Please wait...",
+                // });
+            },
+        });
+
+        const res = response.data;
+        content   = "<option value = ''>Semua Role</option>";
+        for (let i = 0; i < res.length; i++) {
+            const element = res[i];
+            rolename = res[i]['role_name'] ;
+            content += "<option value = '"+rolename+"'>"+rolename+"</option>";
+        }
+        $("#filter-role").append(content);
     } catch (error) {
         sweetAlert("Oops...", error.responseText, "ERROR");
     }

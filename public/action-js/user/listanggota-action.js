@@ -7,13 +7,31 @@ $(document).ready(function () {
     getListData();
 });
 
+$(".select2").select2();
+$(".select2add").select2({
+    dropdownParent: $("#modal-data"),
+});
 
+$("#filter-btn").on('click',function(e){
+    $('#table-list').dataTable().fnClearTable();
+    $('#table-list').dataTable().fnDraw();
+    $('#table-list').dataTable().fnDestroy();
+    getListData();
+    
+});
+let isObject = {};
 
 function getListData() {
+
     dtpr = $("#table-list").DataTable({
         ajax: {
-            url: baseURL + "/getUserList",
+            url: baseURL + "/getAggotaList",
             type: "POST",
+            dataType: "json",
+            data    : {
+                'status'        :$('#filter-status').val(),
+                'keanggotaan'   :$('#filter-keanggotaan').val()
+            },
             dataSrc: function (response) {
                 if (response.code == 0) {
                     es = response.data;
@@ -54,19 +72,24 @@ function getListData() {
                     return meta.row + meta.settings._iDisplayStart + 1;
                 },
             },
+            { data: "no_anggota" },
             { data: "name" },
-            { data: "email" },
+            { data: "pangkat" },
+            { data: "nrp" },
+            { render:function (data,type,row) {
+                return datetostring2('yymmdd',row.tgl_dinas);
+            } },
+            { data: "handphone" },
+            { data: "keanggotaan" },
             { data: "role_name" },
             { data: "status_name" },
             { 
-                mRender: function (data, type, row) {
+                visible:false,mRender: function (data, type, row) {
                     var $rowData = `<button type="button" class="btn btn-primary btn-icon-sm mx-2 edit-btn"><i class="bi bi-pencil-square"></i></button>`;
                     $rowData += `<button type="button" class="btn btn-danger btn-icon-sm delete-btn"><i class="bi bi-x-square"></i></button>`;
                     return $rowData;
                 },
-                visible: true,
-                targets: 5,
-                className: "text-center"},
+                className: "text-center notdown action"},
         ],
         drawCallback: function (settings) {
             var api = this.api();
@@ -89,17 +112,26 @@ function getListData() {
                 });
         },
     });
+    var action    = dtpr.columns(".action");
+    if(role == 'sekertaris koperasi' || role == 'superadmin' ){
+        action.visible(true);
+    }
 }
-
-let isObject = {};
 
 function editdata(rowData) {
     isObject = rowData;
 
-    $("#form-email").val(rowData.email);
-    $("#form-password").val();
+    $("#form-noanggota").val(rowData.no_anggota);
     $("#form-name").val(rowData.name);
+    $("#form-pangkat").val(rowData.pangkat);
+    $("#form-nrp").val(rowData.nrp);
+    $("#form-alamat").val(rowData.alamat);
+    $("#form-handphone").val(rowData.handphone);
+    $("#form-tgldinas").val(rowData.tgl_dinas);
+    $("#form-status").val(rowData.status).trigger("change");
     $("#form-role").val(rowData.role_id).trigger("change");
+    $("#form-limit").val(rowData.limit_pinjaman);
+    $("#form-password").val();
 
     let $el = $("input:radio[name=form-status]");
 
@@ -113,11 +145,11 @@ $("#add-btn").on("click", function (e) {
 
     isObject = {};
     isObject["id"] = null;
-    $("#form-email").val("");
-    $("#form-password").val("");
-    $("#form-name").val("");
+    isObject["idlimit"] = null;
+    $("#form input").val("");
+    $("#form textarea").val("");
     $("#form-role").val("").trigger("change");
-    $("input:radio[name=form-status]").prop("checked", false);
+    
     $("#modal-data").modal("show");
 });
 
@@ -132,25 +164,74 @@ function checkValidation() {
     // console.log($el);
     if (
         validationSwalFailed(
+            (isObject["limit_pinjaman"] = $("#form-limit").val()),
+            "Limit Pinjaman tidak boleh kosong"
+        )
+    )
+        return false;
+    if (
+        validationSwalFailed(
+            (isObject["noanggota"] = $("#form-noanggota").val()),
+            "No Anggota tidak boleh kosong"
+        )
+    )
+        return false;
+    if (
+        validationSwalFailed(
             (isObject["name"] = $("#form-name").val()),
-            "Name field cannot be empty."
+            "Name tidak boleh kosong"
         )
     )
         return false;
     if (
         validationSwalFailed(
-            (isObject["email"] = $("#form-email").val()),
-            "Email field cannot be empty."
+            (isObject["pangkat"] = $("#form-pangkat").val()),
+            "Pangkat tidak boleh kosong"
         )
     )
         return false;
     if (
         validationSwalFailed(
-            (isObject["is_active"] = $el),
-            "Please choose a status."
+            (isObject["nrp"] = $("#form-nrp").val()),
+            "NRP tidak boleh kosong"
         )
     )
         return false;
+    if (
+        validationSwalFailed(
+            (isObject["alamat"] = $("#form-alamat").val()),
+            "Alamat tidak boleh kosong"
+        )
+    )
+        return false;
+    if (
+        validationSwalFailed(
+            (isObject["handphone"] = $("#form-handphone").val()),
+            "Handphone tidak boleh kosong"
+        )
+    )
+        return false;
+    if (
+        validationSwalFailed(
+            (isObject["tgldinas"] = $("#form-tgldinas").val()),
+            "Tgl Dinas tidak boleh kosong"
+        )
+    )
+        return false;
+    if (
+        validationSwalFailed(
+            (isObject["status"] = $("#form-status").val()),
+            "Status Anggota tidak boleh kosong"
+        )
+    )
+        return false;
+    // if (
+    //     validationSwalFailed(
+    //         (isObject["is_active"] = $el),
+    //         "Please choose a status."
+    //     )
+    // )
+    //     return false;
     if (
         validationSwalFailed(
             (isObject["role_id"] = $("#form-role").val()),
@@ -162,22 +243,18 @@ function checkValidation() {
     saveData();
 }
 
-
-
 function deleteData(data) {
   
     swal({
-        title: "Are you sure to delete ?",
-        text: "You will not be able to recover this imaginary file !!",
+        title: "Yakin untuk INACTIVE ?",
         type: "warning",
         showCancelButton: !0,
         confirmButtonColor: "#DD6B55",
-        confirmButtonText: "Yes, delete it !!",
-        cancelButtonText: "No, cancel it !!",
+        confirmButtonText: "Ya, Inactive !!",
+        cancelButtonText: "Tidak, Batalkan !!",
         closeOnConfirm: !1,
         closeOnCancel: !1,
     }).then(function (e) {
-        console.log(e);
         if (e.value) {
             $.ajax({
                 url: baseURL + "/deleteUser",
@@ -191,15 +268,13 @@ function deleteData(data) {
                         text: "Please wait...",
                     });
                 },
-                complete: function () {},
+                complete: function () {
+                    $('#table-list').DataTable().ajax.reload();
+                },
                 success: function (response) {
                     // Handle response sukses
                     if (response.code == 0) {
-                        swal("Deleted !", response.message, "success").then(
-                            function () {
-                                location.reload();
-                            }
-                        );
+                        swal("BERHASIL !", response.message, "success");
                     } else {
                         sweetAlert("Oops...", response.message, "ERROR");
                     }
@@ -212,9 +287,7 @@ function deleteData(data) {
             });
         } else {
             swal(
-                "Cancelled !!",
-                "Hey, your imaginary file is safe !!",
-                "ERROR"
+                "BATAL !!",
             );
         }
     });
@@ -234,13 +307,15 @@ function saveData() {
                 text: "Please wait...",
             });
         },
-        complete: function () {},
+        complete: function () {
+            $('#table-list').DataTable().ajax.reload();
+            $("#modal-data").modal("hide");
+
+        },
         success: function (response) {
             // Handle response sukses
             if (response.code == 0) {
-                swal("Saved !", response.message, "success").then(function () {
-                    location.reload();
-                });
+                swal("Saved !", response.message, "success");
                 // Reset form
             } else {
                 sweetAlert("Oops...", response.message, "ERROR");

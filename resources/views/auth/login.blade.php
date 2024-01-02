@@ -15,9 +15,9 @@
                 <div class="card-body">
                   <form role="form" method="POST" action="{{ route('login') }}">
                     @csrf
-                    <label>No Anggota</label>
+                    <label>NRP</label>
                     <div class="mb-3">
-                      <input type="text" class="form-control" name="no_anggota" id="no_anggota" placeholder="No Anggota" aria-label="Email" aria-describedby="no_anggota-addon">
+                      <input type="text" class="form-control" name="nrp" id="nrp" placeholder="No Anggota" aria-label="NRP" aria-describedby="nrp-addon">
                       {{-- @error('no_anggota')
                         <p class="text-danger text-xs mt-2">{{ $message }}</p>
                       @enderror --}}
@@ -29,9 +29,9 @@
                         <p class="text-danger text-xs mt-2">{{ $message }}</p>
                       @enderror --}}
                     </div>
-                    @if ($errors->has('no_anggota'))
+                    @if ($errors->has('errormessage'))
                       <div class="form-group mb-3">
-                        <span class="badge bg-danger mb-2">{{ $errors->first('no_anggota') }}</span>
+                        <span class="badge bg-danger mb-2">{{ $errors->first('errormessage') }}</span>
                       </div>
                     @endif
                     <div class="text-center">

@@ -7,6 +7,7 @@ use App\Models\UserAccess;
 use Illuminate\Http\Request;
 use App\Helpers\Master;
 use App\Models\User;
+use App\Models\limit_pinjaman;
 use App\Models\MenusAccess;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
@@ -158,8 +159,11 @@ class JsonDataController extends Controller
                         DB::beginTransaction();
                 
                         $status = [];
-    
-                        $saved = DB::select("SELECT * FROM users_roles ur WHERE role_name not like '%admin%'");
+                        $where = "" ;
+                        if($MasterClass->getSession('role_name') != 'superadmin' ){
+                            $where = " WHERE role_name not like '%admin%'";
+                        }
+                        $saved = DB::select("SELECT * FROM users_roles ur $where");
                         $saved = $MasterClass->checkErrorModel($saved);
                         
                         $status = $saved;
@@ -434,7 +438,9 @@ class JsonDataController extends Controller
                     if ($request->isMethod('post')) {
 
                         DB::beginTransaction();     
-                        
+                        $fstatus     = $request->status ;
+                        $frole       = $request->role ;
+                        $fkeanggotaan= $request->keanggotaan ;
                         $status = [];
                         
                         $select = "
@@ -450,8 +456,8 @@ class JsonDataController extends Controller
                                 WHEN us.tgl_dinas is null THEN 'TGL DINAS KOSONG'
                                 ELSE
                                     CASE 
-                                        WHEN lower(status) != 'pindah' THEN 'AKTIF'
-                                    ELSE 'PINDAH'
+                                        WHEN lower(status) = '2' THEN 'PINDAH'
+                                    ELSE 'AKTIF'
                                 END
                             END keanggotaan
                         ";
@@ -461,9 +467,35 @@ class JsonDataController extends Controller
                             LEFT JOIN users_roles ur ON us.role_id = ur.id
                         ';
                         
+                        
                         $where = "
                             ur.role_name not like '%admin%'
                         ";
+
+                        if($fstatus){
+                            $where .= "
+                                AND us.is_active = $fstatus
+                            ";
+                        }
+
+                        if($frole){
+                            $where .= "
+                                 AND  us.role_id in (select id from users_roles where role_name  = '$frole')
+                            ";
+                        }
+
+                        if($fkeanggotaan){
+                            if($fkeanggotaan == 'pindah'){
+                                $where .= "
+                                     AND lower(us.status) = '2'
+                                ";
+                            }else{
+                                $where .= "
+                                     AND lower(us.tgl_dinas) $fkeanggotaan
+                                ";
+                            }
+                        }
+
                         $result = $MasterClass->selectGlobal($select,$table,$where);
                         
                         $results = [
@@ -501,7 +533,7 @@ class JsonDataController extends Controller
             return $MasterClass->Results($results);
 
         }
-        public function getPenghuniList(Request $request){
+        public function getAggotaList(Request $request){
 
             $MasterClass = new Master();
 
@@ -512,489 +544,61 @@ class JsonDataController extends Controller
                     if ($request->isMethod('post')) {
 
                         DB::beginTransaction();     
-                        
+                        $fstatus     = $request->status ;
+                        $fkeanggotaan= $request->keanggotaan ;
                         $status = [];
                         
                         $select = "
-                            us.id,
-                            us.name,
-                            us.email,
-                            us.handphone,
-                                case 
-                                    when us.is_active = '1' then 'ACTIVE' 
-                                    when us.is_active = '2' then 'INACTIVE' 
-                                end status_name,
-                            us.is_active,
-                            us.role_id,
-                            ur.role_name 
+                            us.*,
+                            case 
+                                when us.is_active = '1' then 'ACTIVE' 
+                                when us.is_active = '2' then 'INACTIVE' 
+                                when us.is_active = '3' then 'DELETE' 
+                            end status_name,
+                            ur.role_name,
+                            CASE 
+                                WHEN us.tgl_dinas > current_date THEN 'PENSIUN'
+                                WHEN us.tgl_dinas is null THEN 'TGL DINAS KOSONG'
+                                ELSE
+                                    CASE 
+                                        WHEN lower(status) = '2' THEN 'PINDAH'
+                                    ELSE 'AKTIF'
+                                END
+                            END keanggotaan,
+                            lp.id as idlimit,
+                            lp.amount as limit_pinjaman
                         ";
                         
                         $table = '
                             users us
-                            LEFT JOIN users_roles ur ON us.role_id = ur.id
+                            JOIN users_roles ur ON us.role_id = ur.id
+                            LEFT JOIN limit_pinjaman lp ON lp.user_id = us.id
                         ';
-                        $where = " ur.role_name like  'penghuni' ";
-                        $result = $MasterClass->selectGlobal($select,$table,$where);
                         
-                        $results = [
-                            'code'  => $result['code'],
-                            'info'  => $result['info'],
-                            'data'  => $result['data'],
-                        ];
-                            
-            
-            
-                    } else {
-                        $results = [
-                            'code' => '103',
-                            'info'  => "Method Failed",
-                        ];
-                    }
-                } catch (\Exception $e) {
-                    // Roll back the transaction in case of an exception
-                    $results = [
-                        'code' => '102',
-                        'info'  => $e->getMessage(),
-                    ];
-        
-                }
-            }
-            else {
-        
-                $results = [
-                    'code' => '403',
-                    'info'  => "Unauthorized",
-                ];
-                
-            }
-
-            return $MasterClass->Results($results);
-
-        }
-        public function getListKamar(Request $request){
-
-            $MasterClass = new Master();
-
-            $checkAuth = $MasterClass->Authenticated($MasterClass->getSession('user_id'));
-            
-            if($checkAuth['code'] == $MasterClass::CODE_SUCCESS){
-                try {
-                    if ($request->isMethod('post')) {
-
-                        DB::beginTransaction();     
                         
-                        $status = [];
-                        
-                        $select = "
-                            k.id,
-                            k.lantai,
-                            k.no_kamar,
-                            k.status,
-                            k.harga,
-                            tk.tipe,
-                            GROUP_CONCAT(fs.fasilitas SEPARATOR ',') as faskos,
-                            GROUP_CONCAT(fsp.fasilitas SEPARATOR ',') as faskosp,
-                            GROUP_CONCAT(fsper.fasilitas SEPARATOR ',') as perbaikan,
-                            GROUP_CONCAT(fs.id SEPARATOR ',') as idfaskos,
-                            GROUP_CONCAT(fsp.id SEPARATOR ',') as idfaskosp,
-                            GROUP_CONCAT(fsper.id SEPARATOR ',') as idperbaikan,
-                            CASE 
-                                WHEN ur.role_name = 'guest' THEN 'Booking'
-                                ELSE
-                                    CASE
-                                        WHEN mk.tgl_awal is not null THEN 'Sudah Terisi'
-                                        ELSE 'Kosong'
-                                    END
-                            END as status_kamar,
-                            us.name,
-                            us.handphone,
-                            ur.role_name,
-                            mk.user_id,
-                            concat(mk.tgl_awal,' SD ',mk.tgl_akhir) as durasi,
-                            CONVERT(mk.tgl_awal,date) tgl_awal,
-                            CONVERT(mk.tgl_akhir,date) tgl_akhir,
-                            DATEDIFF(CONVERT(mk.tgl_akhir,date) , CURRENT_DATE) as sisa_durasi,
-                            count(fsper.fasilitas) countperbaikan
-                        ";
-                        
-                        $table = "
-                            kamar k
-                            LEFT JOIN mapping_kamar mk ON k.id = mk.id_kamar
-                            LEFT JOIN mapping_fasilitas mf ON k.id = mf.id_kamar
-                            LEFT JOIN fasilitas fs ON mf.id_fasilitas = fs.id AND fs.penyedia = 'pihak kos'
-                            LEFT JOIN fasilitas fsp ON mf.id_fasilitas = fsp.id AND fsp.penyedia = 'penghuni'
-                            LEFT JOIN fasilitas fsper ON mf.id_fasilitas = fsper.id AND fsper.penyedia = 'pihak kos' AND mf.status = 'perbaikan'
-                            LEFT JOIN tipe_kamar tk ON mk.id_tipe = tk.id
-                            LEFT JOIN users us ON mk.user_id = us.id
-                            LEFT JOIN users_roles ur ON ur.id = us.role_id
+                        $where = "
+                             us.role_id in (select id from users_roles where role_name  like '%anggota%')
                         ";
 
-                        $where = " 
-                            k.id is not null
-                        ";
-                        $status     = $request->status ;
-                        $kondisi    = $request->kondisi ;
-                        if($status == 1){
-                            $where .="
-                                AND mk.user_id is not null
-                            ";
-                        }elseif($status == 2){
-                            $where .="
-                                AND mk.user_id is null
-                            ";
-                        }elseif($status == 3){
-                            $where .="
-                                AND mk.user_id is not  null and ur.role_name = 'guest'
+                        if($fstatus){
+                            $where .= "
+                                AND us.is_active = $fstatus
                             ";
                         }
 
-                        
-                        $where .= " 
-                            GROUP BY
-                            k.id,
-                            k.lantai,
-                            k.no_kamar,
-                            k.status,
-                            k.harga,
-                            mk.tgl_awal,
-                            us.name,
-                            us.handphone,
-                            ur.role_name,
-                            mk.tgl_awal,
-                            mk.tgl_akhir,
-                            mk.user_id,
-                            tk.tipe
-                            ORDER BY k.no_kamar asc
-                        ";
-
-                        if($kondisi ){
-                            $table = " ( select ".$select." from ".$table." where ".$where." ) a" ;
-                            $select = " * ";
-                            if($kondisi == 1){
-                                $where =" countperbaikan = 0";
-                            }elseif($kondisi == 2){
-                                $where =" countperbaikan >= 1";
-                            }
-                        }
-                        $result = $MasterClass->selectGlobal($select,$table,$where);
-                        
-                        $results = [
-                            'code'  => $result['code'],
-                            'info'  => $result['info'],
-                            'data'  => $result['data'],
-                        ];
-                            
-            
-            
-                    } else {
-                        $results = [
-                            'code' => '103',
-                            'info'  => "Method Failed",
-                        ];
-                    }
-                } catch (\Exception $e) {
-                    // Roll back the transaction in case of an exception
-                    $results = [
-                        'code' => '102',
-                        'info'  => $e->getMessage(),
-                    ];
-        
-                }
-            }
-            else {
-        
-                $results = [
-                    'code' => '403',
-                    'info'  => "Unauthorized",
-                ];
-                
-            }
-
-            return $MasterClass->Results($results);
-
-        }
-        public function getListFasilitas(Request $request){
-
-            $MasterClass = new Master();
-
-            $checkAuth = $MasterClass->Authenticated($MasterClass->getSession('user_id'));
-            
-            if($checkAuth['code'] == $MasterClass::CODE_SUCCESS){
-                try {
-                    if ($request->isMethod('post')) {
-
-                        DB::beginTransaction();     
-                        
-                        $status = [];
-                        
-                        $select = "
-                            f.*
-                        ";
-                        
-                        $table = '
-                            fasilitas f
-                        ';
-                        // $where = " ur.role_name like  'penghuni' ";
-                        $result = $MasterClass->selectGlobal($select,$table);
-                        
-                        $results = [
-                            'code'  => $result['code'],
-                            'info'  => $result['info'],
-                            'data'  => $result['data'],
-                        ];
-                            
-            
-            
-                    } else {
-                        $results = [
-                            'code' => '103',
-                            'info'  => "Method Failed",
-                        ];
-                    }
-                } catch (\Exception $e) {
-                    // Roll back the transaction in case of an exception
-                    $results = [
-                        'code' => '102',
-                        'info'  => $e->getMessage(),
-                    ];
-        
-                }
-            }
-            else {
-        
-                $results = [
-                    'code' => '403',
-                    'info'  => "Unauthorized",
-                ];
-                
-            }
-
-            return $MasterClass->Results($results);
-
-        }
-        public function getPenghuni(Request $request){
-
-            $MasterClass = new Master();
-
-            $checkAuth = $MasterClass->Authenticated($MasterClass->getSession('user_id'));
-            
-            if($checkAuth['code'] == $MasterClass::CODE_SUCCESS){
-                try {
-                    if ($request->isMethod('post')) {
-
-                        $data = json_decode($request->getContent());
-
-                        
-                        DB::beginTransaction();
-                
-                        $status = [];
-    
-                        $saved = DB::select("SELECT us.* FROM users us
-                                LEFT JOIN users_roles ur ON us.role_id = ur.id 
-                                where 
-                                ur.role_name like  'penghuni' ");
-                        $saved = $MasterClass->checkErrorModel($saved);
-                        
-                        $status = $saved;
-    
-                        // if($status['code'] == $MasterClass::CODE_SUCCESS){
-                        //     DB::commit();
-                        // }else{
-                        //     DB::rollBack();
-                        // }
-            
-                        $results = [
-                            'code' => $status['code'],
-                            'info'  => $status['info'],
-                            'data'  =>  $status['data'],
-                        ];
-                            
-            
-            
-                    } else {
-                        $results = [
-                            'code' => '103',
-                            'info'  => "Method Failed",
-                        ];
-                    }
-                } catch (\Exception $e) {
-                    // Roll back the transaction in case of an exception
-                    $results = [
-                        'code' => '102',
-                        'info'  => $e->getMessage(),
-                    ];
-        
-                }
-            }
-            else {
-        
-                $results = [
-                    'code' => '403',
-                    'info'  => "Unauthorized",
-                ];
-                
-            }
-
-            return $MasterClass->Results($results);
-
-        }
-        public function getTipeKamar(Request $request){
-
-            $MasterClass = new Master();
-
-            $checkAuth = $MasterClass->Authenticated($MasterClass->getSession('user_id'));
-            
-            if($checkAuth['code'] == $MasterClass::CODE_SUCCESS){
-                try {
-                    if ($request->isMethod('post')) {
-
-                        $data = json_decode($request->getContent());
-
-                        
-                        DB::beginTransaction();
-                
-                        $status = [];
-    
-                        $saved = DB::select("SELECT * FROM tipe_kamar ");
-                        $saved = $MasterClass->checkErrorModel($saved);
-                        
-                        $status = $saved;
-    
-                        // if($status['code'] == $MasterClass::CODE_SUCCESS){
-                        //     DB::commit();
-                        // }else{
-                        //     DB::rollBack();
-                        // }
-            
-                        $results = [
-                            'code' => $status['code'],
-                            'info'  => $status['info'],
-                            'data'  =>  $status['data'],
-                        ];
-                            
-            
-            
-                    } else {
-                        $results = [
-                            'code' => '103',
-                            'info'  => "Method Failed",
-                        ];
-                    }
-                } catch (\Exception $e) {
-                    // Roll back the transaction in case of an exception
-                    $results = [
-                        'code' => '102',
-                        'info'  => $e->getMessage(),
-                    ];
-        
-                }
-            }
-            else {
-        
-                $results = [
-                    'code' => '403',
-                    'info'  => "Unauthorized",
-                ];
-                
-            }
-
-            return $MasterClass->Results($results);
-
-        }
-        public function getFasilitas(Request $request){
-
-            $MasterClass = new Master();
-
-            $checkAuth = $MasterClass->Authenticated($MasterClass->getSession('user_id'));
-            
-            if($checkAuth['code'] == $MasterClass::CODE_SUCCESS){
-                try {
-                    if ($request->isMethod('post')) {
-
-                        DB::beginTransaction();
-                
-                        $status = [];
-                        
-                        if($request->kamar){
-                            $where = "inner join mapping_fasilitas b on a.id= b.id_fasilitas where b.id_kamar = $request->kamar and a.penyedia= 'pihak kos'";
-                        }else{
-                            if($request->jenis == 'kos'){
-                                $where = "where penyedia= 'pihak kos'";
-                            }elseif($request->jenis == 'penghuni'){
-                                $where = "where penyedia= 'penghuni'";
+                        if($fkeanggotaan){
+                            if($fkeanggotaan == 'pindah'){
+                                $where .= "
+                                     AND lower(us.status) = '2'
+                                ";
                             }else{
-                                $where = '';
+                                $where .= "
+                                     AND lower(us.tgl_dinas) $fkeanggotaan
+                                ";
                             }
                         }
-                        $saved = DB::select("SELECT a.* FROM fasilitas a $where");
-                        $saved = $MasterClass->checkErrorModel($saved);
-                        
-                        $status = $saved;
-    
-                        // if($status['code'] == $MasterClass::CODE_SUCCESS){
-                        //     DB::commit();
-                        // }else{
-                        //     DB::rollBack();
-                        // }
-            
-                        $results = [
-                            'code' => $status['code'],
-                            'info'  => $status['info'],
-                            'data'  =>  $status['data'],
-                        ];
-                            
-            
-            
-                    } else {
-                        $results = [
-                            'code' => '103',
-                            'info'  => "Method Failed",
-                        ];
-                    }
-                } catch (\Exception $e) {
-                    // Roll back the transaction in case of an exception
-                    $results = [
-                        'code' => '102',
-                        'info'  => $e->getMessage(),
-                    ];
-        
-                }
-            }
-            else {
-        
-                $results = [
-                    'code' => '403',
-                    'info'  => "Unauthorized",
-                ];
-                
-            }
 
-            return $MasterClass->Results($results);
-
-        }
-        public function getListTipeKamar(Request $request){
-
-            $MasterClass = new Master();
-
-            $checkAuth = $MasterClass->Authenticated($MasterClass->getSession('user_id'));
-            
-            if($checkAuth['code'] == $MasterClass::CODE_SUCCESS){
-                try {
-                    if ($request->isMethod('post')) {
-
-                        DB::beginTransaction();     
-                        
-                        $status = [];
-                        
-                        $select = "
-                            tk.*
-                        ";
-                        
-                        $table = '
-                            tipe_kamar tk
-                        ';
-                        // $where = " ur.role_name like  'penghuni' ";
-                        $result = $MasterClass->selectGlobal($select,$table);
+                        $result = $MasterClass->selectGlobal($select,$table,$where);
                         
                         $results = [
                             'code'  => $result['code'],
@@ -1031,7 +635,7 @@ class JsonDataController extends Controller
             return $MasterClass->Results($results);
 
         }
-        public function listKamarDashboard(Request $request){
+        public function getSimpanan(Request $request){
 
             $MasterClass = new Master();
 
@@ -1042,102 +646,200 @@ class JsonDataController extends Controller
                     if ($request->isMethod('post')) {
 
                         DB::beginTransaction();     
-                        $idlogin    = strtolower($MasterClass->getSession('user_id'));
-                        $rolelogin  = strtolower($MasterClass->getSession('role_name'));
+                        $fstatus     = $request->status ;
+                        $fkeanggotaan= $request->keanggotaan ;
                         $status = [];
                         
                         $select = "
-                            k.id,
-                            k.lantai,
-                            k.no_kamar,
-                            GROUP_CONCAT(fs.fasilitas SEPARATOR ',') as faskos,
-                            GROUP_CONCAT(fsp.fasilitas SEPARATOR ',') as faskosp,
-                            CASE
-                                WHEN mk.tgl_awal is not null THEN 'Sudah Terisi'
-                                else 'Kosong'
-                            END as status_kamar,
-                            us.name,
-                            mk.user_id,
-                            concat(mk.tgl_awal,' SD ',mk.tgl_akhir) as durasi,
-                            mk.tgl_awal,
-                            mk.tgl_akhir,
-                            DATEDIFF(CONVERT(mk.tgl_akhir,date) , CURRENT_DATE) as sisa_durasi,
-                            tk.tipe,
-                            us.handphone,
-                            sum(fsp.biaya)+k.harga as biaya,
-                            sum(fsp.biaya) as biayatambah,k.harga,
-                            ht.id as status_transaksi,
-                            ht.created_at as tgltransaksi,
-                            ht.total_biaya totaltransaksi,
-                            ht.tgl_awal tgltransaksi1,
-                            ht.tgl_akhir tgltransaksi2,
-                            ht.name nametransaksi,
-                            ht.biaya_kamar biayatransaksi,
-                            ht.biaya_tambahan biayatambahtransaksi,
-                            ht.tipe tipetransaksi,
-                            ht.no_kamar kamartransaksi,
-                            ht.jml_bulan blntransaksi,
-                            ht.handphone hptranaksi
+                            us.name,us.id as user,us.nrp,us.tgl_dinas,
+                            case 
+                                when us.is_active = '1' then 'ACTIVE' 
+                                when us.is_active = '2' then 'INACTIVE' 
+                                when us.is_active = '3' then 'DELETE' 
+                            end status_name,
+                            ur.role_name,
+                            CASE 
+                                WHEN us.tgl_dinas > current_date THEN 'PENSIUN'
+                                WHEN us.tgl_dinas is null THEN 'TGL DINAS KOSONG'
+                                ELSE
+                                    CASE 
+                                        WHEN lower(us.status) = '2' THEN 'PINDAH'
+                                    ELSE 'AKTIF'
+                                END
+                            END keanggotaan,
+                            PERIOD_DIFF(DATE_FORMAT(SYSDATE(), '%Y%m'),DATE_FORMAT(us.tgl_dinas, '%Y%m')) as los,
+                            COALESCE(PERIOD_DIFF(DATE_FORMAT(SYSDATE(), '%Y%m'),DATE_FORMAT(us.tgl_dinas, '%Y%m')) * 50000,0) as simpananpokokwajib,
+                            COALESCE(SUM(pj.amount),0.00) as penarikan,
+                            pj.created_at as tgl_penarikan,
+                            COALESCE(SUM(sm.amount),0.00) sukarela,
+                            COALESCE(((PERIOD_DIFF(DATE_FORMAT(SYSDATE(), '%Y%m'),DATE_FORMAT(us.tgl_dinas, '%Y%m')) * 100000)
+                            +
+                            COALESCE(SUM(sm.amount),0.00)),0.00) total,
+                            COALESCE(((PERIOD_DIFF(DATE_FORMAT(SYSDATE(), '%Y%m'),DATE_FORMAT(us.tgl_dinas, '%Y%m')) * 100000)
+                            +
+                            COALESCE(SUM(sm.amount),0.00))
+                            -
+                            COALESCE(SUM(pj.amount),0.00),0.00) saldo
                         ";
                         
                         $table = "
-                            kamar k
-                            LEFT JOIN mapping_kamar mk ON k.id = mk.id_kamar
-                            LEFT JOIN mapping_fasilitas mf ON k.id = mf.id_kamar
-                            LEFT JOIN fasilitas fs ON mf.id_fasilitas = fs.id and fs.penyedia = 'pihak kos'
-                            LEFT JOIN tipe_kamar tk ON mk.id_tipe = tk.id
-                            LEFT JOIN users us ON mk.user_id = us.id
-                            LEFT JOIN fasilitas fsp ON mf.id_fasilitas = fsp.id and fsp.penyedia = 'penghuni'
-                            LEFT JOIN history_transaksi ht ON ht.user_id = mk.user_id AND ht.tgl_awal = mk.tgl_awal
-                                AND ht.tgl_akhir = mk.tgl_akhir
+                            users us
+                            LEFT JOIN users_roles ur ON us.role_id = ur.id
+                            LEFT JOIN simpanan sm ON sm.user_id = us.id AND sm.status = 'approve'
+                            LEFT JOIN pinjaman pj ON pj.user_id = us.id AND pj.status = 'approve' and pj.jenis = 'tarik simpanan'
                         ";
-                        $where = " 
-                            mk.user_id is not null
-                        ";
-                        $sisawaktu = $request->sisawaktu ;
-                        $statusbayar = $request->status ;
-                        if($rolelogin != 'superadmin' && $rolelogin != 'penjaga' && $rolelogin != 'pemilik'){
-                            $where  .=" AND us.id = $idlogin ";
-                        }
-                        if($sisawaktu){
-                            $where .="
-                                AND DATEDIFF(CONVERT(mk.tgl_akhir,date) , CURRENT_DATE) $sisawaktu 
-                            ";
-                        }
-                        if($statusbayar == '0'){
-                            
-                            $where .=" AND ht.id is null";
-                        }elseif($statusbayar == '1'){
-                            $where .=" AND ht.id is not null";
-                        }
-                        $where .= " GROUP BY
-                            k.id,
-                            k.lantai,
-                            k.no_kamar,
-                            mk.tgl_awal,
-                            mk.user_id,
-                            us.name,
-                            mk.tgl_awal,
-                            mk.tgl_akhir,
-                            tk.tipe,
-                            us.handphone,
-                            k.harga,
-                            ht.id,
-                            ht.created_at,
-                            ht.total_biaya,
-                            ht.tgl_awal,
-                            ht.tgl_akhir,
-                            ht.name,
-                            ht.biaya_kamar,
-                            ht.biaya_tambahan,
-                            ht.tipe,
-                            ht.no_kamar,
-                            ht.jml_bulan,
-                            ht.handphone
-                            ORDER BY mk.tgl_akhir asc
+                        
+                        
+                        $where = "
+                             us.role_id in (select id from users_roles where role_name  like '%anggota%')
                         ";
 
-                        // print_r($where);die;;
+                        if($fkeanggotaan){
+                            if($fkeanggotaan == 'pindah'){
+                                $where .= "
+                                     AND lower(us.status) = '2'
+                                ";
+                            }else{
+                                $where .= "
+                                     AND lower(us.tgl_dinas) $fkeanggotaan
+                                ";
+                            }
+                        }
+
+                        $where.="
+                            GROUP BY 
+                                us.name,us.id,us.nrp,us.tgl_dinas,us.is_active,us.status,
+                                ur.role_name,pj.created_at
+                        ";
+                        $result = $MasterClass->selectGlobal($select,$table,$where);
+                        
+                        $results = [
+                            'code'  => $result['code'],
+                            'info'  => $result['info'],
+                            'data'  => $result['data'],
+                        ];
+                            
+            
+            
+                    } else {
+                        $results = [
+                            'code' => '103',
+                            'info'  => "Method Failed",
+                        ];
+                    }
+                } catch (\Exception $e) {
+                    // Roll back the transaction in case of an exception
+                    $results = [
+                        'code' => '102',
+                        'info'  => $e->getMessage(),
+                    ];
+        
+                }
+            }
+            else {
+        
+                $results = [
+                    'code' => '403',
+                    'info'  => "Unauthorized",
+                ];
+                
+            }
+
+            return $MasterClass->Results($results);
+
+        }
+        public function getPinjaman(Request $request){
+
+            $MasterClass = new Master();
+
+            $checkAuth = $MasterClass->Authenticated($MasterClass->getSession('user_id'));
+            
+            if($checkAuth['code'] == $MasterClass::CODE_SUCCESS){
+                try {
+                    if ($request->isMethod('post')) {
+
+                        DB::beginTransaction();     
+                        $fstatus        = $request->status ;
+                        $fkeanggotaan   = $request->keanggotaan ;
+                        $fstatuspinjam  = $request->statuspinjam ;
+                        $status = [];
+                        
+                        $select = "
+                            us.name,us.id as user,us.nrp,us.tgl_dinas,
+                            case 
+                                when us.is_active = '1' then 'ACTIVE' 
+                                when us.is_active = '2' then 'INACTIVE' 
+                                when us.is_active = '3' then 'DELETE' 
+                            end status_name,
+                            ur.role_name,
+                            CASE 
+                                WHEN us.tgl_dinas > current_date THEN 'PENSIUN'
+                                WHEN us.tgl_dinas is null THEN 'TGL DINAS KOSONG'
+                                ELSE
+                                    CASE 
+                                        WHEN lower(us.status) = '2' THEN 'PINDAH'
+                                    ELSE 'AKTIF'
+                                END
+                            END keanggotaan,
+                            lp.amount as limitpinjaman,
+                            COALESCE(pj.amount,0) as pinjaman,
+                            cast(COALESCE(pj.amount,0) + COALESCE(pj.amount,0)*0.02*pj.tenor as decimal(18,2)) as pinjaman2persen,
+                            PERIOD_DIFF(DATE_FORMAT(SYSDATE(), '%Y%m'),DATE_FORMAT(us.tgl_dinas, '%Y%m')) as totaltenor,
+                            cast((COALESCE(pj.amount,0) + COALESCE(pj.amount,0)*0.02*pj.tenor) / pj.tenor as decimal(18,2)) totalbayarperbulan,
+                            cast((COALESCE(pj.amount,0) + COALESCE(pj.amount,0)*0.02*pj.tenor) / pj.tenor * 
+                            PERIOD_DIFF(DATE_FORMAT(SYSDATE(), '%Y%m'),DATE_FORMAT(us.tgl_dinas, '%Y%m'))
+                            as decimal(18,2)) as totalbayar,
+                            COALESCE(pj.amount,0) - cast(COALESCE(pj.amount,0) - COALESCE(pj.amount,0) / pj.tenor  * PERIOD_DIFF(DATE_FORMAT(SYSDATE(), '%Y%m'),DATE_FORMAT(us.tgl_dinas, '%Y%m'))as decimal(18,2)) as sisalimit,
+                            cast(
+                                (COALESCE(pj.amount,0) + COALESCE(pj.amount,0)*0.02*pj.tenor)
+                                -
+                                (COALESCE(pj.amount,0) + COALESCE(pj.amount,0)*0.02*pj.tenor) / pj.tenor * 
+                                PERIOD_DIFF(DATE_FORMAT(SYSDATE(), '%Y%m'),DATE_FORMAT(us.tgl_dinas, '%Y%m'))
+                            as decimal(18,2)) as sisapinjaman,
+                            pj.tenor - PERIOD_DIFF(DATE_FORMAT(SYSDATE(), '%Y%m'),DATE_FORMAT(us.tgl_dinas, '%Y%m')) as sisatenor,
+                            pj.tenor,
+                            lower(pj.status_pinjaman) as status_pinjaman
+                        ";
+                        
+                        $table = "
+                            users us
+                            JOIN users_roles ur ON us.role_id = ur.id
+                            JOIN pinjaman pj ON pj.user_id = us.id AND pj.status = 'approve'
+                            LEFT JOIN limit_pinjaman lp ON lp.user_id = us.id 
+                        ";
+                        
+                        
+                        $where = "
+                             ur.role_name like '%anggota%' 
+                        ";
+
+                        if($fkeanggotaan){
+                            if($fkeanggotaan == 'pindah'){
+                                $where .= "
+                                     AND lower(us.status) = '2'
+                                ";
+                            }else{
+                                $where .= "
+                                     AND lower(us.tgl_dinas) $fkeanggotaan
+                                ";
+                            }
+                        }
+                        if($fstatuspinjam == '1'){
+                            $where .= "
+                                 AND (lower(pj.status_pinjaman) = 'lunas' OR COALESCE(pj.tenor,0) = PERIOD_DIFF(DATE_FORMAT(SYSDATE(), '%Y%m'),DATE_FORMAT(us.tgl_dinas, '%Y%m')))
+                            ";
+                        }elseif($fstatuspinjam == '2'){
+                            $where .= "
+                                 AND pj.status_pinjaman != 'lunas' AND COALESCE(pj.tenor,0) != PERIOD_DIFF(DATE_FORMAT(SYSDATE(), '%Y%m'),DATE_FORMAT(us.tgl_dinas, '%Y%m'))
+                            ";
+                        }
+
+                        $where.="
+                            GROUP BY 
+                                us.name,us.id,us.nrp,us.tgl_dinas,us.is_active,us.status,
+                                ur.role_name,lp.amount,pj.amount,pj.tenor,pj.created_at,pj.status_pinjaman
+                                ORDER BY pj.created_at desc
+                        ";
                         $result = $MasterClass->selectGlobal($select,$table,$where);
                         
                         $results = [
@@ -1299,167 +1001,7 @@ class JsonDataController extends Controller
             return $MasterClass->Results($results);
 
         }
-        public function cekdatakamar(Request $request){
-
-            $MasterClass = new Master();
-
-            $checkAuth = $MasterClass->Authenticated($MasterClass->getSession('user_id'));
-            
-            if($checkAuth['code'] == $MasterClass::CODE_SUCCESS){
-                try {
-                    if ($request->isMethod('post')) {
-
-                        DB::beginTransaction();
-                        
-                        $id     = $request->id ;
-                        $status = [];
-                        
-                        $select = "
-                            k.id as idkamar,k.no_kamar,k.lantai,k.harga,
-                            GROUP_CONCAT(f.fasilitas SEPARATOR ',') as faskos,
-                            tk.tipe,tk.id as idtipe
-                        ";
-                        $from   = " 
-                            kamar k 
-                            join mapping_kamar mk on mk.id_kamar = k.id
-                            join mapping_fasilitas mf on mf.id_kamar = k.id
-                            join fasilitas f on f.id = mf.id_fasilitas and f.penyedia = 'pihak kos'
-                            join tipe_kamar tk on tk.id = mk.id_tipe
-                        ";
-                        $where = " k.id = $id and mk.user_id is null";
-                        $where .="
-                            GROUP BY 
-                            k.id,k.no_kamar,k.lantai,k.harga,
-                            tk.tipe,tk.id
-                        ";
-                        // print_r("SELECT $select FROM $from WHERE $where");die;
-                        $saved = DB::select("SELECT $select FROM $from WHERE $where");
-                        $saved = $MasterClass->checkErrorModel($saved);
-                        
-                        $status = $saved;
-    
-                        // if($status['code'] == $MasterClass::CODE_SUCCESS){
-                        //     DB::commit();
-                        // }else{
-                        //     DB::rollBack();
-                        // }
-            
-                        $results = [
-                            'code' => $status['code'],
-                            'info'  => $status['info'],
-                            'data'  =>  $status['data'],
-                        ];
-                            
-            
-            
-                    } else {
-                        $results = [
-                            'code' => '103',
-                            'info'  => "Method Failed",
-                        ];
-                    }
-                } catch (\Exception $e) {
-                    // Roll back the transaction in case of an exception
-                    $results = [
-                        'code' => '102',
-                        'info'  => $e->getMessage(),
-                    ];
         
-                }
-            }
-            else {
-        
-                $results = [
-                    'code' => '403',
-                    'info'  => "Unauthorized",
-                ];
-                
-            }
-
-            return $MasterClass->Results($results);
-
-        }
-        public function tipeKamar(Request $request){
-
-            $data = json_decode($request->getContent());
-
-            DB::beginTransaction();
-
-            $status = [];
-
-            $saved = DB::select("SELECT * FROM tipe_kamar ");
-
-            // if($status['code'] == $MasterClass::CODE_SUCCESS){
-            //     DB::commit();
-            // }else{
-            //     DB::rollBack();
-            // }
-
-            $results = [
-                'code' => '0',
-                'info'  => 'ok',
-                'data'  =>  $saved,
-            ];
-
-            return $results;
-        }
-        public function listkamaravailable(Request $request){
-
-            $MasterClass = new Master();
-
-            try {
-                DB::beginTransaction();
-                    
-                $status = [];
-                
-                $select = "
-                    k.id as idkamar,k.no_kamar,k.lantai,k.harga,
-                    GROUP_CONCAT(f.fasilitas SEPARATOR ',') as faskos,
-                    tk.tipe,tk.id as idtipe,fk.alamat,fk.file,fk.jenis
-                ";
-                $from   = " 
-                    kamar k 
-                    join mapping_kamar mk on mk.id_kamar = k.id
-                    join mapping_fasilitas mf on mf.id_kamar = k.id
-                    join fasilitas f on f.id = mf.id_fasilitas and f.penyedia = 'pihak kos'
-                    join tipe_kamar tk on tk.id = mk.id_tipe
-                    join foto_kamar fk on fk.id_kamar = k.id and fk.jenis='sampul'
-                ";
-                $where = " mk.user_id is null";
-                $where .="
-                    GROUP BY 
-                    k.id,k.no_kamar,k.lantai,k.harga,
-                    tk.tipe,tk.id,fk.alamat,fk.file,fk.jenis
-                ";
-                $saved = DB::select("SELECT $select FROM $from WHERE $where");
-                $saved = $MasterClass->checkErrorModel($saved);
-                
-                $status = $saved;
-
-                // if($status['code'] == $MasterClass::CODE_SUCCESS){
-                //     DB::commit();
-                // }else{
-                //     DB::rollBack();
-                // }
-    
-                $results = [
-                    'code' => $status['code'],
-                    'info'  => $status['info'],
-                    'data'  =>  $status['data'],
-                ];
-                    
-            } catch (\Exception $e) {
-                // Roll back the transaction in case of an exception
-                $results = [
-                    'code' => '102',
-                    'info'  => $e->getMessage(),
-                ];
-    
-            }
-            
-            return $MasterClass->Results($results);
-
-        }
     //CRUD FUNCTION
         public function saveUser(Request $request){
 
@@ -1519,11 +1061,23 @@ class JsonDataController extends Controller
                             
                         }
                         
+                        $saved2 = limit_pinjaman::updateOrCreate(
+                            [
+                                'id' => $data->idlimit,
+                            ], 
+                            [
+                                'user_id' => $saved->id,
+                                'amount'  => $data->limit_pinjaman,
+                            ] // Kolom yang akan diisi
+                        );
+
                         $saved = $MasterClass->checkErrorModel($saved);
+                        $saved2 = $MasterClass->checkErrorModel($saved2);
                         
-                        $status = $saved;
+                        $status  = $saved;
+                        $status2 = $saved2;
     
-                        if($status['code'] == $MasterClass::CODE_SUCCESS){
+                        if($status['code'] == $MasterClass::CODE_SUCCESS && $status2['code'] == $MasterClass::CODE_SUCCESS){
                             DB::commit();
                         }else{
                             DB::rollBack();
@@ -1600,588 +1154,6 @@ class JsonDataController extends Controller
                             'info'  => $status['info'],
                         ];
                             
-            
-            
-                    } else {
-                        $results = [
-                            'code' => '103',
-                            'info'  => "Method Failed",
-                        ];
-                    }
-                } catch (\Exception $e) {
-                    // Roll back the transaction in case of an exception
-                    $results = [
-                        'code' => '102',
-                        'info'  => $e->getMessage(),
-                    ];
-        
-                }
-            }
-            else {
-        
-                $results = [
-                    'code' => '403',
-                    'info'  => "Unauthorized",
-                ];
-                
-            }
-
-            return $MasterClass->Results($results);
-
-        }
-        public function actionFasilitas(Request $request){
-
-            $MasterClass = new Master();
-
-            $checkAuth = $MasterClass->Authenticated($MasterClass->getSession('user_id'));
-            
-            if($checkAuth['code'] == $MasterClass::CODE_SUCCESS){
-                try {
-                    if ($request->isMethod('post')) {
-
-                        DB::beginTransaction();     
-
-                        $data       = json_decode($request->getContent());
-                        $id         = $data->id;
-
-                        if($data->tipe == 'deleted'){
-                             $where     = [
-                                'id' => $id
-                            ];
-                            $saved      = $MasterClass->deleteGlobal('fasilitas', $where );
-                        }else{
-                            
-                            $fasilitas  = $data->name;
-                            $penyedia   = $data->penyedia;
-                            $biaya      = $data->biaya;
-                            if($id){
-                                $attributes     = [
-                                    'fasilitas' => $fasilitas,
-                                    'penyedia'  => $penyedia,
-                                    'biaya'     => $biaya,
-                                ];
-                                $where     = [
-                                    'id' => $id
-                                ];
-                                $saved      = $MasterClass->updateGlobal('fasilitas', $attributes,$where );
-                                $status     = $saved;
-                            }else{
-                                $attributes     = [
-                                    'fasilitas' => $fasilitas,
-                                    'penyedia'  => $penyedia,
-                                    'biaya'     => $biaya,
-                                ];
-                                $saved      = $MasterClass->saveGlobal('fasilitas', $attributes );
-                                
-                            }
-                        }
-                        $status     = $saved;
-                        if($status['code'] == $MasterClass::CODE_SUCCESS){
-                            DB::commit();
-                        }else{
-                            DB::rollBack();
-                        }
-            
-                        $results = [
-                            'code'  => $status['code'],
-                            'info'  => $status['info'],
-                        ];
-                            
-            
-            
-                    } else {
-                        $results = [
-                            'code' => '103',
-                            'info'  => "Method Failed",
-                        ];
-                    }
-                } catch (\Exception $e) {
-                    // Roll back the transaction in case of an exception
-                    $results = [
-                        'code' => '102',
-                        'info'  => $e->getMessage(),
-                    ];
-        
-                }
-            }
-            else {
-        
-                $results = [
-                    'code' => '403',
-                    'info'  => "Unauthorized",
-                ];
-                
-            }
-
-            return $MasterClass->Results($results);
-
-        }
-        public function actionTipeKamar(Request $request){
-
-            $MasterClass = new Master();
-
-            $checkAuth = $MasterClass->Authenticated($MasterClass->getSession('user_id'));
-            
-            if($checkAuth['code'] == $MasterClass::CODE_SUCCESS){
-                try {
-                    if ($request->isMethod('post')) {
-
-                        DB::beginTransaction();     
-
-                        $data       = json_decode($request->getContent());
-                        $id         = $data->id;
-                        $table      = 'tipe_kamar';
-                        if($data->tipe == 'deleted'){
-                             $where     = [
-                                'id' => $id
-                            ];
-                            $saved      = $MasterClass->deleteGlobal($table, $where );
-                        }else{
-                            
-                            $fasilitas  = $data->name;
-                            if($id){
-                                $attributes     = [
-                                    'tipe' => $fasilitas
-                                ];
-                                $where     = [
-                                    'id' => $id
-                                ];
-                                $saved      = $MasterClass->updateGlobal($table, $attributes,$where );
-                                $status     = $saved;
-                            }else{
-                                $attributes     = [
-                                    'tipe' => $fasilitas
-                                ];
-                                $saved      = $MasterClass->saveGlobal($table, $attributes );
-                                
-                            }
-                        }
-                        $status     = $saved;
-                        if($status['code'] == $MasterClass::CODE_SUCCESS){
-                            DB::commit();
-                        }else{
-                            DB::rollBack();
-                        }
-            
-                        $results = [
-                            'code'  => $status['code'],
-                            'info'  => $status['info'],
-                        ];
-                            
-            
-            
-                    } else {
-                        $results = [
-                            'code' => '103',
-                            'info'  => "Method Failed",
-                        ];
-                    }
-                } catch (\Exception $e) {
-                    // Roll back the transaction in case of an exception
-                    $results = [
-                        'code' => '102',
-                        'info'  => $e->getMessage(),
-                    ];
-        
-                }
-            }
-            else {
-        
-                $results = [
-                    'code' => '403',
-                    'info'  => "Unauthorized",
-                ];
-                
-            }
-
-            return $MasterClass->Results($results);
-
-        }
-        public function actionKamar(Request $request){
-
-            $MasterClass = new Master();
-
-            $checkAuth = $MasterClass->Authenticated($MasterClass->getSession('user_id'));
-            
-            if($checkAuth['code'] == $MasterClass::CODE_SUCCESS){
-                try {
-                    if ($request->isMethod('post')) {
-
-                        DB::beginTransaction();     
-
-                        $id                 = $request->id;
-                        $tipe               = $request->tipe;
-                        $tipekamar          = $request->tipekamar;
-                        $no                 = $request->no;
-                        $lantai             = $request->lantai;
-                        $harga              = $request->harga;
-                        $fasilitas          = $request->fasilitas;
-                        $fasilitaspenghuni  = $request->fasilitaspenghuni;
-                        $fasilitasperbaikan = $request->fasilitasperbaikan;
-                        $penghuni           = $request->penghuni;
-                        $durasi             = $request->durasi;
-                        $jmlbulan           = $request->jmlbulan;
-                        $tglawal            = null;
-                        $tglakhir           = null;
-                        if($penghuni){
-                            // $tglawal        = explode(" ",$durasi)[0];
-                            // $tglakhir       = explode(" ",$durasi)[2];
-                            $tglawal       = date("Y-m-d",strtotime($durasi)) ;
-                            $tglakhir      = date("Y-m-d", strtotime("+".$jmlbulan." month", strtotime($tglawal))) ;
-                        }
-                        $now                = date('Y-m-d H:i:s');
-                        $docname            = 'kos';
-                        $idkamar            = null;
-                        if($tipe == 'deleted'){
-                             $where     = [
-                                 'id' => $id
-                            ];
-                            $where1     = [
-                                'id_kamar' => $id
-                            ];
-                            $deleted1      = $MasterClass->deleteGlobal('mapping_fasilitas', $where1 );
-                            $deleted2      = $MasterClass->deleteGlobal('mapping_kamar', $where1 );
-                            $deleted3      = $MasterClass->deleteGlobal('foto_kamar', $where1 );
-                            $deleted4      = $MasterClass->deleteGlobal('kamar', $where );
-                            $status        = $deleted4;
-                            $code          = $MasterClass::CODE_SUCCESS;
-                            if($deleted1['code'] != $code || $deleted2['code'] != $code 
-                            || $deleted3['code'] != $code || $deleted4['code'] != $code){
-                                DB::rollBack();
-                                $results = [
-                                    'code' => '1',
-                                    'info'  => "Gagal simpan data kamar",
-                                ];
-                                return $MasterClass->Results($results);
-                            }
-                        }elseif($tipe == 'update'){
-                            if($request->noold != $no){
-                                $cekkamar = $MasterClass->selectGlobal("*",'kamar',"no_kamar= '$no'");
-                                if(count($cekkamar['data']) >= 1){
-                                    DB::rollBack();
-                                    $results = [
-                                        'code' => '1',
-                                        'info'  => "No Kamar sudah tersedia",
-                                    ];
-                                    return $MasterClass->Results($results);
-                                }
-                            }
-
-                            $attrkamar     = [
-                                'no_kamar'  => $no,
-                                'lantai'    => $lantai,
-                                'harga'     => $harga,
-                                'created_at'=> $now,
-                            ];
-                            $where     = [
-                                'id' => $id
-                            ];
-                            $savedkamar      = $MasterClass->updateGlobal('kamar', $attrkamar, $where );
-                            if($savedkamar['code'] != '0'){
-                                DB::rollBack();
-                                $results = [
-                                    'code' => '1',
-                                    'info'  => "Gagal update data kamar",
-                                ];
-                                return $MasterClass->Results($results);
-                            }
-                            
-                            $attrmapping     = [
-                                'user_id'       => $penghuni,
-                                'id_tipe'       => $tipekamar,
-                                'tgl_awal'      => $tglawal,
-                                'tgl_akhir'     => $tglakhir,
-                                'created_at'    => $now,
-                            ];
-                            $where = [
-                                'id_kamar'      => $id,
-                            ];
-                            $savedmapping      = $MasterClass->updateGlobal('mapping_kamar', $attrmapping,$where );
-                            if($savedmapping['code'] != $MasterClass::CODE_SUCCESS){
-                                DB::rollBack();
-                                $results = [
-                                    'code' => '1',
-                                    'info'  => "Gagal update data kamar",
-                                ];
-                                return $MasterClass->Results($results);
-                            }
-
-                            //save mapping fasilitas kos
-                            $MasterClass->deleteGlobal('mapping_fasilitas', $where );
-                            $fasilitas = explode(",",$fasilitas) ;
-                            foreach ($fasilitas as $value) {
-                                $attrmappingfas     = [
-                                    'id_kamar'      => $id,
-                                    'id_fasilitas'  => $value,
-                                    'created_at'    => $now,
-                                ];
-                                $savedmappingfas      = $MasterClass->saveGlobal('mapping_fasilitas', $attrmappingfas );
-                                if($savedmappingfas['code'] != $MasterClass::CODE_SUCCESS){
-                                    DB::rollBack();
-                                    $results = [
-                                        'code' => '1',
-                                        'info'  => "Gagal update data kamar",
-                                    ];
-                                    return $MasterClass->Results($results);
-                                }
-                            }
-
-                            //save mapping fasilitas penghuni
-                            $fasilitas = explode(",",$fasilitaspenghuni) ;
-                            foreach ($fasilitas as $value) {
-                                $attrmappingfas     = [
-                                    'id_kamar'      => $id,
-                                    'id_fasilitas'  => $value,
-                                    'created_at'    => $now,
-                                ];
-                                $savedmappingfas      = $MasterClass->saveGlobal('mapping_fasilitas', $attrmappingfas );
-                                if($savedmappingfas['code'] != $MasterClass::CODE_SUCCESS){
-                                    DB::rollBack();
-                                    $results = [
-                                        'code' => '1',
-                                        'info'  => "Gagal update data kamar",
-                                    ];
-                                    return $MasterClass->Results($results);
-                                }
-                            }
-
-                            //Perbaikan
-                            if($fasilitasperbaikan){
-                                $fasilitasperbaikan = explode(",",$fasilitasperbaikan) ;
-                                foreach ($fasilitasperbaikan as $value) {
-                                    $whereperbaikan     = [
-                                        'id_fasilitas'  => $value,
-                                        'id_kamar'      => $id,
-                                    ];
-                                    $attrmappingfas     = [
-                                        'status'        => 'perbaikan',
-                                        'updated_at'    => $now,
-                                    ];
-                                    $savedmappingfas      = $MasterClass->updateGlobal('mapping_fasilitas', $attrmappingfas,$whereperbaikan );
-                                    if($savedmappingfas['code'] != $MasterClass::CODE_SUCCESS){
-                                        DB::rollBack();
-                                        $results = [
-                                            'code' => '1',
-                                            'info'  => "Gagal update data kamar",
-                                        ];
-                                        return $MasterClass->Results($results);
-                                    }
-                                }
-                            }else{
-                                $whereperbaikan     = [
-                                    'id_kamar'      => $id,
-                                ];
-                                $attrmappingfas     = [
-                                    'status'        => 'aman',
-                                    'updated_at'    => $now,
-                                ];
-                                $savedmappingfas      = $MasterClass->updateGlobal('mapping_fasilitas', $attrmappingfas,$whereperbaikan );
-                                if($savedmappingfas['code'] != $MasterClass::CODE_SUCCESS){
-                                        DB::rollBack();
-                                        $results = [
-                                            'code' => '1',
-                                            'info'  => "Gagal update data kamar",
-                                        ];
-                                        return $MasterClass->Results($results);
-                                    }
-                            }
-
-                            //save foto lainnya jika diganti
-                            if(!empty($_FILES['filelainnya']['name'])){
-                                //save foto kamar lainnya
-                                $MasterClass->deleteGlobal('foto_kamar', [
-                                'id_kamar'      => $id,
-                                'jenis'         => 'lainnya'
-                            ]   );
-                                for ($i=0; $i < count($_FILES['filelainnya']['name']); $i++) { 
-        
-                                    $nama_file          = $_FILES['filelainnya']['name'][$i];
-                                    $type		        = $_FILES['filelainnya']['type'][$i];
-                                    $ukuran		        = $_FILES['filelainnya']['size'][$i];
-                                    $tmp_name		    = $_FILES['filelainnya']['tmp_name'][$i];
-                                    $nama_file_upload   = strtolower(str_replace(' ','_',$docname.'-'.$nama_file));
-                                    $alamatfile         = '../public/data/kos/'; // directory file
-                                    $uploaddir          = $alamatfile.$nama_file_upload; // directory file
-                                    
-                                    if (move_uploaded_file($tmp_name,$uploaddir)){
-                                        chmod($uploaddir, 0777);
-    
-                                        $attrphoto     = [
-                                            'id_kamar'  => $id,
-                                            'file'      => $nama_file_upload,
-                                            'alamat'    => $alamatfile,
-                                            'size'      => $ukuran,
-                                            'tipe'      => $type,
-                                            'jenis'     => 'lainnya',
-                                            'created_at'=> $now,
-                                        ];
-                                        $savefoto      = $MasterClass->saveGlobal('foto_kamar', $attrphoto );
-                                        if($savefoto['code'] != $MasterClass::CODE_SUCCESS){
-                                            DB::rollBack();
-                                            $results = [
-                                                'code' => '1',
-                                                'info'  => "Gagal update data kamar",
-                                            ];
-                                            return $MasterClass->Results($results);
-                                        }
-                                    }
-    
-                                }
-                            }
-                            
-                        }else{ // action save
-                            
-                            $cekkamar = $MasterClass->selectGlobal("*",'kamar',"no_kamar= '$no'");
-                            if(count($cekkamar['data']) >= 1){
-                                DB::rollBack();
-                                $results = [
-                                    'code' => '1',
-                                    'info'  => "No Kamar sudah tersedia",
-                                ];
-                                return $MasterClass->Results($results);
-                            }
-                            // save data kamar
-                            $attrkamar     = [
-                                'no_kamar'  => $no,
-                                'lantai'    => $lantai,
-                                'harga'     => $harga,
-                                'created_at'=> $now,
-                            ];
-                            $savedkamar      = $MasterClass->saveGlobal('kamar', $attrkamar );
-                            if($savedkamar['code'] != '0'){
-                                DB::rollBack();
-                                $results = [
-                                    'code' => '1',
-                                    'info'  => "Gagal simpan data kamar",
-                                ];
-                                return $MasterClass->Results($results);
-                            }
-                            $idkamar        = $savedkamar['data'];
-                            
-                            //save mapping kamar
-                            $attrmapping     = [
-                                'user_id'       => $penghuni,
-                                'id_kamar'      => $idkamar,
-                                'id_tipe'       => $tipekamar,
-                                'tgl_awal'      => $tglawal,
-                                'tgl_akhir'     => $tglakhir,
-                                'created_at'    => $now,
-                            ];
-                            $savedmapping      = $MasterClass->saveGlobal('mapping_kamar', $attrmapping );
-                            if($savedmapping['code'] != $MasterClass::CODE_SUCCESS){
-                                DB::rollBack();
-                                $results = [
-                                    'code' => '1',
-                                    'info'  => "Gagal simpan data kamar",
-                                ];
-                                return $MasterClass->Results($results);
-                            }
-                            
-                            if($fasilitas){
-                                //save mapping fasilitas kos
-                                $fasilitas = explode(",",$fasilitas) ;
-                                foreach ($fasilitas as $value) {
-                                    $attrmappingfas     = [
-                                        'id_kamar'      => $idkamar,
-                                        'id_fasilitas'  => $value,
-                                        'created_at'    => $now,
-                                    ];
-                                    $savedmappingfas      = $MasterClass->saveGlobal('mapping_fasilitas', $attrmappingfas );
-                                    if($savedmappingfas['code'] != $MasterClass::CODE_SUCCESS){
-                                        DB::rollBack();
-                                        $results = [
-                                            'code' => '1',
-                                            'info'  => "Gagal simpan data kamar",
-                                        ];
-                                        return $MasterClass->Results($results);
-                                    }
-                                }
-                            }
-                            //save mapping fasilitas penghuni
-                            if($fasilitaspenghuni){
-                                $fasilitas = explode(",",$fasilitaspenghuni) ;
-                                foreach ($fasilitas as $value) {
-                                    $attrmappingfas     = [
-                                        'id_kamar'      => $idkamar,
-                                        'id_fasilitas'  => $value,
-                                        'created_at'    => $now,
-                                    ];
-                                    $savedmappingfas      = $MasterClass->saveGlobal('mapping_fasilitas', $attrmappingfas );
-                                    if($savedmappingfas['code'] != $MasterClass::CODE_SUCCESS){
-                                        DB::rollBack();
-                                        $results = [
-                                            'code' => '1',
-                                            'info'  => "Gagal simpan data kamar",
-                                        ];
-                                        return $MasterClass->Results($results);
-                                    }
-                                }
-                            }
-
-                            //save foto kamar lainnya
-                            for ($i=0; $i < count($_FILES['filelainnya']['name']); $i++) { 
-    
-                                $nama_file          = $_FILES['filelainnya']['name'][$i];
-                                $type		        = $_FILES['filelainnya']['type'][$i];
-                                $ukuran		        = $_FILES['filelainnya']['size'][$i];
-                                $tmp_name		    = $_FILES['filelainnya']['tmp_name'][$i];
-                                $nama_file_upload   = strtolower(str_replace(' ','_',$docname.'-'.$nama_file));
-                                $alamatfile         = '../public/data/kos/'; // directory file
-                                $uploaddir          = $alamatfile.$nama_file_upload; // directory file
-                                
-                                if (move_uploaded_file($tmp_name,$uploaddir)){
-                                    chmod($uploaddir, 0777);
-
-                                    $attrphoto     = [
-                                        'id_kamar'  => $idkamar,
-                                        'file'      => $nama_file_upload,
-                                        'alamat'    => $alamatfile,
-                                        'size'      => $ukuran,
-                                        'tipe'      => $type,
-                                        'jenis'     => 'lainnya',
-                                        'created_at'=> $now,
-                                    ];
-                                    $savefoto      = $MasterClass->saveGlobal('foto_kamar', $attrphoto );
-                                    if($savefoto['code'] != $MasterClass::CODE_SUCCESS){
-                                        DB::rollBack();
-                                        $results = [
-                                            'code' => '1',
-                                            'info'  => "Gagal simpan data kamar",
-                                        ];
-                                        return $MasterClass->Results($results);
-                                    }
-                                }
-
-                            }
-                            
-                        }
-
-                        if($tipe == 'deleted'){// ini deleted
-                            if($status['code'] == $MasterClass::CODE_SUCCESS){
-                                DB::commit();
-                            }else{
-                                DB::rollBack();
-                            }
-
-                            $results = [
-                                'code'  => $status['code'],
-                                'info'  => $status['info'],
-                            ];
-                        }elseif($tipe == 'update'){// ini update
-                            DB::commit();
-                            $results = [
-                            'code'  => $MasterClass::CODE_SUCCESS,
-                            'info'  => 'ok',
-                            'data'  => $id, //balikin id kamar untuk save foto sampul
-                            ];
-                        }else{//ini add
-                            DB::commit();
-                            $results = [
-                            'code'  => $MasterClass::CODE_SUCCESS,
-                            'info'  => 'ok',
-                            'data'  => $idkamar, //balikin id kamar untuk save foto sampul
-                            ];
-                        }
             
             
                     } else {
@@ -2434,213 +1406,6 @@ class JsonDataController extends Controller
                             'code'  => $MasterClass::CODE_SUCCESS,
                             'info'  => 'ok',
                         ];
-            
-            
-                    } else {
-                        $results = [
-                            'code' => '103',
-                            'info'  => "Method Failed",
-                        ];
-                    }
-                } catch (\Exception $e) {
-                    // Roll back the transaction in case of an exception
-                    $results = [
-                        'code' => '102',
-                        'info'  => $e->getMessage(),
-                    ];
-        
-                }
-            }
-            else {
-        
-                $results = [
-                    'code' => '403',
-                    'info'  => "Unauthorized",
-                ];
-                
-            }
-
-            return $MasterClass->Results($results);
-
-        }
-        public function savebooking(Request $request){
-            $MasterClass = new Master();
-            $checkAuth = $MasterClass->Authenticated($MasterClass->getSession('user_id'));            
-            if($checkAuth['code'] == $MasterClass::CODE_SUCCESS){
-                try {
-                    if ($request->isMethod('post')) {
-
-                        DB::beginTransaction();
-                        $penghuni           = $MasterClass->getSession('user_id');
-                        
-                        $cekdata = DB::select("SELECT * FROM mapping_kamar mk WHERE mk.user_id = $penghuni");
-                        if($cekdata){
-                            DB::rollBack();
-                            $results = [
-                                'code' => '1',
-                                'info' => "Anda sudah booking kamar,silahkan untuk menghubungi pihak kos lewat WA",
-                            ];
-                            return $MasterClass->Results($results);
-                        }
-                        $id                 = $request->idkamar;                        
-                        $durasi             = $request->tanggal;
-                        $jmlbulan           = $request->bulan;
-                        $tipekamar          = $request->tipe;
-                        $tglawal            = null;
-                        $tglakhir           = null;
-                        if($penghuni){
-                            $tglawal       = date("Y-m-d",strtotime($durasi)) ;
-                            $tglakhir      = date("Y-m-d", strtotime("+".$jmlbulan." month", strtotime($tglawal))) ;
-                        }
-                        $now                = date('Y-m-d H:i:s');
-                        $attrmapping     = [
-                            'user_id'       => $penghuni,
-                            'id_tipe'       => $tipekamar,
-                            'tgl_awal'      => $tglawal,
-                            'tgl_akhir'     => $tglakhir,
-                            'updated_at'    => $now,
-                        ];
-                        $where     = [
-                            'id_kamar'      => $id
-                        ];
-                        $savedmapping      = $MasterClass->updateGlobal('mapping_kamar', $attrmapping,$where );
-                        if($savedmapping['code'] != $MasterClass::CODE_SUCCESS){
-                            DB::rollBack();
-                            $results = [
-                                'code' => '1',
-                                'info'  => "Gagal simpan data booking",
-                            ];
-                            return $MasterClass->Results($results);
-                        }
-
-                        DB::commit();
-                        $results = [
-                            'code'  => $MasterClass::CODE_SUCCESS,
-                            'info'  => 'ok',
-                        ];
-            
-            
-                    } else {
-                        $results = [
-                            'code' => '103',
-                            'info'  => "Method Failed",
-                        ];
-                    }
-                } catch (\Exception $e) {
-                    // Roll back the transaction in case of an exception
-                    $results = [
-                        'code' => '102',
-                        'info'  => $e->getMessage(),
-                    ];
-        
-                }
-            }
-            else {
-        
-                $results = [
-                    'code' => '403',
-                    'info'  => "Unauthorized",
-                ];
-                
-            }
-
-            return $MasterClass->Results($results);
-
-        }
-        public function setujuibooking(Request $request){
-
-            $MasterClass = new Master();
-
-            $checkAuth = $MasterClass->Authenticated($MasterClass->getSession('user_id'));
-            
-            if($checkAuth['code'] == $MasterClass::CODE_SUCCESS){
-                try {
-                    if ($request->isMethod('post')) {
-
-                        DB::beginTransaction();     
-
-                        $data = json_decode($request->getContent());
-                        $status = [];
-                        
-                        $saved      = DB::update("UPDATE users us set role_id = (select id from users_roles where role_name='penghuni') where id= $data->id ");
-                        $status     = $saved;
-                        if($status == 1){
-                            DB::commit();
-                            
-                            $results = [
-                                'code' => '0',
-                                'info'  => 'ok',
-                            ];
-                        }else{
-                            $results = [
-                                'code' => '1',
-                                'info'  => 'Gagal Setujui Booking',
-                            ];
-                        }
-                            
-            
-            
-                    } else {
-                        $results = [
-                            'code' => '103',
-                            'info'  => "Method Failed",
-                        ];
-                    }
-                } catch (\Exception $e) {
-                    // Roll back the transaction in case of an exception
-                    $results = [
-                        'code' => '102',
-                        'info'  => $e->getMessage(),
-                    ];
-        
-                }
-            }
-            else {
-        
-                $results = [
-                    'code' => '403',
-                    'info'  => "Unauthorized",
-                ];
-                
-            }
-
-            return $MasterClass->Results($results);
-
-        }
-        public function deleteTransaksi(Request $request){
-
-            $MasterClass = new Master();
-
-            $checkAuth = $MasterClass->Authenticated($MasterClass->getSession('user_id'));
-            
-            if($checkAuth['code'] == $MasterClass::CODE_SUCCESS){
-                try {
-                    if ($request->isMethod('post')) {
-
-                        DB::beginTransaction();     
-
-                        $data = json_decode($request->getContent());
-                        
-                        $status = [];
-
-                        $where     = [
-                                'id' => $data->id
-                        ];
-                        $saved      = $MasterClass->deleteGlobal('history_transaksi', $where );
-                        
-                        $status = $saved;
-    
-                        if($status['code'] == $MasterClass::CODE_SUCCESS){
-                            DB::commit();
-                        }else{
-                            DB::rollBack();
-                        }
-            
-                        $results = [
-                            'code' => $status['code'],
-                            'info'  => $status['info'],
-                        ];
-                            
             
             
                     } else {

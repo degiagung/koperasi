@@ -25,10 +25,10 @@
     <ul class="sidebar-nav" id="sidebar-nav">
 
       <li class="nav-item">
-        <a class="nav-link collapsed" href="/dashboard">
+        {{-- <a class="nav-link collapsed" href="/dashboard">
           <i class="bi bi-grid"></i>
           <span>Dashboard</span>
-        </a>
+        </a> --}}
       </li><!-- End Dashboard Nav -->
 
       <div class="isSidebarMenu">
