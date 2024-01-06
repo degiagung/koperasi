@@ -12,7 +12,7 @@
                 <div class="card">
                     <div class="card-header mt-2 flex-wrap d-flex justify-content-between">
                         <div>
-                            <h4 class="card-title">Menu Role Access</h4>
+                            <h4 class="card-title">Menu Akses Setting</h4>
                             <p class="m-0 subtitle">Setting Permission</p>
                         </div>
                         <ul class="nav nav-pills justify-content-end mb-4">
@@ -34,9 +34,8 @@
                                                 <thead>
                                                     <tr>
                                                         <th>No</th>
-                                                        <th>Header Name</th>
                                                         <th>Menu Name</th>
-                                                        <th>URL</th>
+                                                        <th>Route URL</th>
                                                         <th>Action</th>
                                                     </tr>
                                                 </thead>
@@ -151,7 +150,7 @@
                     <div class="modal-body">
                         <div class="basic-form p-1">
                             <form id="base-form2">
-                                <div class="mb-3 row">
+                                 <div class="mb-3 row" style="display:none;">
                                     <label class="col-sm-3 col-form-label">Header Name</label>
                                     <div class="col-sm-9">
                                         <input id="form-mid" type="hidden" class="form-control" placeholder="">

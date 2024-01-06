@@ -14,7 +14,8 @@ return new class extends Migration
         Schema::create('simpanan', function (Blueprint $table) {
             $table->id();
             $table->unsignedBigInteger('user_id')->nullable();
-            $table->string('id_transaksi')->nullable();
+            $table->string('jenis')->nullable();
+            $table->string('invoice')->nullable();
             $table->decimal('amount', $precision = 18, $scale = 2)->default(0.00);
             $table->string('status');
             $table->timestamps();

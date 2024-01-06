@@ -69,7 +69,6 @@ function getListView() {
                     return meta.row + meta.settings._iDisplayStart + 1;
                 },
             },
-            { data: "header_menu" },
             { data: "menu_name" },
             { data: "url" },
             { data: "id" },
@@ -101,7 +100,7 @@ function getListView() {
                     return $rowData;
                 },
                 visible: true,
-                targets: 4,
+                targets: 3,
                 className: "text-center",
             },
         ],
@@ -421,12 +420,11 @@ function savePermission() {
 
 function updateDataMenu() {
     mid=$("#form-mid").val();
-    headname=$("#form-header").val();
+    headname=$("#form-menu").val();
     menuname =$("#form-menu").val();
-
+    
     data={mid:mid, nhead:headname , nmenu: menuname }
 
-    console.log(data);
     $.ajax({
         url: baseURL + "/updateMenuAccessName",
         type: "POST",
@@ -444,7 +442,6 @@ function updateDataMenu() {
             // swal.close();
         },
         success: function (response) {
-            console.log(response);
             // Handle response sukses
             if (response.code == 0) {
                 swal("Saved !", response.info, "success").then(function () {
@@ -486,34 +483,3 @@ function saveConfirm(params) {
         }
     });
 }
-
-// async function loadRole() {
-//     try {
-//         const response = await $.ajax({
-//             url: baseUrl + "/getRole",
-//             type: "POST",
-//             dataType: "json",
-//             beforeSend: function () {
-//                 // Swal.fire({
-//                 //     title: "Loading",
-//                 //     text: "Please wait...",
-//                 // });
-//             },
-//         });
-
-//         const res = response.data.map(function (item) {
-//             return {
-//                 id: item.id,
-//                 text: item.category_name,
-//             };
-//         });
-
-//         $("#form-category").select2({
-//             data: res,
-//             placeholder: "Please choose an option",
-//             dropdownParent: $("#modal-data"),
-//         });
-//     } catch (error) {
-//         sweetAlert("Oops...", error.responseText, "ERROR");
-//     }
-// }

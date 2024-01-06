@@ -9,6 +9,7 @@ $(document).ready(function () {
 $(".select2").select2();
 $(".select2add").select2({
     dropdownParent: $("#modal-data"),
+    dropdownParent: $("#modal-payment"),
 });
 
 $("#filter-btn").on('click',function(e){
@@ -74,9 +75,9 @@ function getListData() {
             },
             { render:function (data,type,row) {
                 if(row.sisatenor == row.totaltenor || row.status_pinjaman == 'lunas')
-                    return "<a style='color:green;cursor:pointer;'>LUNAS</a>";
+                    return "<a class='updatestatus' style='font-weight:bold;color:green;cursor:pointer;'>LUNAS</a>";
                  else
-                    return "<a style='color:red;cursor:pointer;'>BELUM LUNAS</a>";
+                    return "<a class='updatestatus' style='font-weight:bold;color:red;cursor:pointer;'>BELUM LUNAS</a>";
             } },
             { data: "nrp" },
             { data: "name",render:function (data,type,row) {
@@ -93,34 +94,50 @@ function getListData() {
                 return 'Rp. 0';
             } },
             { render:function (data,type,row) {
-                if (row.pinjaman2persen > 0)
-                return row.tenor +' BLN & Rp.'+formatRupiah(row.pinjaman)+ '<b>X2%/BLN</b> = Rp.' +formatRupiah(row.pinjaman2persen);
-                else
-                return row.tenor +' BLN & Rp.0';
+                // return row.tenor +' BLN & Rp.'+formatRupiah(row.pinjaman)+ '<b>X2%/BLN</b> = Rp.' +formatRupiah(row.pinjaman2persen);
+                return row.tenor +' BLN & Rp.'+formatRupiah(row.pinjaman)+ '<b>X2%</b> = Rp.' +formatRupiah(row.pinjamanbunga);
+    
             } },
             { render:function (data,type,row) {
-                if (row.totalbayar > 0)
-                return row.totaltenor+' X Rp.'+formatRupiah(row.totalbayarperbulan)+' = Rp.' +formatRupiah(row.totalbayar);
+                if(row.status_pinjaman == 'lunas')
+                    return (row.totaltenor+row.sisatenor)+' BLN X Rp.'+formatRupiah(row.totalbayarperbulan1)+' = Rp.' +formatRupiah(row.pinjamanbunga);
                 else
-                return row.totaltenor+' X 0';
+                    // return row.totaltenor+' BLN X Rp.'+formatRupiah(row.totalbayarperbulan)+' = Rp.' +formatRupiah(row.totalbayar);
+                    return row.totaltenor+' BLN X Rp.'+formatRupiah(row.totalbayarperbulan1)+' = Rp.' +formatRupiah(row.totalbayar1);
+        
             } },
             { render:function (data,type,row) {
-                if (row.sisalimit > 0)
+                if(row.status_pinjaman == 'lunas')
+                return 'Rp. ' +formatRupiah(row.limitpinjaman)
+                else
                 return 'Rp. ' +formatRupiah(row.sisalimit);
-                else
-                return '0';
             } },
             { render:function (data,type,row) {
-                if (row.sisapinjaman > 0)
-                return row.sisatenor+' & Rp.' +formatRupiah(row.sisapinjaman);
+                if(row.status_pinjaman == 'lunas')
+                    return "<a class='updatestatus' style='font-weight:bold;color:green;cursor:pointer;'>LUNAS</a>";
                 else
-                return row.sisatenor+' & Rp.0';
+                    if (row.sisapinjaman > 0)
+                    return row.sisatenor+' BLN & Rp.' +formatRupiah(row.sisapinjaman);
+                    else
+                    return row.sisatenor+' BLN & Rp.0';
             } },
         ],
         drawCallback: function (settings) {
             var api = this.api();
             var rows = api.rows({ page: "current" }).nodes();
             var last = null;
+
+            $(rows)
+                .find(".updatestatus")
+                .on("click", function () {
+                    var tr = $(this).closest("tr");
+                    var rowData = dtpr.row(tr).data();
+                    if(role == 'superadmin' || role == 'bendahara koperasi'){
+                        isObject = {};
+                        isObject = rowData ;
+                        $("#modal-payment").modal('show');
+                    }
+                });
 
             $(rows)
                 .find(".detail")
@@ -139,17 +156,90 @@ function getListData() {
 
 function detail(rowData) {
     isObject = rowData;
-
+    pengajuan = rowData.tenor +' BLN & Rp.'+formatRupiah(rowData.pinjaman)+ ' X2%  = Rp.' +formatRupiah(rowData.pinjamanbunga) ;
+    if(rowData.status_pinjaman == 'lunas'){
+        saldo = formatRupiah(rowData.limitpinjaman)
+    }else{
+        saldo = formatRupiah(rowData.sisalimit);
+    }
+    
+    if(rowData.status_pinjaman == 'lunas'){
+        sisalimit = formatRupiah(rowData.limitpinjaman);
+    }else{
+        sisalimit = rowData.totaltenor+' BLN X '+formatRupiah(rowData.totalbayarperbulan1)+' = ' +formatRupiah(rowData.totalbayar1);
+    }
+        
+    if(rowData.status_pinjaman == 'lunas'){
+        sisatenor = 'LUNAS' ;
+    }
+    else{
+        if (rowData.sisapinjaman > 0){
+            sisatenor = rowData.sisatenor+' BLN & ' +formatRupiah(rowData.sisapinjaman);
+        }
+    }
+    console.log(rowData);
     $("#form-nrp").val(rowData.nrp);
     $("#form-name").val(rowData.name);
+    $("#form-keanggotaan").val(rowData.keanggotaan);
     $("#form-tgldinas").val(datetostring2('yymmdd',rowData.tgl_dinas));
-    $("#form-smwajib").val(rowData.simpananpokokwajib);
-    $("#form-smpokok").val(rowData.simpananpokokwajib);
-    $("#form-smsukarela").val(rowData.sukarela);
-    $("#form-tarik").val(rowData.penarikan);
-    $("#form-tgltarik").val(rowData.tgl_penarikan);
-    $("#form-saldo").val(rowData.saldo);
+    $("#form-limit").val(formatRupiah(rowData.limitpinjaman));
+    $("#form-totallimit").val(sisalimit);
+    $("#form-pinjaman").val(pengajuan);
+    $("#form-sisatenor").val(sisatenor);
+    $("#form-tgltarik").val(datetostring2('yymmdd',rowData.tglaju));
+    $("#form-tglbayar").val(datetostring2('yymmdd',rowData.tglbayar));
 
 
     $("#modal-data").modal("show");
+}
+
+function approval(){
+    let status = $("#form-statuslunas").val();
+    swal({
+        title: "Yakin untuk update "+status+" pinjaman "+ isObject.name +" ?",
+        type: "warning",
+        showCancelButton: !0,
+        confirmButtonColor: "#DD6B55",
+        confirmButtonText: "Ya, update "+status+" !!",
+        cancelButtonText: "Tidak, Batalkan !!",
+        closeOnConfirm: !1,
+        closeOnCancel: !1,
+    }).then(function (e) {
+        if (e.value) {
+            $.ajax({
+                url: baseURL + "/approvalpinjaman",
+                type: "POST",
+                data: JSON.stringify({ idpinjam: isObject.idpinjam, status: status,jenis: 'statuslunas' }),
+                dataType: "json",
+                contentType: "application/json",
+                beforeSend: function () {
+                    Swal.fire({
+                        title: "Loading",
+                        text: "Please wait...",
+                    });
+                },
+                complete: function () {
+                    $('#table-list').DataTable().ajax.reload();
+                },
+                success: function (response) {
+                    // Handle response sukses
+                    if (response.code == 0) {
+                        swal("BERHASIL !", response.message, "success");
+                        $("#modal-payment").modal('hide');
+                    } else {
+                        sweetAlert("Oops...", response.message, "ERROR");
+                    }
+                },
+                error: function (xhr, status, error) {
+                    // Handle error response
+                    // console.log("ERROR");
+                    sweetAlert("Oops...", "ERROR", "ERROR");
+                },
+            });
+        } else {
+            swal(
+                "BATAL !!",
+            );
+        }
+    });
 }

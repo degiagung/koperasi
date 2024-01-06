@@ -80,7 +80,7 @@
             <div class="modal-dialog modal-dialog-centered" role="document">
                 <div class="modal-content">
                     <div class="modal-header headermodal">
-                        <h5 class="modal-title">Data View</h5>
+                        <h5 class="modal-title">Data Pinjaman Terbaru</h5>
                         <button type="button" class="btn-close" data-bs-dismiss="modal">
                         </button>
                     </div>
@@ -91,7 +91,7 @@
                                     <label class="col-sm-3 col-form-label">NRP</label>
                                     <div class="col-sm-9">
                                         <input readonly id="form-nrp" type="text" class="form-control">
-                                    </div>Status div>
+                                    </div>
                                 </div>
                                 <div class="mb-3 row">
                                     <label class="col-sm-3 col-form-label">Nama</label>
@@ -114,6 +114,12 @@
                                 <div class="mb-3 row">
                                     <label class="col-sm-3 col-form-label">Total Limit</label>
                                     <div class="col-sm-9">
+                                        <input readonly id="form-limit" type="text" class="form-control" >
+                                    </div>
+                                </div>
+                                <div class="mb-3 row">
+                                    <label class="col-sm-3 col-form-label">Sisa Limit</label>
+                                    <div class="col-sm-9">
                                         <input readonly id="form-totallimit" type="text" class="form-control" >
                                     </div>
                                 </div>
@@ -124,15 +130,21 @@
                                     </div>
                                 </div>
                                 <div class="mb-3 row">
-                                    <label class="col-sm-3 col-form-label">Tgl Penarikan Terakhir</label>
+                                    <label class="col-sm-3 col-form-label">Sisa Tenor & Pinjaman</label>
+                                    <div class="col-sm-9">
+                                        <input readonly id="form-sisatenor" type="text" class="form-control" >
+                                    </div>
+                                </div>
+                                <div class="mb-3 row">
+                                    <label class="col-sm-3 col-form-label">Tgl Pinjaman</label>
                                     <div class="col-sm-9">
                                         <input readonly id="form-tgltarik" type="text" class="form-control" >
                                     </div>
                                 </div>
                                 <div class="mb-3 row">
-                                    <label class="col-sm-3 col-form-label">Saldo Akhir</label>
+                                    <label class="col-sm-3 col-form-label">Tanggal Angsuran Terbaru</label>
                                     <div class="col-sm-9">
-                                        <input readonly id="form-saldo" type="text" class="form-control" >
+                                        <input readonly id="form-tglbayar" type="text" class="form-control" >
                                     </div>
                                 </div>
 
@@ -141,6 +153,38 @@
                     </div>
                     <div class="modal-footer">
                         <button type="button" class="btn btn-danger light" data-bs-dismiss="modal">Close</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="modal fade" id="modal-payment" style="display: none;" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered" role="document">
+                <div class="modal-content">
+                    <div class="modal-header headermodal">
+                        <h5 class="modal-title">UPDATE PINJAMAN</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal">
+                        </button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="basic-form">
+                            <form>
+                                <div class="mb-3 row">
+                                    <label class="col-sm-5 col-form-label ">Status Pinjaman</label>
+                                    <div class="col-sm-7">
+                                        <select class="select2add" id="form-statuslunas">
+                                            <option value="belum lunas">Belum Lunas</option>
+                                            <option value="lunas">Lunas</option>
+                                        </select>
+                                    </div>
+                                </div>
+
+                            </form>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-danger light" data-bs-dismiss="modal">Close</button>
+                        <button type="button" class="btn btn-sgn light" onClick="approval() ">Simpan</button>
                     </div>
                 </div>
             </div>

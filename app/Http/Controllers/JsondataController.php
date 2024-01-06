@@ -685,7 +685,7 @@ class JsonDataController extends Controller
                         $table = "
                             users us
                             LEFT JOIN users_roles ur ON us.role_id = ur.id
-                            LEFT JOIN simpanan sm ON sm.user_id = us.id AND sm.status = 'approve'
+                            LEFT JOIN simpanan sm ON sm.user_id = us.id AND sm.status = 'approve' and sm.jenis = 'simpan'
                             LEFT JOIN pinjaman pj ON pj.user_id = us.id AND pj.status = 'approve' and pj.jenis = 'tarik simpanan'
                         ";
                         
@@ -782,9 +782,15 @@ class JsonDataController extends Controller
                                 END
                             END keanggotaan,
                             lp.amount as limitpinjaman,
+                            pj.id as idpinjam,
                             COALESCE(pj.amount,0) as pinjaman,
-                            cast(COALESCE(pj.amount,0) + COALESCE(pj.amount,0)*0.02*pj.tenor as decimal(18,2)) as pinjaman2persen,
                             PERIOD_DIFF(DATE_FORMAT(SYSDATE(), '%Y%m'),DATE_FORMAT(us.tgl_dinas, '%Y%m')) as totaltenor,
+
+                            cast(COALESCE(pj.amount,0) + COALESCE(pj.amount,0)*0.02 as decimal(18,2)) as pinjamanbunga,
+                            cast((COALESCE(pj.amount,0) + COALESCE(pj.amount,0)*0.02) / pj.tenor as decimal(18,2)) as totalbayarperbulan1,
+                            cast(((COALESCE(pj.amount,0) + COALESCE(pj.amount,0)*0.02) / pj.tenor) * PERIOD_DIFF(DATE_FORMAT(SYSDATE(), '%Y%m'),DATE_FORMAT(us.tgl_dinas, '%Y%m')) as decimal(18,2)) as totalbayar1,
+
+                            cast(COALESCE(pj.amount,0) + COALESCE(pj.amount,0)*0.02*pj.tenor as decimal(18,2)) as pinjaman2persen,
                             cast((COALESCE(pj.amount,0) + COALESCE(pj.amount,0)*0.02*pj.tenor) / pj.tenor as decimal(18,2)) totalbayarperbulan,
                             cast((COALESCE(pj.amount,0) + COALESCE(pj.amount,0)*0.02*pj.tenor) / pj.tenor * 
                             PERIOD_DIFF(DATE_FORMAT(SYSDATE(), '%Y%m'),DATE_FORMAT(us.tgl_dinas, '%Y%m'))
@@ -798,7 +804,13 @@ class JsonDataController extends Controller
                             as decimal(18,2)) as sisapinjaman,
                             pj.tenor - PERIOD_DIFF(DATE_FORMAT(SYSDATE(), '%Y%m'),DATE_FORMAT(us.tgl_dinas, '%Y%m')) as sisatenor,
                             pj.tenor,
-                            lower(pj.status_pinjaman) as status_pinjaman
+                            pj.created_at tglaju,
+                            pj.updated_at tgllunas,
+                            case
+                                when lower(pj.status_pinjaman) = 'lunas' then 'lunas'
+                                else 'belum lunas'
+                            END as status_pinjaman,
+                            concat(DATE_FORMAT(current_date, '%Y-%m'),'-01') as tglbayar
                         ";
                         
                         $table = "
@@ -837,8 +849,150 @@ class JsonDataController extends Controller
                         $where.="
                             GROUP BY 
                                 us.name,us.id,us.nrp,us.tgl_dinas,us.is_active,us.status,
-                                ur.role_name,lp.amount,pj.amount,pj.tenor,pj.created_at,pj.status_pinjaman
+                                ur.role_name,lp.amount,pj.amount,pj.tenor,pj.created_at,pj.status_pinjaman,
+                                pj.id,pj.created_at,pj.updated_at
                                 ORDER BY pj.created_at desc
+                        ";
+                        $result = $MasterClass->selectGlobal($select,$table,$where);
+                        
+                        $results = [
+                            'code'  => $result['code'],
+                            'info'  => $result['info'],
+                            'data'  => $result['data'],
+                        ];
+                            
+            
+            
+                    } else {
+                        $results = [
+                            'code' => '103',
+                            'info'  => "Method Failed",
+                        ];
+                    }
+                } catch (\Exception $e) {
+                    // Roll back the transaction in case of an exception
+                    $results = [
+                        'code' => '102',
+                        'info'  => $e->getMessage(),
+                    ];
+        
+                }
+            }
+            else {
+        
+                $results = [
+                    'code' => '403',
+                    'info'  => "Unauthorized",
+                ];
+                
+            }
+
+            return $MasterClass->Results($results);
+
+        }
+        public function getpengajuanpinjaman(Request $request){
+
+            $MasterClass = new Master();
+
+            $user_id    = $MasterClass->getSession('user_id') ;
+            $role       = $MasterClass->getSession('role_name') ;
+            $checkAuth = $MasterClass->Authenticated($user_id);
+            
+            if($checkAuth['code'] == $MasterClass::CODE_SUCCESS){
+                try {
+                    if ($request->isMethod('post')) {
+
+                        DB::beginTransaction();     
+                        $fstatus        = $request->status ;
+                        $fkeanggotaan   = $request->keanggotaan ;
+                        $fstatuspinjam  = $request->statuspinjam ;
+                        $status = [];
+                        
+                        $select = "
+                            us.name,us.id as user,us.nrp,us.tgl_dinas,us.no_anggota,us.pangkat,
+                            case 
+                                when us.is_active = '1' then 'ACTIVE' 
+                                when us.is_active = '2' then 'INACTIVE' 
+                                when us.is_active = '3' then 'DELETE' 
+                            end status_name,
+                            ur.role_name,
+                            CASE 
+                                WHEN us.tgl_dinas > current_date THEN 'PENSIUN'
+                                WHEN us.tgl_dinas is null THEN 'TGL DINAS KOSONG'
+                                ELSE
+                                    CASE 
+                                        WHEN lower(us.status) = '2' THEN 'PINDAH'
+                                    ELSE 'AKTIF'
+                                END
+                            END keanggotaan,
+                            lp.amount as limitpinjaman,
+                            pj.id as idpinjam,
+                            COALESCE(pj.amount,0) as pinjaman,
+                            PERIOD_DIFF(DATE_FORMAT(SYSDATE(), '%Y%m'),DATE_FORMAT(us.tgl_dinas, '%Y%m')) as totaltenor,
+
+                            cast(COALESCE(pj.amount,0) + COALESCE(pj.amount,0)*0.02 as decimal(18,2)) as pinjamanbunga,
+                            cast((COALESCE(pj.amount,0) + COALESCE(pj.amount,0)*0.02) / pj.tenor as decimal(18,2)) as totalbayarperbulan1,
+                            cast(((COALESCE(pj.amount,0) + COALESCE(pj.amount,0)*0.02) / pj.tenor) * PERIOD_DIFF(DATE_FORMAT(SYSDATE(), '%Y%m'),DATE_FORMAT(us.tgl_dinas, '%Y%m')) as decimal(18,2)) as totalbayar1,
+
+                            cast(COALESCE(pj.amount,0) + COALESCE(pj.amount,0)*0.02*pj.tenor as decimal(18,2)) as pinjaman2persen,
+                            cast((COALESCE(pj.amount,0) + COALESCE(pj.amount,0)*0.02*pj.tenor) / pj.tenor as decimal(18,2)) totalbayarperbulan,
+                            cast((COALESCE(pj.amount,0) + COALESCE(pj.amount,0)*0.02*pj.tenor) / pj.tenor * 
+                            PERIOD_DIFF(DATE_FORMAT(SYSDATE(), '%Y%m'),DATE_FORMAT(us.tgl_dinas, '%Y%m'))
+                            as decimal(18,2)) as totalbayar,
+                            COALESCE(pj.amount,0) - cast(COALESCE(pj.amount,0) - COALESCE(pj.amount,0) / pj.tenor  * PERIOD_DIFF(DATE_FORMAT(SYSDATE(), '%Y%m'),DATE_FORMAT(us.tgl_dinas, '%Y%m'))as decimal(18,2)) as sisalimit,
+                            cast(
+                                (COALESCE(pj.amount,0) + COALESCE(pj.amount,0)*0.02*pj.tenor)
+                                -
+                                (COALESCE(pj.amount,0) + COALESCE(pj.amount,0)*0.02*pj.tenor) / pj.tenor * 
+                                PERIOD_DIFF(DATE_FORMAT(SYSDATE(), '%Y%m'),DATE_FORMAT(us.tgl_dinas, '%Y%m'))
+                            as decimal(18,2)) as sisapinjaman,
+                            pj.tenor - PERIOD_DIFF(DATE_FORMAT(SYSDATE(), '%Y%m'),DATE_FORMAT(us.tgl_dinas, '%Y%m')) as sisatenor,
+                            pj.tenor,
+                            pj.status,
+                            pj.jenis,
+                            lower(pj.status_pinjaman) as status_pinjaman
+                        ";
+                        
+                        $table = "
+                            users us
+                            JOIN users_roles ur ON us.role_id = ur.id
+                            JOIN pinjaman pj ON pj.user_id = us.id
+                            LEFT JOIN limit_pinjaman lp ON lp.user_id = us.id 
+                        ";
+                        
+                        
+                        $where = "
+                             ur.role_name like '%anggota%' 
+                        ";
+                        
+                        if($role == 'anggota'){
+                            $where .= "
+                                 AND us.id = $user_id  
+                            ";
+                        }
+                        if($fkeanggotaan){
+                            if($fkeanggotaan == 'pindah'){
+                                $where .= "
+                                     AND lower(us.status) = '2'
+                                ";
+                            }else{
+                                $where .= "
+                                     AND lower(us.tgl_dinas) $fkeanggotaan
+                                ";
+                            }
+                        }
+                        if($fstatuspinjam ){
+                            $where .= "
+                                 AND (lower(pj.status) = '$fstatuspinjam')
+                            ";
+                        }
+
+                        $where.="
+                            GROUP BY 
+                                us.name,us.id,us.nrp,us.tgl_dinas,us.is_active,us.status,us.no_anggota,us.pangkat,
+                                ur.role_name,lp.amount,pj.amount,pj.tenor,pj.created_at,pj.status_pinjaman,
+                                pj.status,pj.jenis,pj.id
+                                ORDER BY pj.status desc,pj.created_at asc
                         ";
                         $result = $MasterClass->selectGlobal($select,$table,$where);
                         
@@ -1001,7 +1155,139 @@ class JsonDataController extends Controller
             return $MasterClass->Results($results);
 
         }
+        public function getlaporan(Request $request){
+
+            $MasterClass = new Master();
+
+            $checkAuth = $MasterClass->Authenticated($MasterClass->getSession('user_id'));
+            
+            if($checkAuth['code'] == $MasterClass::CODE_SUCCESS){
+                try {
+                    if ($request->isMethod('post')) {
+
+                        DB::beginTransaction();     
+                        $fstatus        = $request->status ;
+                        $fkeanggotaan   = $request->keanggotaan ;
+                        $fstatuspinjam  = $request->statuspinjam ;
+                        $status = [];
+                        
+                        $select = "
+                            us.name,us.id as user,us.nrp,us.tgl_dinas,
+                            case 
+                                when us.is_active = '1' then 'ACTIVE' 
+                                when us.is_active = '2' then 'INACTIVE' 
+                                when us.is_active = '3' then 'DELETE' 
+                            end status_name,
+                            ur.role_name,
+                            CASE 
+                                WHEN us.tgl_dinas > current_date THEN 'PENSIUN'
+                                WHEN us.tgl_dinas is null THEN 'TGL DINAS KOSONG'
+                                ELSE
+                                    CASE 
+                                        WHEN lower(us.status) = '2' THEN 'PINDAH'
+                                    ELSE 'AKTIF'
+                                END
+                            END keanggotaan,
+                            lp.amount as limitpinjaman,
+                            pj.id as idpinjam,
+                            COALESCE(pj.amount,0) as pinjaman,
+                            COALESCE(cast(COALESCE(pj.amount,0) + COALESCE(pj.amount,0)*0.02 as decimal(18,2)),0) as pinjamanbunga,
+                            COALESCE(cast(((COALESCE(pj.amount,0) + COALESCE(pj.amount,0)*0.02) / pj.tenor) * PERIOD_DIFF(DATE_FORMAT(SYSDATE(), '%Y%m'),DATE_FORMAT(us.tgl_dinas, '%Y%m')) as decimal(18,2)),0) as totalbayar1,
+                            
+                            COALESCE(cast(
+                                (COALESCE(pj.amount,0) + COALESCE(pj.amount,0)*0.02*pj.tenor)
+                                -
+                                (COALESCE(pj.amount,0) + COALESCE(pj.amount,0)*0.02*pj.tenor) / pj.tenor * 
+                                PERIOD_DIFF(DATE_FORMAT(SYSDATE(), '%Y%m'),DATE_FORMAT(us.tgl_dinas, '%Y%m'))
+                            as decimal(18,2)),0) as sisapinjaman,
+                            pj.created_at tglaju,
+                            pj.updated_at tgllunas,
+                            case
+                                when lower(pj.status_pinjaman) = 'lunas' then 'lunas'
+                                else 'belum lunas'
+                            END as status_pinjaman,
+                            concat(DATE_FORMAT(current_date, '%Y-%m'),'-01') as tglbayar
+                        ";
+                        
+                        $table = "
+                            users us
+                            JOIN users_roles ur ON us.role_id = ur.id
+                            LEFT JOIN pinjaman pj ON pj.user_id = us.id AND pj.status = 'approve'
+                            LEFT JOIN limit_pinjaman lp ON lp.user_id = us.id 
+                            LEFT JOIN simpanan sm ON sm.user_id = us.id AND sm.jenis = 'simpan'
+                            LEFT JOIN simpanan st ON st.user_id = us.id AND st.jenis = 'tarik'
+                        ";
+                        
+                        
+                        $where = "
+                             ur.role_name like '%anggota%' 
+                        ";
+
+                        if($fkeanggotaan){
+                            if($fkeanggotaan == 'pindah'){
+                                $where .= "
+                                     AND lower(us.status) = '2'
+                                ";
+                            }else{
+                                $where .= "
+                                     AND lower(us.tgl_dinas) $fkeanggotaan
+                                ";
+                            }
+                        }
+                        if($fstatuspinjam == '1'){
+                            $where .= "
+                                 AND (lower(pj.status_pinjaman) = 'lunas' OR COALESCE(pj.tenor,0) = PERIOD_DIFF(DATE_FORMAT(SYSDATE(), '%Y%m'),DATE_FORMAT(us.tgl_dinas, '%Y%m')))
+                            ";
+                        }elseif($fstatuspinjam == '2'){
+                            $where .= "
+                                 AND pj.status_pinjaman != 'lunas' AND COALESCE(pj.tenor,0) != PERIOD_DIFF(DATE_FORMAT(SYSDATE(), '%Y%m'),DATE_FORMAT(us.tgl_dinas, '%Y%m'))
+                            ";
+                        }
+
+                        $where.="
+                            GROUP BY 
+                                us.name,us.id,us.nrp,us.tgl_dinas,us.is_active,us.status,
+                                ur.role_name,lp.amount,pj.amount,pj.tenor,pj.created_at,pj.status_pinjaman,
+                                pj.id,pj.created_at,pj.updated_at
+                                ORDER BY pj.created_at desc
+                        ";
+                        $result = $MasterClass->selectGlobal($select,$table,$where);
+                        
+                        $results = [
+                            'code'  => $result['code'],
+                            'info'  => $result['info'],
+                            'data'  => $result['data'],
+                        ];
+                            
+            
+            
+                    } else {
+                        $results = [
+                            'code' => '103',
+                            'info'  => "Method Failed",
+                        ];
+                    }
+                } catch (\Exception $e) {
+                    // Roll back the transaction in case of an exception
+                    $results = [
+                        'code' => '102',
+                        'info'  => $e->getMessage(),
+                    ];
         
+                }
+            }
+            else {
+        
+                $results = [
+                    'code' => '403',
+                    'info'  => "Unauthorized",
+                ];
+                
+            }
+
+            return $MasterClass->Results($results);
+
+        }
     //CRUD FUNCTION
         public function saveUser(Request $request){
 
@@ -1141,6 +1427,79 @@ class JsonDataController extends Controller
                             'id' => $data->id
                         ];
                         $saved      = $MasterClass->updateGlobal('users', $attributes,$where );
+                        $status = $saved;
+    
+                        if($status['code'] == $MasterClass::CODE_SUCCESS){
+                            DB::commit();
+                        }else{
+                            DB::rollBack();
+                        }
+            
+                        $results = [
+                            'code' => $status['code'],
+                            'info'  => $status['info'],
+                        ];
+                            
+            
+            
+                    } else {
+                        $results = [
+                            'code' => '103',
+                            'info'  => "Method Failed",
+                        ];
+                    }
+                } catch (\Exception $e) {
+                    // Roll back the transaction in case of an exception
+                    $results = [
+                        'code' => '102',
+                        'info'  => $e->getMessage(),
+                    ];
+        
+                }
+            }
+            else {
+        
+                $results = [
+                    'code' => '403',
+                    'info'  => "Unauthorized",
+                ];
+                
+            }
+
+            return $MasterClass->Results($results);
+
+        }
+        public function approvalpinjaman(Request $request){
+
+            $MasterClass = new Master();
+
+            $checkAuth = $MasterClass->Authenticated($MasterClass->getSession('user_id'));
+            
+            if($checkAuth['code'] == $MasterClass::CODE_SUCCESS){
+                try {
+                    if ($request->isMethod('post')) {
+
+                        DB::beginTransaction();     
+
+                        $data = json_decode($request->getContent());
+                        
+                        $status = [];
+
+                        if($data->jenis == 'statuslunas'){
+                            $attributes     = [
+                                'status_pinjaman' => $data->status,
+                                'updated_at'      => date('Y-m-d H:i:s')
+                            ];
+                        }else{
+                            $attributes     = [
+                                'status' => $data->status
+                            ];
+                        }
+                        $where     = [
+                            'id' => $data->idpinjam
+                        ];
+
+                        $saved      = $MasterClass->updateGlobal('pinjaman', $attributes,$where );
                         $status = $saved;
     
                         if($status['code'] == $MasterClass::CODE_SUCCESS){

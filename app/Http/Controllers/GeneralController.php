@@ -21,7 +21,7 @@ class GeneralController extends Controller
         
         if($checkAuth['code'] == $MasterClass::CODE_SUCCESS){
 
-            return redirect('/dashboard');
+            return redirect('/laporan');
 
         }else{
             return redirect('/login');
@@ -31,37 +31,11 @@ class GeneralController extends Controller
         $MasterClass = new Master();
 
         $checkAuth = $MasterClass->AuthenticatedView($request->route()->uri());
-
+        
         if($checkAuth['code'] == $MasterClass::CODE_SUCCESS){
-           
-            $javascriptFiles = [
-                asset('action-js/global/global-action.js'),
-                // asset('action-js/dashboard-action.js'),
-            ];
-        
-            $cssFiles = [
-                // asset('css/main.css'),
-                // asset('css/custom.css'),
-            ];
-            $baseURL = url('/');
-            $rolename = strtolower($MasterClass->getSession('role_name'))  ;
-            $varJs = [
-                'const baseURL = "' . $baseURL . '"',
-                'const role = "' . $rolename . '"',
 
-            ];
-            
-            
-            $data = [
-                'javascriptFiles' => $javascriptFiles,
-                'cssFiles' => $cssFiles,
-                'varJs'=> $varJs,
-                'role'=> $rolename,
-                // Menambahkan base URL ke dalam array
-            ];
-        
-            return view('pages.admin.dashboard')
-                ->with($data);
+            return redirect('/laporan');
+
         }else{
             return redirect('/login');
         }
@@ -259,7 +233,7 @@ class GeneralController extends Controller
         }
         
     }
-    public function laporansimpanpinjam(Request $request){
+    public function laporan(Request $request){
 
         $MasterClass = new Master();
 
@@ -291,6 +265,45 @@ class GeneralController extends Controller
             ];
         
             return view('pages.admin.transaksi.laporansimpanpinjam')
+                ->with($data);
+        }else{
+            return redirect('/login');
+        }
+        
+    }
+    public function pengajuanpinjaman(Request $request){
+
+        $MasterClass = new Master();
+
+        $checkAuth = $MasterClass->AuthenticatedView($request->route()->uri());
+        
+        if($checkAuth['code'] == $MasterClass::CODE_SUCCESS){
+            $javascriptFiles = [
+                asset('action-js/global/global-action.js'),
+                // asset('action-js/generate/generate-action.js'),
+                asset('action-js/transaksi/pengajuanpinjaman.js'),
+            ];
+        
+            $cssFiles = [
+                // asset('css/main.css'),
+                // asset('css/custom.css'),
+            ];
+            $baseURL = url('/');
+            $rolename = strtolower($MasterClass->getSession('role_name'))  ;
+            $varJs = [
+                'const baseURL = "' . $baseURL . '"',
+                'const role = "' . $rolename .'"',
+
+            ];
+            $data = [
+                'javascriptFiles' => $javascriptFiles,
+                'cssFiles' => $cssFiles,
+                'varJs'=> $varJs,
+                'role'=> $rolename,
+                 // Menambahkan base URL ke dalam array
+            ];
+        
+            return view('pages.admin.transaksi.pengajuanpinjaman')
                 ->with($data);
         }else{
             return redirect('/login');
