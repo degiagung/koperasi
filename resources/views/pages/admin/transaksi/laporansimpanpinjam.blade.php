@@ -61,6 +61,9 @@
                                         <th>Nama Anggota</th>
                                         <th>Tanggal Dinas</th>
                                         <th>keanggotaan</th>
+                                        <th>Total Simpanan Awal</th>
+                                        <th>Total Tarik Simpanan</th>
+                                        <th>Total Sisa Simpanan</th>
                                         <th>Total Pinjaman Awal</th>
                                         <th>Total Pembayaran</th>
                                         <th>Total Sisa Pinjaman</th>
@@ -70,9 +73,12 @@
                                     <tr>
                                         <th ><b>Total</b></th>
                                         <th colspan="5"></th>
-                                        <th class="totalpinjamawal">0</th>
-                                        <th class="totalbayar">0</th>
-                                        <th class="totalsisapinjam">0</th>
+                                        <th class="total totalsimpanan">0</th>
+                                        <th class="total totaltariksimpanan">0</th>
+                                        <th class="total totalsisasimpanan">0</th>
+                                        <th class="total totalpinjamawal">0</th>
+                                        <th class="total totalbayar">0</th>
+                                        <th class="total totalsisapinjam">0</th>
                                     </tr>
                                 </tfoot>
                             </table>

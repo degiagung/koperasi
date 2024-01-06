@@ -22,7 +22,7 @@ $("#filter-btn").on('click',function(e){
 let isObject = {};
 
 function getListData() {
-
+    $(".total").empty();
     dtpr = $("#table-list").DataTable({
         ajax: {
             url: baseURL + "/getlaporan",
@@ -34,9 +34,17 @@ function getListData() {
             },
             dataSrc: function (response) {
                 if (response.code == 0) {
-                    es = response.data;
+                    console.log(response.data.sum[0])
+                    es = response.data.data;
+                    sum = response.data.sum[0];
+                    $(".totalsimpanan").html(formatRupiah(sum.simpanan));
+                    $(".totaltariksimpanan").html(formatRupiah(sum.tariksimpanan));
+                    $(".totalsisasimpanan").html(formatRupiah(sum.sisasimpanan));
+                    $(".totalpinjamawal").html(formatRupiah(sum.pinjaman));
+                    $(".totalbayar").html(formatRupiah(sum.totalbayar));
+                    $(".totalsisapinjam").html(formatRupiah(sum.sisapinjaman));
                     // console.log(es);
-                    return response.data;
+                    return es;
                 } else {
                     return response;
                 }
@@ -85,13 +93,22 @@ function getListData() {
             } },
             { data: "keanggotaan" },
             { render:function (data,type,row) {
-                return formatRupiah(row.pinjamanbunga);
+                return formatRupiah(row.simpanan);
+            } },
+            { render:function (data,type,row) {
+                return formatRupiah(row.tariksimpanan) ;
+            } },
+            { render:function (data,type,row) {
+                return formatRupiah(row.sisasimpanan) ;
+            } },
+            { render:function (data,type,row) {
+                return formatRupiah(row.pinjaman) ;
+            } },
+            { render:function (data,type,row) {
+                return formatRupiah(row.totalbayar) ;
             } },
             { render:function (data,type,row) {
                 return formatRupiah(row.sisapinjaman) ;
-            } },
-            { render:function (data,type,row) {
-                return formatRupiah(row.totalbayar1) ;
             } },
         ],
         drawCallback: function (settings) {

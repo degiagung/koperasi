@@ -1188,34 +1188,26 @@ class JsonDataController extends Controller
                                     ELSE 'AKTIF'
                                 END
                             END keanggotaan,
-                            lp.amount as limitpinjaman,
-                            pj.id as idpinjam,
-                            COALESCE(pj.amount,0) as pinjaman,
-                            COALESCE(cast(COALESCE(pj.amount,0) + COALESCE(pj.amount,0)*0.02 as decimal(18,2)),0) as pinjamanbunga,
-                            COALESCE(cast(((COALESCE(pj.amount,0) + COALESCE(pj.amount,0)*0.02) / pj.tenor) * PERIOD_DIFF(DATE_FORMAT(SYSDATE(), '%Y%m'),DATE_FORMAT(us.tgl_dinas, '%Y%m')) as decimal(18,2)),0) as totalbayar1,
-                            
-                            COALESCE(cast(
-                                (COALESCE(pj.amount,0) + COALESCE(pj.amount,0)*0.02*pj.tenor)
-                                -
-                                (COALESCE(pj.amount,0) + COALESCE(pj.amount,0)*0.02*pj.tenor) / pj.tenor * 
-                                PERIOD_DIFF(DATE_FORMAT(SYSDATE(), '%Y%m'),DATE_FORMAT(us.tgl_dinas, '%Y%m'))
-                            as decimal(18,2)),0) as sisapinjaman,
-                            pj.created_at tglaju,
-                            pj.updated_at tgllunas,
-                            case
-                                when lower(pj.status_pinjaman) = 'lunas' then 'lunas'
-                                else 'belum lunas'
-                            END as status_pinjaman,
-                            concat(DATE_FORMAT(current_date, '%Y-%m'),'-01') as tglbayar
+                            COALESCE(100000 * (PERIOD_DIFF(DATE_FORMAT(SYSDATE(), '%Y%m'),DATE_FORMAT(us.tgl_dinas, '%Y%m'))),0) + coalesce(sum(sm.amount),0) as simpanan, 
+                            coalesce(sum(st.amount),0) as tariksimpanan, 
+                            COALESCE(100000 * (PERIOD_DIFF(DATE_FORMAT(SYSDATE(), '%Y%m'),DATE_FORMAT(us.tgl_dinas, '%Y%m'))),0) + coalesce(sum(sm.amount),0) - coalesce(sum(st.amount),0) as sisasimpanan,
+                            coalesce(sum(pj.amount),0) pinjaman,
+                            coalesce(cast(((coalesce(pj1.amount,0) + COALESCE(pj1.amount,0)*0.02) / coalesce(pj1.tenor,0)) * PERIOD_DIFF(DATE_FORMAT(SYSDATE(), '%Y%m'),DATE_FORMAT(us.tgl_dinas, '%Y%m')) as decimal(18,2)),0) as totalbayar,
+                            coalesce(sum(pj.amount),0)
+                            -
+                            coalesce(cast(((coalesce(pj1.amount,0) + COALESCE(pj1.amount,0)*0.02) / coalesce(pj1.tenor,0)) * PERIOD_DIFF(DATE_FORMAT(SYSDATE(), '%Y%m'),DATE_FORMAT(us.tgl_dinas, '%Y%m')) as decimal(18,2)),0) as sisapinjaman
+
                         ";
                         
                         $table = "
                             users us
                             JOIN users_roles ur ON us.role_id = ur.id
                             LEFT JOIN pinjaman pj ON pj.user_id = us.id AND pj.status = 'approve'
+                            LEFT JOIN pinjaman pj1 ON pj1.user_id = us.id AND pj1.status = 'approve' AND pj1.status_pinjaman != 'lunas' 
                             LEFT JOIN limit_pinjaman lp ON lp.user_id = us.id 
-                            LEFT JOIN simpanan sm ON sm.user_id = us.id AND sm.jenis = 'simpan'
-                            LEFT JOIN simpanan st ON st.user_id = us.id AND st.jenis = 'tarik'
+                            LEFT JOIN limit_pinjaman lp1 ON lp.user_id = us.id 
+                            LEFT JOIN simpanan sm ON sm.user_id = us.id AND sm.jenis = 'simpan' AND sm.status = 'approve'
+                            LEFT JOIN simpanan st ON st.user_id = us.id AND st.jenis = 'tarik' AND st.status = 'approve'
                         ";
                         
                         
@@ -1247,16 +1239,34 @@ class JsonDataController extends Controller
                         $where.="
                             GROUP BY 
                                 us.name,us.id,us.nrp,us.tgl_dinas,us.is_active,us.status,
-                                ur.role_name,lp.amount,pj.amount,pj.tenor,pj.created_at,pj.status_pinjaman,
-                                pj.id,pj.created_at,pj.updated_at
-                                ORDER BY pj.created_at desc
+                                ur.role_name,pj1.amount,pj1.tenor
+                                ORDER BY us.name asc
                         ";
-                        $result = $MasterClass->selectGlobal($select,$table,$where);
-                        
+                        $result      = $MasterClass->selectGlobal($select,$table,$where);
+                        $selectcount = " 
+                            sum(a.simpanan) as simpanan,
+                            sum(a.tariksimpanan) as tariksimpanan,
+                            sum(a.sisasimpanan) as sisasimpanan,
+                            sum(a.pinjaman) as pinjaman,
+                            sum(a.totalbayar) as totalbayar,
+                            sum(a.sisapinjaman) as sisapinjaman 
+                            from (select
+                        " ;
+                        $ressum = $MasterClass->selectGlobal($selectcount.$select,$table,$where.') as a');
+
+                        if($result['data']){
+                            $datas = [
+                                'data' => $result['data'],
+                                'sum' => $ressum['data'],
+                            ];
+                        }else{
+                            $datas = null ;
+                        }
+
                         $results = [
                             'code'  => $result['code'],
                             'info'  => $result['info'],
-                            'data'  => $result['data'],
+                            'data'  => $datas
                         ];
                             
             
