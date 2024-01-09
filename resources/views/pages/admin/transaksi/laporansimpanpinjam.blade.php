@@ -56,7 +56,6 @@
                                 <thead>
                                     <tr>
                                         <th>No</th>
-                                        <th>Status </th>
                                         <th>NRP</th>
                                         <th>Nama Anggota</th>
                                         <th>Tanggal Dinas</th>
@@ -72,7 +71,7 @@
                                 <tfoot>
                                     <tr>
                                         <th ><b>Total</b></th>
-                                        <th colspan="5"></th>
+                                        <th colspan="4"></th>
                                         <th class="total totalsimpanan">0</th>
                                         <th class="total totaltariksimpanan">0</th>
                                         <th class="total totalsisasimpanan">0</th>

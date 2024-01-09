@@ -4,11 +4,13 @@ let dtpr;
 
 $(document).ready(function () {
     getListData();
+    getdatlimitpinjaman();
 });
 
 $(".select2").select2();
 $(".select2add").select2({
     dropdownParent: $("#modal-approval"),
+    dropdownParent: $("#modal-data"),
 });
 
 $("#filter-btn").on('click',function(e){
@@ -62,7 +64,6 @@ function getListData() {
                     $('#table-list').DataTable().ajax.reload();
                 }
             },
-            { text: ' ', extend: 'pdfHtml5',  className: 'btndownload iconpdf',  title:'Pinjaman Anggota', exportOptions: {columns:[':not(.notdown)']}},
             { text: ' ', extend: 'excel',  className: 'btndownload iconexcel',  title:'Pinjaman Anggota', exportOptions: {columns:[':not(.notdown)']}},
         ],
         columns: [
@@ -85,10 +86,7 @@ function getListData() {
                 return row.name;
             } },
             { render:function (data,type,row) {
-                return datetostring2('yymmdd',row.created_at);
-            } },
-            { render:function (data,type,row) {
-                return datetostring2('yymmdd',row.tgl_dinas);
+                return datetostring2('yymmdd',row.tgl_approve);
             } },
             { data: "keanggotaan" },
             { render:function (data,type,row) {
@@ -119,10 +117,10 @@ function getListData() {
                 else
                 return row.sisatenor+' BLN & Rp.0';
             } },
-            { render:function (data,type,row) {
+            { visible:false,sClass:"notdown action",render:function (data,type,row) {
                 return "<a style='cursor:pointer' class='pengajuan'>Klik Disini</a>";
             } },
-            { render:function (data,type,row) {
+            { visible:false,sClass:"notdown action",render:function (data,type,row) {
                 return "<a style='cursor:pointer' class='perjanjian'>Klik Disini</a>";
             } },
         ],
@@ -199,7 +197,7 @@ function detailpengajuan(rowData) {
 
     $(".nama").text(rowData.name);
     $(".noanggota").text(rowData.no_anggota);
-    $(".pangkat").text(rowData.pangkat);
+    $(".pangkat").text(rowData.pangkat+'/'+rowData.nrp);
     $(".pinjaman").text(formatRupiah(rowData.pinjaman) + ' ('+pembilang(rowData.pinjaman)+')');
     $(".keperluan").text(rowData.jenis);
     $(".tenor").text(rowData.tenor +' Bulan');
@@ -221,7 +219,7 @@ function detailperjanjian(rowData) {
     $(".pengajuanterbilang").text('');
 
     pengajuanrp = rowData.pinjaman - (rowData.pinjaman*0.01) - 10000 ;
-    $(".pengajuannama").text(rowData.name);
+    $(".pengajuannama").text(rowData.name+'/'+rowData.pangkat+'/'+rowData.nrp);
     $(".pengajuanpinjaman").text(formatRupiah(rowData.pinjaman));
     $(".pengajuantenor").text(rowData.tenor);
     $(".pengajuanbayarsimpanan").text();
@@ -332,4 +330,123 @@ function approval(){
             );
         }
     });
+}
+
+$("#add-btn").on("click", function (e) {
+    e.preventDefault();
+    isObject = {};
+    $("#form-pinjaman").val("");
+    $("#form-tenor").val("");
+    $("#modal-data").modal("show");
+});
+
+$("#ajukan-btn").on("click", function (e) {
+    e.preventDefault();
+    if ($("#form-pinjaman").val() < 500000){
+        swalwarning('Minimal pengajuan Rp 500.000');
+        return false;
+    }
+    if (parseFloat($("#form-pinjaman").val()) > parseFloat(islimit)){
+        swalwarning('Limit Pinjaman tidak cukup');
+        return false;
+    }
+    if ($("#form-tenor").val() < 5){
+        swalwarning('Minimal tenor 5 Bulan');
+        return false;
+    }
+    if ($("#form-keperluan").val() == ''){
+        swalwarning('Keperluan harus diisi.');
+        return false;
+    }
+
+    ajukanpinjaman();
+});
+
+function ajukanpinjaman(){
+    pinjaman = $("#form-pinjaman").val() ;
+    tenor = $("#form-tenor").val() ;
+    keperluan = $("#form-keperluan").val() ;
+    title = 'Pinjaman Rp.'+formatRupiah(pinjaman)+' dengan tenor '+tenor+' Bulan ?';
+    swal({
+        title: title,
+        type: "warning",
+        showCancelButton: !0,
+        confirmButtonColor: "#DD6B55",
+        confirmButtonText: "Ya, Benar !!",
+        cancelButtonText: "Tidak, Batalkan !!",
+        closeOnConfirm: !1,
+        closeOnCancel: !1,
+    }).then(function (e) {
+        if (e.value) {
+            $.ajax({
+                url: baseURL + "/actionpengajuanpinjaman",
+                type: "POST",
+                data: JSON.stringify({ 
+                    pinjaman: pinjaman, 
+                    tenor   : tenor,
+                    keperluan   : keperluan 
+                }),
+                dataType: "json",
+                contentType: "application/json",
+                beforeSend: function () {
+                    Swal.fire({
+                        title: "Loading",
+                        text: "Please wait...",
+                    });
+                },
+                complete: function () {
+                    $('#table-list').DataTable().ajax.reload();
+
+                },
+                success: function (response) {
+                    // Handle response sukses
+                    if (response.code == 0) {
+                        swal("BERHASIL !", response.message, "success");
+                            $("#modal-data").modal("hide");
+
+                    } else {
+                        sweetAlert("Oops...", response.message, "ERROR");
+                    }
+                },
+                error: function (xhr, status, error) {
+                    // Handle error response
+                    // console.log("ERROR");
+                    sweetAlert("Oops...", "ERROR", "ERROR");
+                },
+            });
+        } else {
+            swal(
+                "BATAL !!",
+            );
+        }
+    });
+} 
+var islimit = 0 ; 
+async function getdatlimitpinjaman() {
+    $(".inputan").val('');
+    try {
+        const response = await $.ajax({
+            url: baseURL + "/getlimitpinjaman",
+            type: "POST",
+            dataType: "json",
+            beforeSend: function () {
+                // Swal.fire({
+                //     title: "Loading",
+                //     text: "Please wait...",
+                // });
+            },
+        });
+        const res = response.data.map(function (item) {
+            $("#form-limit").val('Rp. '+formatRupiah(item.amount));
+            islimit = item.amount ;
+        });
+
+        $("#form-role").select2({
+            data: res,
+            placeholder: "Please choose an option",
+            dropdownParent: $("#modal-data"),
+        });
+    } catch (error) {
+        sweetAlert("Oops...", error.responseText, "ERROR");
+    }
 }

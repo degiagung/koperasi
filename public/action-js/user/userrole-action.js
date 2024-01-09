@@ -52,7 +52,6 @@ function getListView() {
         },
         buttons: [
             
-            { text: '', extend: 'pdfHtml5',  className: 'btndownload iconpdf',  title:'List Akses', exportOptions: {columns:[':not(.notdown)']}},
             { text: '', extend: 'excel',  className: 'btndownload iconexcel',  title:'List Akses', exportOptions: {columns:[':not(.notdown)']}},
             { 
                 className: 'btnreload',

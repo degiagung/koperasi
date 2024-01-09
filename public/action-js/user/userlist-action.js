@@ -64,7 +64,6 @@ function getListData() {
                     $('#table-list').DataTable().ajax.reload();
                 }
             },
-            { text: ' ', extend: 'pdfHtml5',  className: 'btndownload iconpdf',  title:'List User', exportOptions: {columns:[':not(.notdown)']}},
             { text: ' ', extend: 'excel',  className: 'btndownload iconexcel',  title:'List User', exportOptions: {columns:[':not(.notdown)']}},
         ],
         columns: [

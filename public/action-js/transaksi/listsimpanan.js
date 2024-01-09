@@ -61,7 +61,6 @@ function getListData() {
                     $('#table-list').DataTable().ajax.reload();
                 }
             },
-            { text: ' ', extend: 'pdfHtml5',  className: 'btndownload iconpdf',  title:'Simpanan Anggota', exportOptions: {columns:[':not(.notdown)']}},
             { text: ' ', extend: 'excel',  className: 'btndownload iconexcel',  title:'Simpanan Anggota', exportOptions: {columns:[':not(.notdown)']}},
         ],
         columns: [
@@ -80,14 +79,14 @@ function getListData() {
             } },
             { data: "keanggotaan" },
             { render:function (data,type,row) {
-                if (row.simpananpokokwajib > 0)
-                return 'Rp. ' +formatRupiah(row.simpananpokokwajib);
+                if (row.simpananpokok > 0)
+                return 'Rp. ' +formatRupiah(row.simpananpokok);
                 else
                 return 'Rp. 0';
             } },
             { render:function (data,type,row) {
-                if (row.simpananpokokwajib > 0)
-                return 'Rp. ' +formatRupiah(row.simpananpokokwajib);
+                if (row.simpananwajib > 0)
+                return 'Rp. ' +formatRupiah(row.simpananwajib);
                 else
                 return 'Rp. 0';
             } },

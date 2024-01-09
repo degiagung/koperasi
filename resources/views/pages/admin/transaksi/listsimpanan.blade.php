@@ -53,8 +53,8 @@
                                         <th>Nama Anggota</th>
                                         <th>Tanggal Dinas</th>
                                         <th>keanggotaan</th>
-                                        <th>Simpanan Wajib</th>
                                         <th>Simpanan Pokok</th>
+                                        <th>Simpanan Wajib</th>
                                         <th>Simpanan Sukarela</th>
                                         <th>Total Simpan</th>
                                         <th>Penarikan</th>

@@ -50,7 +50,11 @@
             <div class="col-lg-12">
                 <div class="card">
                     <div class="card-header mt-2 flex-wrap d-flex justify-content-between">
-                        
+                        <ul class="nav nav-tabs dzm-tabs" id="myTab-4" role="tablist">
+                            <li class="nav-item" role="presentation">
+                                <button type="button" id="add-btn" class="nav-link active btn-sgn">Ajukan</button>
+                            </li>
+                        </ul>
                     </div>
                     <div class="card-body">
                         <div class="table-responsive">
@@ -61,8 +65,7 @@
                                         <th>Status </th>
                                         <th>NRP</th>
                                         <th>Nama Anggota</th>
-                                        <th>Tanggal Pengajuan</th>
-                                        <th>Tanggal Dinas</th>
+                                        <th>Tanggal Approve</th>
                                         <th>keanggotaan</th>
                                         <th>Total Limit</th>
                                         <th>Pengajuan Tenor & Pinjaman</th>
@@ -445,6 +448,74 @@
                     <div class="modal-footer">
                         <button type="button" onclick="printDiv('print','Title')" class="btn btn-sgn" data-dismiss="modal" style="width: 10%;">Print</button>
                         <button type="button" class="btn btn-sgn" data-bs-dismiss="modal" style="width: 10%;">Back</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="modal fade" id="modal-data" style="display: none;" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered" role="document">
+                <div class="modal-content">
+                    <div class="modal-header headermodal">
+                        <h5 class="modal-title">Pengajuan Pinjaman</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal">
+                        </button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="basic-form">
+                            <form id="form">
+                                <div class="mb-3 row">
+                                    <label class="col-sm-3 col-form-label">Limit Pinjaman </label>
+                                    <div class="col-sm-9">
+                                        <input id="form-limit" type="text" class="form-control" readonly>
+                                    </div>
+                                </div>
+                                <div class="mb-3 row">
+                                    <label class="col-sm-3 col-form-label">Bunga Pinjaman </label>
+                                    <div class="col-sm-9">
+                                        <input id="form-bunga" type="text" class="form-control" readonly value="2% dari total pinjaman">
+                                    </div>
+                                </div>
+                                <div class="mb-3 row">
+                                    <label class="col-sm-3 col-form-label">Jumlah Pinjaman </label>
+                                    <div class="col-sm-9">
+                                        <input id="form-pinjaman" type="number" class="form-control">
+                                    </div>
+                                </div>
+                                <div class="mb-3 row">
+                                    <label class="col-sm-3 col-form-label">Tenor</label>
+                                    <div class="col-sm-9">
+                                        <select id="form-tenor" name="form-tenor" class="select2add">
+                                            <option value="" disabled>Pilih Tenor</option>
+                                            <option value="5">5</option>
+                                            <option value="10">10</option>
+                                            <option value="12">12</option>
+                                            <option value="20">20</option>
+                                            <option value="24">24</option>
+                                            <option value="36">36</option>
+                                            <option value="48">48</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="mb-3 row">
+                                    <label class="col-sm-3 col-form-label">Keperluan</label>
+                                    <div class="col-sm-9">
+                                        <select id="form-keperluan" name="form-keperluan" class="select2add">
+                                            <option value="" disabled>Pilih Keperluan</option>
+                                            <option value="pendidikan">Pendidikan</option>
+                                            <option value="kesejahteraan">Kesejahteraan</option>
+                                            <option value="produktif">Produktif</option>
+                                            <option value=lain-lain">Lain-lain</option>
+                                        </select>
+                                    </div>
+                                </div>
+
+                            </form>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-danger light" data-bs-dismiss="modal">Close</button>
+                        <button type="button" id="ajukan-btn" class="btn btn-primary">Ajukan</button>
                     </div>
                 </div>
             </div>

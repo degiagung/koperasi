@@ -36,10 +36,13 @@
                             @enderror
                         </div>
                         <div class="mb-3">
-                            <input type="email" class="form-control" placeholder="Email" name="email" id="form-email" aria-label="Email" aria-describedby="email-addon" value="{{ old('email') }}">
-                            @error('email')
-                            <p class="text-danger text-xs mt-2">{{ $message }}</p>
-                            @enderror
+                            <input type="text" class="form-control" placeholder="No Anggota" id="form-noanngota" >
+                        </div>
+                        <div class="mb-3">
+                            <input type="text" class="form-control" placeholder="NRP" id="form-nrp" >
+                        </div>
+                        <div class="mb-3">
+                            <input type="text" class="form-pangkat" placeholder="Pangkat" id="form-pangkat" >
                         </div>
                         <div class="mb-3">
                             <input type="password" class="form-control" placeholder="Password" name="password" id="form-password" aria-label="Password" aria-describedby="password-addon">
