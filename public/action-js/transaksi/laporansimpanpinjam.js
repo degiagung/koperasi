@@ -70,7 +70,7 @@ function getListData() {
                     $('#table-list').DataTable().ajax.reload();
                 }
             },
-            { text: ' ', extend: 'excel',  className: 'btndownload iconexcel',  title:'Laporan', exportOptions: {columns:[':not(.notdown)']}},
+            { footer: true, text: ' ', extend: 'excel',  className: 'btndownload iconexcel',  title:'Laporan', exportOptions: {columns:[':not(.notdown)']}},
         ],
         columns: [
             {
@@ -85,6 +85,9 @@ function getListData() {
                 return datetostring2('yymmdd',row.tgl_dinas);
             } },
             { data: "keanggotaan" },
+            { render:function (data,type,row) {
+                return row.jmldinas+' Bulan';
+            } },
             { render:function (data,type,row) {
                 return formatRupiah(row.simpanan);
             } },

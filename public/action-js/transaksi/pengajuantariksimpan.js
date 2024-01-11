@@ -4,15 +4,12 @@ let dtpr;
 
 $(document).ready(function () {
     getListData();
-    getdatlimitpinjaman();
+    gettotalsimpanan();
 });
 
 $(".select2").select2();
 $(".select2add").select2({
     dropdownParent: $("#modal-approval"),
-});
-$("#form-tenor").select2({
-    dropdownParent: $("#modal-data"),
 });
 
 $("#filter-btn").on('click',function(e){
@@ -28,7 +25,7 @@ function getListData() {
 
     dtpr = $("#table-list").DataTable({
         ajax: {
-            url: baseURL + "/getpengajuanpinjaman",
+            url: baseURL + "/getlistpenarikan",
             type: "POST",
             dataType: "json",
             data    : {
@@ -66,7 +63,7 @@ function getListData() {
                     $('#table-list').DataTable().ajax.reload();
                 }
             },
-            { text: ' ', extend: 'excel',  className: 'btndownload iconexcel',  title:'List Pengajuan Pinjaman', exportOptions: {columns:[':not(.notdown)']}},
+            { text: ' ', extend: 'excel',  className: 'btndownload iconexcel',  title:'List Penarikan Simpanan', exportOptions: {columns:[':not(.notdown)']}},
         ],
         columns: [
             {
@@ -77,53 +74,32 @@ function getListData() {
             },
             { render:function (data,type,row) {
                 if(row.status == 'approve')
-                    return "<a class='approvalpinjaman' style='color:green;cursor:pointer;font-weight:bold;' >APPROVED</a>";
+                    return "<a class='approvalsukarela' style='color:green;cursor:pointer;font-weight:bold;' >APPROVED</a>";
                 else if(row.status == 'reject')
-                    return "<a class='approvalpinjaman' style='color:red;cursor:pointer;font-weight:bold;'>REJECTED</a>";
+                    return "<a class='approvalsukarela' style='color:red;cursor:pointer;font-weight:bold;'>REJECTED</a>";
                 else
-                    return "<a class='approvalpinjaman' style='color:black;cursor:pointer;font-weight:bold;'>WAITING APPROVED</a>";
+                    return "<a class='approvalsukarela' style='color:black;cursor:pointer;font-weight:bold;'>WAITING APPROVED</a>";
             } },
             { data: "nrp" },
             { data: "name",render:function (data,type,row) {
                 return row.name;
             } },
+            { data: "keanggotaan" },
+            
+            { render:function (data,type,row) {
+                return datetostring2('yymmdd',row.tgl_pengajuan);
+            } },
             { render:function (data,type,row) {
                 return datetostring2('yymmdd',row.tgl_approve);
             } },
-            { data: "keanggotaan" },
             { render:function (data,type,row) {
-                if (row.limitpinjaman > 0)
-                return 'Rp. ' +formatRupiah(row.limitpinjaman);
-                else
-                return 'Rp. 0';
+                return formatRupiah(row.simpanan);
             } },
             { render:function (data,type,row) {
-                // return row.tenor +' BLN & Rp.'+formatRupiah(row.pinjaman)+ '<b>X2%/BLN</b> = Rp.' +formatRupiah(row.pinjaman2persen);
-                return row.tenor +' BLN & Rp.'+formatRupiah(row.pinjaman)+ '<b>X2%</b> = Rp.' +formatRupiah(row.pinjamanbunga);
-    
+                return formatRupiah(row.jml_pengajuan);
             } },
             { render:function (data,type,row) {
-                // return row.totaltenor+' BLN X Rp.'+formatRupiah(row.totalbayarperbulan)+' = Rp.' +formatRupiah(row.totalbayar);
-                return row.totaltenor+' BLN X Rp.'+formatRupiah(row.totalbayarperbulan1)+' = Rp.' +formatRupiah(row.totalbayar1);
-        
-            } },
-            { render:function (data,type,row) {
-                if (row.sisalimit > 0)
-                return 'Rp. ' +formatRupiah(row.sisalimit);
-                else
-                return '0';
-            } },
-            { render:function (data,type,row) {
-                if (row.sisapinjaman > 0)
-                return row.sisatenor+' BLN & Rp.' +formatRupiah(row.sisapinjaman);
-                else
-                return row.sisatenor+' BLN & Rp.0';
-            } },
-            { visible:false,sClass:"notdown action",render:function (data,type,row) {
-                return "<a style='cursor:pointer' class='pengajuan'>Klik Disini</a>";
-            } },
-            { visible:false,sClass:"notdown action",render:function (data,type,row) {
-                return "<a style='cursor:pointer' class='perjanjian'>Klik Disini</a>";
+                return formatRupiah(row.simpanan - row.jml_pengajuan);
             } },
         ],
         drawCallback: function (settings) {
@@ -132,7 +108,7 @@ function getListData() {
             var last = null;
 
             $(rows)
-                .find(".approvalpinjaman")
+                .find(".approvalsukarela")
                 .on("click", function () {
                     var tr = $(this).closest("tr");
                     var rowData = dtpr.row(tr).data();
@@ -168,125 +144,10 @@ function getListData() {
     }
 }
 
-function detail(rowData) {
-    isObject = rowData;
-
-    $("#form-nrp").val(rowData.nrp);
-    $("#form-name").val(rowData.name);
-    $("#form-tgldinas").val(datetostring2('yymmdd',rowData.tgl_dinas));
-    $("#form-smwajib").val(rowData.simpananpokokwajib);
-    $("#form-smpokok").val(rowData.simpananpokokwajib);
-    $("#form-smsukarela").val(rowData.sukarela);
-    $("#form-tarik").val(rowData.penarikan);
-    $("#form-tgltarik").val(rowData.tgl_penarikan);
-    $("#form-saldo").val(rowData.saldo);
-
-
-    $("#modal-data").modal("show");
-}
-
-function detailpengajuan(rowData) {
-    $(".nama").text('');
-    $(".noanggota").text('');
-    $(".pangkat").text('');
-    $(".pinjaman").text('');
-    $(".keperluan").text('');
-    $(".tenor").text('');
-    $(".tempattanggal").text('');
-    $(".pangkatttd").text('');
-    $(".pinjaman").text('');
-    $(".tempattanggal").text('');
-
-    $(".nama").text(rowData.name);
-    $(".noanggota").text(rowData.no_anggota);
-    $(".pangkat").text(rowData.pangkat+'/'+rowData.nrp);
-    $(".pinjaman").text(formatRupiah(rowData.pinjaman) + ' ('+pembilang(rowData.pinjaman)+')');
-    $(".keperluan").text(rowData.jenis);
-    $(".tenor").text(rowData.tenor +' Bulan');
-    $(".pangkatttd").text(rowData.pangkat+' NRP '+rowData.nrp);
-
-    
-    $("#modal-pengajuan").modal("show");
-}
-
-function detailperjanjian(rowData) {
-    $(".pengajuannama").text('');
-    $(".pengajuanpinjaman").text('');
-    $(".pengajuantenor").text('');
-    $(".pengajuanbayarsimpanan").text('');
-    $(".pengajuatempattanggal").text('');
-    $(".pengajuatempattanggal").text('');
-    $(".pengajuanprovisi").text('');
-    $(".pengajuanditerima").text('');
-    $(".pengajuanterbilang").text('');
-
-    pengajuanrp = rowData.pinjaman - (rowData.pinjaman*0.01) - 10000 ;
-    $(".pengajuannama").text(rowData.name+'/'+rowData.pangkat+'/'+rowData.nrp);
-    $(".pengajuanpinjaman").text(formatRupiah(rowData.pinjaman));
-    $(".pengajuantenor").text(rowData.tenor);
-    $(".pengajuanbayarsimpanan").text();
-    $(".pengajuanprovisi").text(formatRupiah(rowData.pinjaman*0.01));
-    $(".pengajuanditerima").text(formatRupiah(pengajuanrp));
-    $(".pengajuanterbilang").text(pembilang(pengajuanrp));
-
-    
-
-    
-    $("#modal-perjanjian").modal("show");
-}
-
-$(".tanggalinput" ).on('change',function() {
-    $('.tempattanggal').empty();
-    var tempat    = $(".tempatinput").val();
-    var tanggal    = $(".tanggalinput").val();
-    if(tempat == ''){
-        swalwarning('Tempat Harus Di isi');
-        return false ;
-    }
-
-
-    $('.tempattanggal').empty();
-    $('.tempattanggal').text(tempat+', '+datetostring2('yymmdd',tanggal));
-
-});
-$(".pengajuantanggalinput" ).on('change',function() {
-    $('.pengajuantempattanggal').empty();
-    var tempat    = $(".pengajuantempatinput").val();
-    var tanggal    = $(".pengajuantanggalinput").val();
-    if(tempat == ''){
-        swalwarning('Tempat Harus Di isi');
-        return false ;
-    }
-
-
-    $('.pengajuatempattanggal').empty();
-    $('.pengajuatempattanggal').text(tempat+', '+datetostring2('yymmdd',tanggal));
-
-});
-
-function printDiv(divId, title){
-    $(".tempatinput").empty();
-    $(".tanggalinput").empty();
-
-    
-  let mywindow = window.open('', 'PRINT', 'height=650,width=900,top=100,left=150');
-
-  mywindow.document.write(`<html><head><title>${title}</title>`);
-//   mywindow.document.write('</head><body style="padding-left: 200px;padding-right: 150px;padding-top: 150px;padding-bottom: 150px; !important;">');
-  mywindow.document.write('</head><body>');
-  mywindow.document.write(document.getElementById(divId).innerHTML);
-  mywindow.document.write('</body></html>');
-
-  mywindow.document.close(); // necessary for IE >= 10
-  mywindow.focus(); // necessary for IE >= 10*/
-
-  mywindow.print();
-}
-
 function approval(){
     let status = $("#form-statusapprove").val();
     swal({
-        title: "Yakin untuk "+status+" pinjaman "+ isObject.name +" ?",
+        title: "Yakin untuk "+status+" simpanan "+ isObject.name +" ?",
         type: "warning",
         showCancelButton: !0,
         confirmButtonColor: "#DD6B55",
@@ -297,9 +158,9 @@ function approval(){
     }).then(function (e) {
         if (e.value) {
             $.ajax({
-                url: baseURL + "/approvalpinjaman",
+                url: baseURL + "/approvaltariksimpan",
                 type: "POST",
-                data: JSON.stringify({ idpinjam: isObject.idpinjam, status: status,jenis: '' }),
+                data: JSON.stringify({ id: isObject.idpenarikan, status: status }),
                 dataType: "json",
                 contentType: "application/json",
                 beforeSend: function () {
@@ -344,20 +205,12 @@ $("#add-btn").on("click", function (e) {
 
 $("#ajukan-btn").on("click", function (e) {
     e.preventDefault();
-    if ($("#form-pinjaman").val() < 500000){
-        swalwarning('Minimal pengajuan Rp 500.000');
+    if ($("#form-pengajuan").val() < 100000){
+        swalwarning('Minimal Penarikan Rp 100000');
         return false;
     }
-    if (parseFloat($("#form-pinjaman").val()) > parseFloat(islimit)){
-        swalwarning('Limit Pinjaman tidak cukup');
-        return false;
-    }
-    if ($("#form-tenor").val() < 5){
-        swalwarning('Minimal tenor 5 Bulan');
-        return false;
-    }
-    if ($("#form-keperluan").val() == ''){
-        swalwarning('Keperluan harus diisi.');
+    if (parseFloat($("#form-pengajuan").val()) > parseFloat(issimpanan) ){
+        swalwarning('Simpanan tidak mencukupi');
         return false;
     }
 
@@ -365,10 +218,8 @@ $("#ajukan-btn").on("click", function (e) {
 });
 
 function ajukanpinjaman(){
-    pinjaman = $("#form-pinjaman").val() ;
-    tenor = $("#form-tenor").val() ;
-    keperluan = $("#form-keperluan").val() ;
-    title = 'Pinjaman Rp.'+formatRupiah(pinjaman)+' dengan tenor '+tenor+' Bulan ?';
+    jumlah      = $("#form-pengajuan").val() ;
+    title = 'Penarikan Rp.'+formatRupiah(jumlah) +' ? ';
     swal({
         title: title,
         type: "warning",
@@ -381,12 +232,10 @@ function ajukanpinjaman(){
     }).then(function (e) {
         if (e.value) {
             $.ajax({
-                url: baseURL + "/actionpengajuanpinjaman",
+                url: baseURL + "/actionpenarikan",
                 type: "POST",
                 data: JSON.stringify({ 
-                    pinjaman: pinjaman, 
-                    tenor   : tenor,
-                    keperluan   : keperluan 
+                    jumlah      : jumlah,
                 }),
                 dataType: "json",
                 contentType: "application/json",
@@ -422,13 +271,14 @@ function ajukanpinjaman(){
             );
         }
     });
-} 
-var islimit = 0 ; 
-async function getdatlimitpinjaman() {
+}
+
+var issimpanan = 0 ; 
+async function gettotalsimpanan() {
     $(".inputan").val('');
     try {
         const response = await $.ajax({
-            url: baseURL + "/getlimitpinjaman",
+            url: baseURL + "/getsimpananperson",
             type: "POST",
             dataType: "json",
             beforeSend: function () {
@@ -439,15 +289,10 @@ async function getdatlimitpinjaman() {
             },
         });
         const res = response.data.map(function (item) {
-            $("#form-limit").val('Rp. '+formatRupiah(item.amount));
-            islimit = item.amount ;
+            $("#form-simpanan").val('Rp. '+formatRupiah(item.amount));
+            issimpanan = item.amount ;
         });
 
-        $("#form-role").select2({
-            data: res,
-            placeholder: "Please choose an option",
-            dropdownParent: $("#modal-data"),
-        });
     } catch (error) {
         sweetAlert("Oops...", error.responseText, "ERROR");
     }

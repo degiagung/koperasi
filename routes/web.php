@@ -33,8 +33,6 @@ Route::get('/gendataview', [GenerateController::class, 'gendataview']);
 Route::middleware(['auth'])->group(function () { // harus login terlebih dahulu
 
     Route::get('/', [GeneralController::class, 'dashboard'])->name('/');
-    Route::post('getlimitpinjaman', [JsonDataController::class, 'getlimitpinjaman'])->name('getlimitpinjaman');
-    Route::post('actionpengajuanpinjaman', [JsonDataController::class, 'actionpengajuanpinjaman'])->name('actionpengajuanpinjaman');
 
     Route::middleware(['role:Superadmin'])->group(function () {
         Route::post('/generate', [GenerateController::class, 'generate'])->name('generate');

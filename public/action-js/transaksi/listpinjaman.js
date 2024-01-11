@@ -63,7 +63,7 @@ function getListData() {
                     $('#table-list').DataTable().ajax.reload();
                 }
             },
-            { text: ' ', extend: 'excel',  className: 'btndownload iconexcel',  title:'Pinjaman Anggota', exportOptions: {columns:[':not(.notdown)']}},
+            { text: ' ', extend: 'excel',  className: 'btndownload iconexcel',  title:'List Pinjaman', exportOptions: {columns:[':not(.notdown)']}},
         ],
         columns: [
             {

@@ -146,7 +146,8 @@ class GeneralController extends Controller
             $data = [
                 'javascriptFiles' => $javascriptFiles,
                 'cssFiles' => $cssFiles,
-                'varJs'=> $varJs
+                'varJs'=> $varJs,
+                'role'=> $rolename
                  // Menambahkan base URL ke dalam array
             ];
         
@@ -261,6 +262,7 @@ class GeneralController extends Controller
                 'javascriptFiles' => $javascriptFiles,
                 'cssFiles' => $cssFiles,
                 'varJs'=> $varJs,
+                'role'=> $rolename,
                  // Menambahkan base URL ke dalam array
             ];
         
@@ -304,6 +306,84 @@ class GeneralController extends Controller
             ];
         
             return view('pages.admin.transaksi.pengajuanpinjaman')
+                ->with($data);
+        }else{
+            return redirect('/login');
+        }
+        
+    }
+    public function pengajuansukarela(Request $request){
+
+        $MasterClass = new Master();
+
+        $checkAuth = $MasterClass->AuthenticatedView($request->route()->uri());
+        
+        if($checkAuth['code'] == $MasterClass::CODE_SUCCESS){
+            $javascriptFiles = [
+                asset('action-js/global/global-action.js'),
+                // asset('action-js/generate/generate-action.js'),
+                asset('action-js/transaksi/pengajuansukarela.js'),
+            ];
+        
+            $cssFiles = [
+                // asset('css/main.css'),
+                // asset('css/custom.css'),
+            ];
+            $baseURL = url('/');
+            $rolename = strtolower($MasterClass->getSession('role_name'))  ;
+            $varJs = [
+                'const baseURL = "' . $baseURL . '"',
+                'const role = "' . $rolename .'"',
+
+            ];
+            $data = [
+                'javascriptFiles' => $javascriptFiles,
+                'cssFiles' => $cssFiles,
+                'varJs'=> $varJs,
+                'role'=> $rolename,
+                 // Menambahkan base URL ke dalam array
+            ];
+        
+            return view('pages.admin.transaksi.pengajuansukarela')
+                ->with($data);
+        }else{
+            return redirect('/login');
+        }
+        
+    }
+    public function pengajuantariksimpan(Request $request){
+
+        $MasterClass = new Master();
+
+        $checkAuth = $MasterClass->AuthenticatedView($request->route()->uri());
+        
+        if($checkAuth['code'] == $MasterClass::CODE_SUCCESS){
+            $javascriptFiles = [
+                asset('action-js/global/global-action.js'),
+                // asset('action-js/generate/generate-action.js'),
+                asset('action-js/transaksi/pengajuantariksimpan.js'),
+            ];
+        
+            $cssFiles = [
+                // asset('css/main.css'),
+                // asset('css/custom.css'),
+            ];
+            $baseURL = url('/');
+            $rolename = strtolower($MasterClass->getSession('role_name'))  ;
+            $varJs = [
+                'const baseURL = "' . $baseURL . '"',
+                'const role = "' . $rolename .'"',
+
+            ];
+            $data = [
+                'javascriptFiles' => $javascriptFiles,
+                'cssFiles' => $cssFiles,
+                'varJs'=> $varJs,
+                'role'=> $rolename,
+                 // Menambahkan base URL ke dalam array
+            ];
+        
+            return view('pages.admin.transaksi.pengajuantariksimpan')
                 ->with($data);
         }else{
             return redirect('/login');

@@ -6,6 +6,12 @@ $(document).ready(function () {
     loadRole();
     getListData();
 });
+if(role != 'bendahara koperasi' && role != 'superadmin' ){
+        $(".forbdhara").hide();
+}
+if(role != 'sekertaris koperasi' && role != 'superadmin' ){
+    $(".forsekertaris").hide();
+}
 
 $(".select2").select2();
 $(".select2add").select2({
@@ -83,7 +89,7 @@ function getListData() {
             { data: "role_name" },
             { data: "status_name" },
             { 
-                visible:false,mRender: function (data, type, row) {
+                mRender: function (data, type, row) {
                     var $rowData = `<button type="button" class="btn btn-primary btn-icon-sm mx-2 edit-btn"><i class="bi bi-pencil-square"></i></button>`;
                     $rowData += `<button type="button" class="btn btn-danger btn-icon-sm delete-btn"><i class="bi bi-x-square"></i></button>`;
                     return $rowData;
@@ -101,6 +107,7 @@ function getListData() {
                     var tr = $(this).closest("tr");
                     var rowData = dtpr.row(tr).data();
                     editdata(rowData);
+                    
                 });
             $(rows)
                 .find(".delete-btn")
@@ -111,13 +118,10 @@ function getListData() {
                 });
         },
     });
-    var action    = dtpr.columns(".action");
-    if(role == 'sekertaris koperasi' || role == 'superadmin' ){
-        action.visible(true);
-    }
 }
 
 function editdata(rowData) {
+    
     isObject = rowData;
 
     $("#form-noanggota").val(rowData.no_anggota);
@@ -141,7 +145,8 @@ function editdata(rowData) {
 
 $("#add-btn").on("click", function (e) {
     e.preventDefault();
-
+    
+    
     isObject = {};
     isObject["id"] = null;
     isObject["idlimit"] = null;
@@ -161,89 +166,108 @@ $("#save-btn").on("click", function (e) {
 function checkValidation() {
     let $el = $("input:radio[name=form-status]:checked").val();
     // console.log($el);
-    if (
-        validationSwalFailed(
-            (isObject["limit_pinjaman"] = $("#form-limit").val()),
-            "Limit Pinjaman tidak boleh kosong"
+    if(role == 'bendahara koperasi' || role == 'superadmin' ){
+
+        if (
+            validationSwalFailed(
+                (isObject["limit_pinjaman"] = $("#form-limit").val()),
+                "Limit Pinjaman tidak boleh kosong"
+            )
         )
-    )
         return false;
-    if (
-        validationSwalFailed(
-            (isObject["noanggota"] = $("#form-noanggota").val()),
-            "No Anggota tidak boleh kosong"
+    }
+
+    if(role == 'sekertaris koperasi' || role == 'superadmin' ){
+        if (
+            validationSwalFailed(
+                (isObject["noanggota"] = $("#form-noanggota").val()),
+                "No Anggota tidak boleh kosong"
+            )
         )
-    )
-        return false;
-    if (
-        validationSwalFailed(
-            (isObject["name"] = $("#form-name").val()),
-            "Name tidak boleh kosong"
+            return false;
+        if (
+            validationSwalFailed(
+                (isObject["name"] = $("#form-name").val()),
+                "Name tidak boleh kosong"
+            )
         )
-    )
-        return false;
-    if (
-        validationSwalFailed(
-            (isObject["pangkat"] = $("#form-pangkat").val()),
-            "Pangkat tidak boleh kosong"
+            return false;
+        if (
+            validationSwalFailed(
+                (isObject["pangkat"] = $("#form-pangkat").val()),
+                "Pangkat tidak boleh kosong"
+            )
         )
-    )
-        return false;
-    if (
-        validationSwalFailed(
-            (isObject["nrp"] = $("#form-nrp").val()),
-            "NRP tidak boleh kosong"
+            return false;
+        if (
+            validationSwalFailed(
+                (isObject["nrp"] = $("#form-nrp").val()),
+                "NRP tidak boleh kosong"
+            )
         )
-    )
-        return false;
-    if (
-        validationSwalFailed(
-            (isObject["alamat"] = $("#form-alamat").val()),
-            "Alamat tidak boleh kosong"
+            return false;
+        if (
+            validationSwalFailed(
+                (isObject["alamat"] = $("#form-alamat").val()),
+                "Alamat tidak boleh kosong"
+            )
         )
-    )
-        return false;
-    if (
-        validationSwalFailed(
-            (isObject["handphone"] = $("#form-handphone").val()),
-            "Handphone tidak boleh kosong"
+            return false;
+        if (
+            validationSwalFailed(
+                (isObject["handphone"] = $("#form-handphone").val()),
+                "Handphone tidak boleh kosong"
+            )
         )
-    )
-        return false;
-    if (
-        validationSwalFailed(
-            (isObject["tgldinas"] = $("#form-tgldinas").val()),
-            "Tgl Dinas tidak boleh kosong"
+            return false;
+        if (
+            validationSwalFailed(
+                (isObject["tgldinas"] = $("#form-tgldinas").val()),
+                "Tgl Dinas tidak boleh kosong"
+            )
         )
-    )
-        return false;
-    if (
-        validationSwalFailed(
-            (isObject["status"] = $("#form-status").val()),
-            "Status Anggota tidak boleh kosong"
+            return false;
+        if (
+            validationSwalFailed(
+                (isObject["status"] = $("#form-status").val()),
+                "Status Anggota tidak boleh kosong"
+            )
         )
-    )
-        return false;
-    // if (
-    //     validationSwalFailed(
-    //         (isObject["is_active"] = $el),
-    //         "Please choose a status."
-    //     )
-    // )
-    //     return false;
-    if (
-        validationSwalFailed(
-            (isObject["role_id"] = $("#form-role").val()),
-            "Please choose a role."
+            return false;
+        if (
+            validationSwalFailed(
+                (isObject["role_id"] = $("#form-role").val()),
+                "Please choose a role."
+            )
         )
-    )
-        return false;
-    isObject["password"] = $("#form-password").val();
+            return false;
+    }else{
+        
+        isObject["noanggota"] = $("#form-noanggota").val();
+        isObject["name"] = $("#form-name").val();
+        isObject["pangkat"] = $("#form-pangkat").val();
+        isObject["nrp"] = $("#form-nrp").val();
+        isObject["alamat"] = $("#form-alamat").val();
+        isObject["handphone"] = $("#form-handphone").val();
+        isObject["tgldinas"] = $("#form-tgldinas").val();
+        isObject["status"] = $("#form-status").val();
+        isObject["role_id"] = $("#form-role").val();
+    }
+    password = $("#form-password").val() ;
+    if($("#form-password").val() === undefined){
+        
+        password = '' ;
+    }
+    isObject["limit_pinjaman"] = $("#form-limit").val()
+    isObject["password"] = password ;
     saveData();
 }
 
 function deleteData(data) {
-  
+    if(role != 'sekertaris koperasi' && role != 'superadmin' ){
+        swalwarning("Hanya datap dilakukan oleh sekertaris koperasi");
+        return false;
+    }
     swal({
         title: "Yakin untuk INACTIVE ?",
         type: "warning",
@@ -290,6 +314,7 @@ function deleteData(data) {
             );
         }
     });
+
 }
 
 function saveData() {

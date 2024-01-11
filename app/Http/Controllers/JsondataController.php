@@ -646,6 +646,8 @@ class JsonDataController extends Controller
                     if ($request->isMethod('post')) {
 
                         DB::beginTransaction();     
+                        $userid      = $MasterClass->getSession('user_id') ;
+                        $role        = $MasterClass->getSession('role_name') ;
                         $fstatus     = $request->status ;
                         $fkeanggotaan= $request->keanggotaan ;
                         $status = [];
@@ -668,35 +670,87 @@ class JsonDataController extends Controller
                                 END
                             END keanggotaan,
                             PERIOD_DIFF(DATE_FORMAT(SYSDATE(), '%Y%m'),DATE_FORMAT(us.tgl_dinas, '%Y%m')) as los,
-                            case 
-                                when COALESCE(PERIOD_DIFF(DATE_FORMAT(SYSDATE(), '%Y%m'),DATE_FORMAT(us.tgl_dinas, '%Y%m')),0) > 1 then 50000
-                                else 0
-                            end as simpananpokok,
-                            COALESCE(PERIOD_DIFF(DATE_FORMAT(SYSDATE(), '%Y%m'),DATE_FORMAT(us.tgl_dinas, '%Y%m')),0) * 50000 as simpananwajib,
-                            COALESCE(SUM(pj.amount),0.00) as penarikan,
-                            pj.created_at as tgl_penarikan,
-                            COALESCE(SUM(sm.amount),0.00) sukarela,
-                            COALESCE(((PERIOD_DIFF(DATE_FORMAT(SYSDATE(), '%Y%m'),DATE_FORMAT(us.tgl_dinas, '%Y%m')) * 100000)
+                            
+                            cast(( 50000 * COALESCE(PERIOD_DIFF(DATE_FORMAT(SYSDATE(), '%Y%m'),DATE_FORMAT(us.tgl_dinas, '%Y%m')),0) / COALESCE(PERIOD_DIFF(DATE_FORMAT(SYSDATE(), '%Y%m'),DATE_FORMAT(us.tgl_dinas, '%Y%m')),0)) as decimal(18,2)) as simpananpokok,
+                            
+                            cast(COALESCE(PERIOD_DIFF(DATE_FORMAT(SYSDATE(), '%Y%m'),DATE_FORMAT(us.tgl_dinas, '%Y%m')),0) * 50000 as decimal(18,2)) as simpananwajib,
+                            
+                            COALESCE(PERIOD_DIFF(DATE_FORMAT(SYSDATE(), '%Y%m'),DATE_FORMAT(us.tgl_dinas, '%Y%m')),0) jmldinas,
+                            ( 50000 * COALESCE(PERIOD_DIFF(DATE_FORMAT(SYSDATE(), '%Y%m'),DATE_FORMAT(us.tgl_dinas, '%Y%m')),0) / COALESCE(PERIOD_DIFF(DATE_FORMAT(SYSDATE(), '%Y%m'),DATE_FORMAT(us.tgl_dinas, '%Y%m')),0))
                             +
-                            COALESCE(SUM(sm.amount),0.00)),0.00) total,
-                            COALESCE(((PERIOD_DIFF(DATE_FORMAT(SYSDATE(), '%Y%m'),DATE_FORMAT(us.tgl_dinas, '%Y%m')) * 100000)
+                            (50000 * COALESCE(PERIOD_DIFF(DATE_FORMAT(SYSDATE(), '%Y%m'),DATE_FORMAT(us.tgl_dinas, '%Y%m')),0))
+                            + 
+                            sum(su.amount) 
+                            as sukarela,
+
+                            (
+                                cast(( 50000 * COALESCE(PERIOD_DIFF(DATE_FORMAT(SYSDATE(), '%Y%m'),DATE_FORMAT(us.tgl_dinas, '%Y%m')),0) / COALESCE(PERIOD_DIFF(DATE_FORMAT(SYSDATE(), '%Y%m'),DATE_FORMAT(us.tgl_dinas, '%Y%m')),0)) as decimal(18,2))
+                            )
                             +
-                            COALESCE(SUM(sm.amount),0.00))
+                            (
+                                COALESCE(PERIOD_DIFF(DATE_FORMAT(SYSDATE(), '%Y%m'),DATE_FORMAT(us.tgl_dinas, '%Y%m')),0) * 50000
+                            )
+                            +
+                            coalesce(
+                                ( 50000 * COALESCE(PERIOD_DIFF(DATE_FORMAT(SYSDATE(), '%Y%m'),DATE_FORMAT(us.tgl_dinas, '%Y%m')),0) / COALESCE(PERIOD_DIFF(DATE_FORMAT(SYSDATE(), '%Y%m'),DATE_FORMAT(us.tgl_dinas, '%Y%m')),0))
+                                +
+                                (50000 * COALESCE(PERIOD_DIFF(DATE_FORMAT(SYSDATE(), '%Y%m'),DATE_FORMAT(us.tgl_dinas, '%Y%m')),0))
+                                + 
+                                sum(su.amount) 
+                            ,0)
+                            as total,
+                            coalesce(sum(st.amount),0) penarikan,
+                            cast((
+                                ( 50000 * COALESCE(PERIOD_DIFF(DATE_FORMAT(SYSDATE(), '%Y%m'),DATE_FORMAT(us.tgl_dinas, '%Y%m')),0) / COALESCE(PERIOD_DIFF(DATE_FORMAT(SYSDATE(), '%Y%m'),DATE_FORMAT(us.tgl_dinas, '%Y%m')),0))
+                            )
+                            +
+                            (
+                                COALESCE(PERIOD_DIFF(DATE_FORMAT(SYSDATE(), '%Y%m'),DATE_FORMAT(us.tgl_dinas, '%Y%m')),0) * 50000
+                            )
+                            +
+                            coalesce(
+                                ( 50000 * COALESCE(PERIOD_DIFF(DATE_FORMAT(SYSDATE(), '%Y%m'),DATE_FORMAT(us.tgl_dinas, '%Y%m')),0) / COALESCE(PERIOD_DIFF(DATE_FORMAT(SYSDATE(), '%Y%m'),DATE_FORMAT(us.tgl_dinas, '%Y%m')),0))
+                                +
+                                (50000 * COALESCE(PERIOD_DIFF(DATE_FORMAT(SYSDATE(), '%Y%m'),DATE_FORMAT(us.tgl_dinas, '%Y%m')),0))
+                                + 
+                                sum(su.amount) 
+                            ,0)
                             -
-                            COALESCE(SUM(pj.amount),0.00),0.00) saldo
+                            cast(coalesce(sum(st.amount),0) as decimal(18,2))
+                            as decimal(18,2) ) as saldo,
+                            st.created_at tgl_penarikan
                         ";
                         
                         $table = "
                             users us
                             LEFT JOIN users_roles ur ON us.role_id = ur.id
-                            LEFT JOIN simpanan sm ON sm.user_id = us.id AND sm.status = 'approve' and sm.jenis = 'simpan'
-                            LEFT JOIN pinjaman pj ON pj.user_id = us.id AND pj.status = 'approve' and pj.jenis = 'tarik simpanan'
+                            LEFT JOIN (
+                                    select 
+                                        user_id,
+                                        CASE
+                                            WHEN DATE_ADD(tgl_awal, INTERVAL durasi MONTH) >= CURRENT_DATE() THEN 
+                                                amount * COALESCE(PERIOD_DIFF(DATE_FORMAT(SYSDATE(), '%Y%m'),
+                                                DATE_FORMAT(tgl_awal, '%Y%m')),0) 
+                                            ELSE 
+                                                amount * durasi
+                                        END amount
+                                    from 
+                                        simpanan_sukarela su 
+                                ) as su ON su.user_id = us.id                            
+                            LEFT JOIN simpanan st ON st.user_id = us.id AND st.jenis = 'tarik' AND (st.status is not null or st.status != '')
                         ";
                         
                         
                         $where = "
                              us.role_id in (select id from users_roles where role_name  like '%anggota%')
                         ";
+                        
+                        if($role == 'anggota'){
+                            $where .= "
+                                 AND us.id = $userid  
+                            ";
+                        }
+                        
 
                         if($fkeanggotaan){
                             if($fkeanggotaan == 'pindah'){
@@ -713,7 +767,7 @@ class JsonDataController extends Controller
                         $where.="
                             GROUP BY 
                                 us.name,us.id,us.nrp,us.tgl_dinas,us.is_active,us.status,
-                                ur.role_name,pj.created_at
+                                ur.role_name,st.created_at
                         ";
                         $result = $MasterClass->selectGlobal($select,$table,$where);
                         
@@ -792,7 +846,7 @@ class JsonDataController extends Controller
 
                             cast(COALESCE(pj.amount,0) + COALESCE(pj.amount,0)*0.02 as decimal(18,2)) as pinjamanbunga,
                             cast((COALESCE(pj.amount,0) + COALESCE(pj.amount,0)*0.02) / pj.tenor as decimal(18,2)) as totalbayarperbulan1,
-                            cast(((COALESCE(pj.amount,0) + COALESCE(pj.amount,0)*0.02) / pj.tenor) * PERIOD_DIFF(DATE_FORMAT(SYSDATE(), '%Y%m'),DATE_FORMAT(pj.tgl_approve, '%Y%m')) as decimal(18,2)) as totalbayar1,
+                            cast(((COALESCE(pj.amount,0) + COALESCE(pj.amount,0)*0.02) / pj.tenor) * COALESCE(PERIOD_DIFF(DATE_FORMAT(SYSDATE(), '%Y%m'),DATE_FORMAT(pj.tgl_approve, '%Y%m')),0) as decimal(18,2)) as totalbayar1,
 
                             cast(COALESCE(pj.amount,0) + COALESCE(pj.amount,0)*0.02*pj.tenor as decimal(18,2)) as pinjaman2persen,
                             cast((COALESCE(pj.amount,0) + COALESCE(pj.amount,0)*0.02*pj.tenor) / pj.tenor as decimal(18,2)) totalbayarperbulan,
@@ -1035,60 +1089,6 @@ class JsonDataController extends Controller
             return $MasterClass->Results($results);
 
         }
-        public function getfotokamar(Request $request){
-
-            $MasterClass = new Master();
-
-            $checkAuth = $MasterClass->Authenticated($MasterClass->getSession('user_id'));
-            
-            if($checkAuth['code'] == $MasterClass::CODE_SUCCESS){
-                try {
-                    if ($request->isMethod('post')) {
-                        
-                        DB::beginTransaction();
-                
-                        $status = [];
-    
-                        $saved = DB::select("SELECT * FROM foto_kamar where id_kamar = ".$request->id);
-                        $saved = $MasterClass->checkErrorModel($saved);
-                        
-                        $status = $saved;
-            
-                        $results = [
-                            'code' => $status['code'],
-                            'info'  => $status['info'],
-                            'data'  =>  $status['data'],
-                        ];
-                            
-            
-            
-                    } else {
-                        $results = [
-                            'code' => '103',
-                            'info'  => "Method Failed",
-                        ];
-                    }
-                } catch (\Exception $e) {
-                    // Roll back the transaction in case of an exception
-                    $results = [
-                        'code' => '102',
-                        'info'  => $e->getMessage(),
-                    ];
-        
-                }
-            }
-            else {
-        
-                $results = [
-                    'code' => '403',
-                    'info'  => "Unauthorized",
-                ];
-                
-            }
-
-            return $MasterClass->Results($results);
-
-        }
         public function getlaporan(Request $request){
 
             $MasterClass = new Master();
@@ -1100,6 +1100,8 @@ class JsonDataController extends Controller
                     if ($request->isMethod('post')) {
 
                         DB::beginTransaction();     
+                        $userid         = $MasterClass->getSession('user_id') ;
+                        $role           = $MasterClass->getSession('role_name') ;
                         $fstatus        = $request->status ;
                         $fkeanggotaan   = $request->keanggotaan ;
                         $fstatuspinjam  = $request->statuspinjam ;
@@ -1122,32 +1124,93 @@ class JsonDataController extends Controller
                                     ELSE 'AKTIF'
                                 END
                             END keanggotaan,
-                            COALESCE(100000 * (PERIOD_DIFF(DATE_FORMAT(SYSDATE(), '%Y%m'),DATE_FORMAT(us.tgl_dinas, '%Y%m'))),0) + coalesce(sum(sm.amount),0) as simpanan, 
-                            coalesce(sum(st.amount),0) as tariksimpanan, 
-                            COALESCE(100000 * (PERIOD_DIFF(DATE_FORMAT(SYSDATE(), '%Y%m'),DATE_FORMAT(us.tgl_dinas, '%Y%m'))),0) + coalesce(sum(sm.amount),0) - coalesce(sum(st.amount),0) as sisasimpanan,
-                            coalesce(sum(pj.amount),0) pinjaman,
-                            coalesce(cast(((coalesce(pj1.amount,0) + COALESCE(pj1.amount,0)*0.02) / coalesce(pj1.tenor,0)) * PERIOD_DIFF(DATE_FORMAT(SYSDATE(), '%Y%m'),DATE_FORMAT(pj.tgl_approve, '%Y%m')) as decimal(18,2)),0) as totalbayar,
-                            coalesce(sum(pj.amount),0)
+                            COALESCE(PERIOD_DIFF(DATE_FORMAT(SYSDATE(), '%Y%m'),DATE_FORMAT(us.tgl_dinas, '%Y%m')),0) jmldinas,
+                            ( 50000 * COALESCE(PERIOD_DIFF(DATE_FORMAT(SYSDATE(), '%Y%m'),DATE_FORMAT(us.tgl_dinas, '%Y%m')),0) / COALESCE(PERIOD_DIFF(DATE_FORMAT(SYSDATE(), '%Y%m'),DATE_FORMAT(us.tgl_dinas, '%Y%m')),0))
+                            +
+                            (50000 * COALESCE(PERIOD_DIFF(DATE_FORMAT(SYSDATE(), '%Y%m'),DATE_FORMAT(us.tgl_dinas, '%Y%m')),0))
+                            + 
+                            sum(su.amount) 
+                            as sukarela,
+
+                            (
+                                cast(( 50000 * COALESCE(PERIOD_DIFF(DATE_FORMAT(SYSDATE(), '%Y%m'),DATE_FORMAT(us.tgl_dinas, '%Y%m')),0) / COALESCE(PERIOD_DIFF(DATE_FORMAT(SYSDATE(), '%Y%m'),DATE_FORMAT(us.tgl_dinas, '%Y%m')),0)) as decimal(18,2))
+                            )
+                            +
+                            (
+                                COALESCE(PERIOD_DIFF(DATE_FORMAT(SYSDATE(), '%Y%m'),DATE_FORMAT(us.tgl_dinas, '%Y%m')),0) * 50000
+                            )
+                            +
+                            coalesce(
+                                ( 50000 * COALESCE(PERIOD_DIFF(DATE_FORMAT(SYSDATE(), '%Y%m'),DATE_FORMAT(us.tgl_dinas, '%Y%m')),0) / COALESCE(PERIOD_DIFF(DATE_FORMAT(SYSDATE(), '%Y%m'),DATE_FORMAT(us.tgl_dinas, '%Y%m')),0))
+                                +
+                                (50000 * COALESCE(PERIOD_DIFF(DATE_FORMAT(SYSDATE(), '%Y%m'),DATE_FORMAT(us.tgl_dinas, '%Y%m')),0))
+                                + 
+                                sum(su.amount) 
+                            ,0)
+                            as simpanan,
+
+                            coalesce(sum(st.amount),0) tariksimpanan,
+                            cast((
+                                ( 50000 * COALESCE(PERIOD_DIFF(DATE_FORMAT(SYSDATE(), '%Y%m'),DATE_FORMAT(us.tgl_dinas, '%Y%m')),0) / COALESCE(PERIOD_DIFF(DATE_FORMAT(SYSDATE(), '%Y%m'),DATE_FORMAT(us.tgl_dinas, '%Y%m')),0))
+                            )
+                            +
+                            (
+                                COALESCE(PERIOD_DIFF(DATE_FORMAT(SYSDATE(), '%Y%m'),DATE_FORMAT(us.tgl_dinas, '%Y%m')),0) * 50000
+                            )
+                            +
+                            coalesce(
+                                ( 50000 * COALESCE(PERIOD_DIFF(DATE_FORMAT(SYSDATE(), '%Y%m'),DATE_FORMAT(us.tgl_dinas, '%Y%m')),0) / COALESCE(PERIOD_DIFF(DATE_FORMAT(SYSDATE(), '%Y%m'),DATE_FORMAT(us.tgl_dinas, '%Y%m')),0))
+                                +
+                                (50000 * COALESCE(PERIOD_DIFF(DATE_FORMAT(SYSDATE(), '%Y%m'),DATE_FORMAT(us.tgl_dinas, '%Y%m')),0))
+                                + 
+                                sum(su.amount) 
+                            ,0)
                             -
-                            coalesce(cast(((coalesce(pj1.amount,0) + COALESCE(pj1.amount,0)*0.02) / coalesce(pj1.tenor,0)) * PERIOD_DIFF(DATE_FORMAT(SYSDATE(), '%Y%m'),DATE_FORMAT(pj1.tgl_approve, '%Y%m')) as decimal(18,2)),0) as sisapinjaman
+                            cast(coalesce(sum(st.amount),0) as decimal(18,2))
+                            as decimal(18,2) ) as sisasimpanan,
+                            pj.amount pinjaman,
+                            cast(((COALESCE(pj1.amount,0) + COALESCE(pj1.amount,0)*0.02) / pj1.tenor) * COALESCE(PERIOD_DIFF(DATE_FORMAT(SYSDATE(), '%Y%m'),DATE_FORMAT(pj1.tgl_approve, '%Y%m')),0) as decimal(18,2)) as totalbayar,
+                            cast(pj1.amount - ((COALESCE(pj1.amount,0) + COALESCE(pj1.amount,0)*0.02) / pj1.tenor) * COALESCE(PERIOD_DIFF(DATE_FORMAT(SYSDATE(), '%Y%m'),DATE_FORMAT(pj1.tgl_approve, '%Y%m')),0) as decimal(18,2)) as sisapinjaman
 
                         ";
                         
                         $table = "
                             users us
-                            JOIN users_roles ur ON us.role_id = ur.id
-                            LEFT JOIN pinjaman pj ON pj.user_id = us.id AND pj.status = 'approve'
-                            LEFT JOIN pinjaman pj1 ON pj1.user_id = us.id AND pj1.status = 'approve' AND pj1.status_pinjaman != 'lunas' 
-                            LEFT JOIN limit_pinjaman lp ON lp.user_id = us.id 
-                            LEFT JOIN limit_pinjaman lp1 ON lp.user_id = us.id 
-                            LEFT JOIN simpanan sm ON sm.user_id = us.id AND sm.jenis = 'simpan' AND sm.status = 'approve'
-                            LEFT JOIN simpanan st ON st.user_id = us.id AND st.jenis = 'tarik' AND st.status = 'approve'
+                            LEFT JOIN users_roles ur ON us.role_id = ur.id
+                            LEFT JOIN (
+                                select 
+                                    sum(amount) amount,
+                                    user_id
+                                from pinjaman
+                                where status = 'approve'
+                                group by user_id
+                            ) pj ON pj.user_id = us.id 
+                            LEFT JOIN pinjaman pj1 ON pj1.user_id = us.id AND pj1.status = 'approve' and pj1.status_pinjaman != 'lunas' and COALESCE(PERIOD_DIFF(DATE_FORMAT(SYSDATE(), '%Y%m'),DATE_FORMAT(pj1.tgl_approve, '%Y%m')),0) < pj1.tenor 
+                            LEFT JOIN (
+                                    select 
+                                        user_id,
+                                        CASE
+                                            WHEN DATE_ADD(tgl_awal, INTERVAL durasi MONTH) >= CURRENT_DATE() THEN 
+                                                amount * COALESCE(PERIOD_DIFF(DATE_FORMAT(SYSDATE(), '%Y%m'),
+                                                DATE_FORMAT(tgl_awal, '%Y%m')),0) 
+                                            ELSE 
+                                                amount * durasi
+                                        END amount
+                                    from 
+                                        simpanan_sukarela su 
+                                ) as su ON su.user_id = us.id                            
+                            LEFT JOIN simpanan st ON st.user_id = us.id AND st.jenis = 'tarik' AND (st.status is not null or st.status != '')
                         ";
-                        
                         
                         $where = "
-                             ur.role_name like '%anggota%' 
+                             us.role_id in (select id from users_roles where role_name  like '%anggota%')
                         ";
+                        
+                        if($role == 'anggota'){
+                            $where .= "
+                                 AND us.id = $userid  
+                            ";
+                        }
 
                         if($fkeanggotaan){
                             if($fkeanggotaan == 'pindah'){
@@ -1173,8 +1236,8 @@ class JsonDataController extends Controller
                         $where.="
                             GROUP BY 
                                 us.name,us.id,us.nrp,us.tgl_dinas,us.is_active,us.status,
-                                ur.role_name,pj1.amount,pj1.tenor,pj.tgl_approve,pj1.tgl_approve
-                                ORDER BY us.name asc
+                                ur.role_name,
+                                pj.amount,pj1.amount,pj1.tenor,pj1.tgl_approve
                         ";
                         $result      = $MasterClass->selectGlobal($select,$table,$where);
                         $selectcount = " 
@@ -1183,9 +1246,10 @@ class JsonDataController extends Controller
                             sum(a.sisasimpanan) as sisasimpanan,
                             sum(a.pinjaman) as pinjaman,
                             sum(a.totalbayar) as totalbayar,
-                            sum(a.sisapinjaman) as sisapinjaman 
+                            sum(a.sisapinjaman) as sisapinjaman
                             from (select
                         " ;
+                          
                         $ressum = $MasterClass->selectGlobal($selectcount.$select,$table,$where.') as a');
 
                         if($result['data']){
@@ -1246,7 +1310,6 @@ class JsonDataController extends Controller
                 
                         $status = [];
                         $userid= $MasterClass->getSession('user_id') ;
-                        $userid= 21;
                         $saved = DB::select("SELECT a.* FROM limit_pinjaman a,users b where a.user_id = b.id and b.id = ".$userid);
                         $saved = $MasterClass->checkErrorModel($saved);
                         
@@ -1256,6 +1319,334 @@ class JsonDataController extends Controller
                             'code' => $status['code'],
                             'info'  => $status['info'],
                             'data'  =>  $status['data'],
+                        ];
+                            
+            
+            
+                    } else {
+                        $results = [
+                            'code' => '103',
+                            'info'  => "Method Failed",
+                        ];
+                    }
+                } catch (\Exception $e) {
+                    // Roll back the transaction in case of an exception
+                    $results = [
+                        'code' => '102',
+                        'info'  => $e->getMessage(),
+                    ];
+        
+                }
+            }
+            else {
+        
+                $results = [
+                    'code' => '403',
+                    'info'  => "Unauthorized",
+                ];
+                
+            }
+
+            return $MasterClass->Results($results);
+
+        }
+        public function getpengajuansukarela(Request $request){
+
+            $MasterClass = new Master();
+
+            $user_id    = $MasterClass->getSession('user_id') ;
+            $role       = $MasterClass->getSession('role_name') ;
+            $checkAuth = $MasterClass->Authenticated($user_id);
+            
+            if($checkAuth['code'] == $MasterClass::CODE_SUCCESS){
+                try {
+                    if ($request->isMethod('post')) {
+
+                        DB::beginTransaction();     
+                        $fstatus        = $request->status ;
+                        $fkeanggotaan   = $request->keanggotaan ;
+                        $fstatuspinjam  = $request->statuspinjam ;
+                        $status = [];
+                        
+                        $select = "
+                            us.name,us.id as user,us.nrp,us.tgl_dinas,us.no_anggota,us.pangkat,
+                            case 
+                                when us.is_active = '1' then 'ACTIVE' 
+                                when us.is_active = '2' then 'INACTIVE' 
+                                when us.is_active = '3' then 'DELETE' 
+                            end status_name,
+                            ur.role_name,
+                            CASE 
+                                WHEN us.tgl_dinas > current_date THEN 'PENSIUN'
+                                WHEN us.tgl_dinas is null THEN 'TGL DINAS KOSONG'
+                                ELSE
+                                    CASE 
+                                        WHEN lower(us.status) = '2' THEN 'PINDAH'
+                                    ELSE 'AKTIF'
+                                END
+                            END keanggotaan,
+                            su.id idsukarela,su.status,su.amount,su.created_at tgl_pengajuan,su.tgl_approve,DATE_FORMAT(su.tgl_awal, '%Y%m') as tgl_awal,su.durasi
+                        ";
+                        
+                        $table = "
+                            users us
+                            JOIN users_roles ur ON us.role_id = ur.id
+                            JOIN simpanan_sukarela su ON us.id = su.user_id
+                        ";
+                        
+                        
+                        $where = "
+                             ur.role_name like '%anggota%' 
+                        ";
+                        
+                        if($role == 'anggota'){
+                            $where .= "
+                                 AND us.id = $user_id  
+                            ";
+                        }
+                        if($fkeanggotaan){
+                            if($fkeanggotaan == 'pindah'){
+                                $where .= "
+                                     AND lower(us.status) = '2'
+                                ";
+                            }else{
+                                $where .= "
+                                     AND lower(us.tgl_dinas) $fkeanggotaan
+                                ";
+                            }
+                        }
+                        if($fstatuspinjam ){
+                            $where .= "
+                                 AND (lower(su.status) = '$fstatuspinjam')
+                            ";
+                        }
+
+                        $where.="
+                            ORDER BY coalesce(su.status,'waiting') desc,su.created_at desc
+                        ";
+                        $result = $MasterClass->selectGlobal($select,$table,$where);
+                        
+                        $results = [
+                            'code'  => $result['code'],
+                            'info'  => $result['info'],
+                            'data'  => $result['data'],
+                        ];
+                            
+            
+            
+                    } else {
+                        $results = [
+                            'code' => '103',
+                            'info'  => "Method Failed",
+                        ];
+                    }
+                } catch (\Exception $e) {
+                    // Roll back the transaction in case of an exception
+                    $results = [
+                        'code' => '102',
+                        'info'  => $e->getMessage(),
+                    ];
+        
+                }
+            }
+            else {
+        
+                $results = [
+                    'code' => '403',
+                    'info'  => "Unauthorized",
+                ];
+                
+            }
+
+            return $MasterClass->Results($results);
+
+        }
+        public function getsimpananperson(Request $request){
+
+            $MasterClass = new Master();
+
+            $checkAuth = $MasterClass->Authenticated($MasterClass->getSession('user_id'));
+            
+            if($checkAuth['code'] == $MasterClass::CODE_SUCCESS){
+                try {
+                    if ($request->isMethod('post')) {
+                        
+                        DB::beginTransaction();
+                
+                        $status = [];
+                        $userid= $MasterClass->getSession('user_id') ;
+                        $saved = DB::select("
+                            select 
+	
+                                COALESCE(PERIOD_DIFF(DATE_FORMAT(SYSDATE(), '%Y%m'),DATE_FORMAT(us.tgl_dinas, '%Y%m')),0) jmldinas,
+                                ( 50000 * COALESCE(PERIOD_DIFF(DATE_FORMAT(SYSDATE(), '%Y%m'),DATE_FORMAT(us.tgl_dinas, '%Y%m')),0) / COALESCE(PERIOD_DIFF(DATE_FORMAT(SYSDATE(), '%Y%m'),DATE_FORMAT(us.tgl_dinas, '%Y%m')),0))
+                                +
+                                (50000 * COALESCE(PERIOD_DIFF(DATE_FORMAT(SYSDATE(), '%Y%m'),DATE_FORMAT(us.tgl_dinas, '%Y%m')),0))
+                                + 
+                                sum(su.amount) as amount
+                            FROM
+                                users us
+                                left join (
+                                    select 
+                                        user_id,
+                                        tgl_awal,
+                                        CASE
+                                            WHEN DATE_ADD(tgl_awal, INTERVAL durasi MONTH) >= CURRENT_DATE() THEN 
+                                                amount * COALESCE(PERIOD_DIFF(DATE_FORMAT(SYSDATE(), '%Y%m'),
+                                                DATE_FORMAT(tgl_awal, '%Y%m')),0) 
+                                            ELSE 
+                                                amount * durasi
+                                        END amount
+                                    from 
+                                        simpanan_sukarela su 
+                                ) as su ON su.user_id = us.id
+                            WHERE
+                                us.id = $userid
+                                
+                                
+                        ");
+                        $saved = $MasterClass->checkErrorModel($saved);
+                        
+                        $status = $saved;
+            
+                        $results = [
+                            'code' => $status['code'],
+                            'info'  => $status['info'],
+                            'data'  =>  $status['data'],
+                        ];
+                            
+            
+            
+                    } else {
+                        $results = [
+                            'code' => '103',
+                            'info'  => "Method Failed",
+                        ];
+                    }
+                } catch (\Exception $e) {
+                    // Roll back the transaction in case of an exception
+                    $results = [
+                        'code' => '102',
+                        'info'  => $e->getMessage(),
+                    ];
+        
+                }
+            }
+            else {
+        
+                $results = [
+                    'code' => '403',
+                    'info'  => "Unauthorized",
+                ];
+                
+            }
+
+            return $MasterClass->Results($results);
+
+        }
+        public function getlistpenarikan(Request $request){
+
+            $MasterClass = new Master();
+
+            $user_id    = $MasterClass->getSession('user_id') ;
+            $role       = $MasterClass->getSession('role_name') ;
+            $checkAuth = $MasterClass->Authenticated($user_id);
+            
+            if($checkAuth['code'] == $MasterClass::CODE_SUCCESS){
+                try {
+                    if ($request->isMethod('post')) {
+
+                        DB::beginTransaction();     
+                        $fstatus        = $request->status ;
+                        $fkeanggotaan   = $request->keanggotaan ;
+                        $status = [];
+                        
+                        $select = "
+                            us.name,us.id as user,us.nrp,us.tgl_dinas,us.no_anggota,us.pangkat,
+                            case 
+                                when us.is_active = '1' then 'ACTIVE' 
+                                when us.is_active = '2' then 'INACTIVE' 
+                                when us.is_active = '3' then 'DELETE' 
+                            end status_name,
+                            ur.role_name,
+                            CASE 
+                                WHEN us.tgl_dinas > current_date THEN 'PENSIUN'
+                                WHEN us.tgl_dinas is null THEN 'TGL DINAS KOSONG'
+                                ELSE
+                                    CASE 
+                                        WHEN lower(us.status) = '2' THEN 'PINDAH'
+                                    ELSE 'AKTIF'
+                                END
+                            END keanggotaan,
+                            sm.created_at as tgl_pengajuan,
+                            sm.tgl_approve,
+                            cast(sm.amount as decimal(18,2) ) as jml_pengajuan,
+                            sm.id as idpenarikan,
+                            sm.status,
+                            cast(( 50000 * COALESCE(PERIOD_DIFF(DATE_FORMAT(SYSDATE(), '%Y%m'),DATE_FORMAT(us.tgl_dinas, '%Y%m')),0) / COALESCE(PERIOD_DIFF(DATE_FORMAT(SYSDATE(), '%Y%m'),DATE_FORMAT(us.tgl_dinas, '%Y%m')),0))
+                            +
+                            (50000 * COALESCE(PERIOD_DIFF(DATE_FORMAT(SYSDATE(), '%Y%m'),DATE_FORMAT(us.tgl_dinas, '%Y%m')),0))
+                            + 
+                            sum(su.amount) as decimal(18,2) )
+                            as simpanan
+                            
+                            
+                        ";
+                        
+                        $table = "
+                            users us
+                            JOIN users_roles ur ON us.role_id = ur.id
+                            JOIN simpanan sm ON sm.user_id = us.id and sm.jenis = 'tarik'
+                            LEFT JOIN simpanan sm1 ON sm1.user_id = us.id and sm1.jenis = 'tarik' and (sm1.status != '' or sm1.status is not null)
+                            LEFT JOIN (
+                                    select 
+                                        user_id,
+                                        CASE
+                                            WHEN DATE_ADD(tgl_awal, INTERVAL durasi MONTH) >= CURRENT_DATE() THEN 
+                                                amount * COALESCE(PERIOD_DIFF(DATE_FORMAT(SYSDATE(), '%Y%m'),
+                                                DATE_FORMAT(tgl_awal, '%Y%m')),0) 
+                                            ELSE 
+                                                amount * durasi
+                                        END amount
+                                    from 
+                                        simpanan_sukarela su 
+                                ) as su ON su.user_id = us.id
+                        ";
+                        
+                        
+                        $where = "
+                             ur.role_name like '%anggota%' 
+                        ";
+                        
+                        if($role == 'anggota'){
+                            $where .= "
+                                 AND us.id = $user_id  
+                            ";
+                        }
+                        if($fkeanggotaan){
+                            if($fkeanggotaan == 'pindah'){
+                                $where .= "
+                                     AND lower(us.status) = '2'
+                                ";
+                            }else{
+                                $where .= "
+                                     AND lower(us.tgl_dinas) $fkeanggotaan
+                                ";
+                            }
+                        }
+
+                        $where.="
+                            GROUP BY
+                                us.name,us.id,us.nrp,us.tgl_dinas,us.no_anggota,us.pangkat,
+                                sm.created_at,sm.tgl_approve,sm.amount,sm.id,sm.status
+                            ORDER BY coalesce(sm.status,'waiting') desc,sm.created_at desc
+                        ";
+                        $result = $MasterClass->selectGlobal($select,$table,$where);
+                        
+                        $results = [
+                            'code'  => $result['code'],
+                            'info'  => $result['info'],
+                            'data'  => $result['data'],
                         ];
                             
             
@@ -1345,14 +1736,17 @@ class JsonDataController extends Controller
                             );
                             
                         }
-                        
+                        $limit = $data->limit_pinjaman;
+                        if($limit == null){
+                            $limit = 0 ;
+                        }
                         $saved2 = limit_pinjaman::updateOrCreate(
                             [
                                 'id' => $data->idlimit,
                             ], 
                             [
                                 'user_id' => $saved->id,
-                                'amount'  => $data->limit_pinjaman,
+                                'amount'  => $limit,
                             ] // Kolom yang akan diisi
                         );
 
@@ -1491,7 +1885,10 @@ class JsonDataController extends Controller
                             ];
                         }else{
                             $attributes     = [
-                                'status' => $data->status
+                                'status'          => $data->status,
+                                'approve_by'      => $MasterClass->getSession('name'),
+                                'tgl_approve'     => date('Y-m-d H:i:s')
+
                             ];
                         }
                         $where     = [
@@ -1629,7 +2026,88 @@ class JsonDataController extends Controller
             return $MasterClass->Results($results);
 
         }
-        public function saveFileSampul(Request $request){
+        public function actionpengajuansukarela(Request $request){
+
+            $MasterClass = new Master();
+            
+            $checkAuth = $MasterClass->Authenticated($MasterClass->getSession('user_id'));
+            
+            if($checkAuth['code'] == $MasterClass::CODE_SUCCESS){
+                try {
+                    if ($request->isMethod('post')) {
+
+                        DB::beginTransaction();     
+
+                        $data = json_decode($request->getContent());
+                        $jumlah     = $data->jumlah ;
+                        $bulan      = $data->bulan.'-01' ;
+                        $durasi     = $data->durasi ;
+                        $userid     = $MasterClass->getSession('user_id') ;
+                        $status = [];
+
+                        $cekpengajuan = $MasterClass->selectGlobal(
+                            "*",
+                            'simpanan_sukarela',
+                            "user_id = $userid and DATE_ADD(tgl_awal, INTERVAL 1 MONTH) >= $bulan");
+                        if($cekpengajuan['data']){
+                            DB::rollBack();
+                            $results = [
+                                'code' => '1',
+                                'message'  => "Mohon maaf ,masih ada simpanan sukarela yang berjalan diperiode tersebut.",
+                            ];
+                            return $MasterClass->Results($results);
+                        }
+                        $attributes     = [
+                            'user_id'           => $userid,
+                            'amount'            => $jumlah,
+                            'tgl_awal'          => $bulan,
+                            'durasi'            => $durasi,
+                            'created_at'        => date('Y-m-d H:i:s'),
+                        ];
+                        $saved      = $MasterClass->saveGlobal('simpanan_sukarela', $attributes );
+                        $status = $saved;
+    
+                        if($status['code'] == $MasterClass::CODE_SUCCESS){
+                            DB::commit();
+                        }else{
+                            DB::rollBack();
+                        }
+            
+                        $results = [
+                            'code'      => $status['code'],
+                            'message'   => 'Pengajuan berhasil',
+                        ];
+                            
+            
+            
+                    } else {
+                        $results = [
+                            'code' => '103',
+                            'info'  => "Method Failed",
+                        ];
+                    }
+                } catch (\Exception $e) {
+                    // Roll back the transaction in case of an exception
+                    $results = [
+                        'code' => '102',
+                        'info'  => $e->getMessage(),
+                    ];
+        
+                }
+            }
+            else {
+        
+                $results = [
+                    'code' => '403',
+                    'info'  => "Unauthorized",
+                ];
+                
+            }
+
+            return $MasterClass->Results($results);
+
+        }
+        public function approvalsukarela(Request $request){
 
             $MasterClass = new Master();
 
@@ -1641,61 +2119,214 @@ class JsonDataController extends Controller
 
                         DB::beginTransaction();     
 
-                        $idkamar            = $request->idkamar;
+                        $data = json_decode($request->getContent());
                         
-                        $now                = date('Y-m-d H:i:s');
-                        $docname            = 'kos';
-                        if(!empty($_FILES['form-sampul']['name'])){//jika file ada maka masukan file 
-                            $where = [
-                                'id_kamar'      => $idkamar,
-                                'jenis'         => 'sampul'
-                            ];
-                            $MasterClass->deleteGlobal('foto_kamar', $where );
+                        $status = [];
 
-                            $nama_file          = $_FILES['form-sampul']['name'];
-                            $type		        = $_FILES['form-sampul']['type'];
-                            $ukuran		        = $_FILES['form-sampul']['size'];
-                            $tmp_name		    = $_FILES['form-sampul']['tmp_name'];
-                            $nama_file_upload   = strtolower(str_replace(' ','_',$docname.'-'.$nama_file));
-                            $alamatfile         = '../public/data/kos/'; // directory file
-                            $uploaddir          = $alamatfile.$nama_file_upload; // directory file
-                            
-                            if (move_uploaded_file($tmp_name,$uploaddir)){
-                                chmod($uploaddir, 0777);
+                        $namelogin  = $MasterClass->getSession('name') ;
+                        $attributes     = [
+                            'status'          => $data->status,
+                            'approve_by'      => $namelogin,
+                            'tgl_approve'     => date('Y-m-d H:i:s')
+                        ];
+                        
+                        $where     = [
+                            'id' => $data->id
+                        ];
+                        $saved      = $MasterClass->updateGlobal('simpanan_sukarela', $attributes,$where );
+                        $status = $saved;
     
-                                $attrphoto     = [
-                                    'id_kamar'  => $idkamar,
-                                    'file'      => $nama_file_upload,
-                                    'alamat'    => $alamatfile,
-                                    'size'      => $ukuran,
-                                    'tipe'      => $type,
-                                    'jenis'     => 'sampul',
-                                    'created_at'=> $now,
-                                ];
-                                $savefoto      = $MasterClass->saveGlobal('foto_kamar', $attrphoto );
-                                if($savefoto['code'] != $MasterClass::CODE_SUCCESS){
-                                    DB::rollBack();
-                                    $results = [
-                                        'code' => '1',
-                                        'info'  => "Gagal simpan data kamar",
-                                    ];
-                                    return $MasterClass->Results($results);
-                                }
-                            }
-    
-                                
-    
+                        if($status['code'] == $MasterClass::CODE_SUCCESS){
                             DB::commit();
-                            $results = [
-                                'code'  => $MasterClass::CODE_SUCCESS,
-                                'info'  => 'ok',
-                            ];
-                        }else{//jika tidak ada anggao sukses
-                            $results = [
-                                'code'  => $MasterClass::CODE_SUCCESS,
-                                'info'  => 'ok',
-                            ];
+                        }else{
+                            DB::rollBack();
                         }
+            
+                        $results = [
+                            'code' => $status['code'],
+                            'info'  => $status['info'],
+                        ];
+                            
+            
+            
+                    } else {
+                        $results = [
+                            'code' => '103',
+                            'info'  => "Method Failed",
+                        ];
+                    }
+                } catch (\Exception $e) {
+                    // Roll back the transaction in case of an exception
+                    $results = [
+                        'code' => '102',
+                        'info'  => $e->getMessage(),
+                    ];
+        
+                }
+            }
+            else {
+        
+                $results = [
+                    'code' => '403',
+                    'info'  => "Unauthorized",
+                ];
+                
+            }
+
+            return $MasterClass->Results($results);
+
+        }
+        public function actionpenarikan(Request $request){
+
+            $MasterClass = new Master();
+            
+            $checkAuth = $MasterClass->Authenticated($MasterClass->getSession('user_id'));
+            
+            if($checkAuth['code'] == $MasterClass::CODE_SUCCESS){
+                try {
+                    if ($request->isMethod('post')) {
+
+                        DB::beginTransaction();     
+
+                        $data = json_decode($request->getContent());
+                        $jumlah     = $data->jumlah ;
+                        $userid     = $MasterClass->getSession('user_id') ;
+                        $status = [];
+
+                        $cekpengajuan = DB::select("
+                            select 
+	
+                                COALESCE(PERIOD_DIFF(DATE_FORMAT(SYSDATE(), '%Y%m'),DATE_FORMAT(us.tgl_dinas, '%Y%m')),0) jmldinas,
+                                ( 50000 * COALESCE(PERIOD_DIFF(DATE_FORMAT(SYSDATE(), '%Y%m'),DATE_FORMAT(us.tgl_dinas, '%Y%m')),0) / COALESCE(PERIOD_DIFF(DATE_FORMAT(SYSDATE(), '%Y%m'),DATE_FORMAT(us.tgl_dinas, '%Y%m')),0))
+                                +
+                                (50000 * COALESCE(PERIOD_DIFF(DATE_FORMAT(SYSDATE(), '%Y%m'),DATE_FORMAT(us.tgl_dinas, '%Y%m')),0))
+                                + 
+                                coalesce(sum(su.amount),0)
+                                -
+                                coalesce(sum(sm.amount),0)
+                                as amount
+                            FROM
+                                users us
+                                left join (
+                                    select 
+                                        user_id,
+                                        tgl_awal,
+                                        CASE
+                                            WHEN DATE_ADD(tgl_awal, INTERVAL durasi MONTH) >= CURRENT_DATE() THEN 
+                                                amount * COALESCE(PERIOD_DIFF(DATE_FORMAT(SYSDATE(), '%Y%m'),
+                                                DATE_FORMAT(tgl_awal, '%Y%m')),0) 
+                                            ELSE 
+                                                amount * durasi
+                                        END amount
+                                    from 
+                                        simpanan_sukarela su 
+                                ) as su ON su.user_id = us.id
+                                left join simpanan sm on sm.user_id = us.id and (sm.status != '' or sm.status is not null) and sm.jenis = 'tarik'
+                            WHERE
+                                us.id = $userid
+                                
+                                
+                        ");
+                        if($cekpengajuan){
+                            if($cekpengajuan[0]->amount < $jumlah){
+                                DB::rollBack();
+                                $results = [
+                                    'code' => '1',
+                                    'message'  => "Uang Simpanan tidak cukup.",
+                                ];
+                                return $MasterClass->Results($results);
+                            }
+                        }
+
+                        $attributes     = [
+                            'user_id'           => $userid,
+                            'jenis'             => 'tarik',
+                            'amount'            => $jumlah,
+                            'created_at'        => date('Y-m-d H:i:s'),
+                        ];
+                        $saved      = $MasterClass->saveGlobal('simpanan', $attributes );
+                        $status = $saved;
+    
+                        if($status['code'] == $MasterClass::CODE_SUCCESS){
+                            DB::commit();
+                        }else{
+                            DB::rollBack();
+                        }
+            
+                        $results = [
+                            'code'      => $status['code'],
+                            'message'   => 'Pengajuan berhasil',
+                        ];
+                            
+            
+            
+                    } else {
+                        $results = [
+                            'code' => '103',
+                            'info'  => "Method Failed",
+                        ];
+                    }
+                } catch (\Exception $e) {
+                    // Roll back the transaction in case of an exception
+                    $results = [
+                        'code' => '102',
+                        'info'  => $e->getMessage(),
+                    ];
+        
+                }
+            }
+            else {
+        
+                $results = [
+                    'code' => '403',
+                    'info'  => "Unauthorized",
+                ];
+                
+            }
+
+            return $MasterClass->Results($results);
+
+        }
+        public function approvaltariksimpan(Request $request){
+
+            $MasterClass = new Master();
+
+            $checkAuth = $MasterClass->Authenticated($MasterClass->getSession('user_id'));
+            
+            if($checkAuth['code'] == $MasterClass::CODE_SUCCESS){
+                try {
+                    if ($request->isMethod('post')) {
+
+                        DB::beginTransaction();     
+
+                        $data = json_decode($request->getContent());
+                        
+                        $status = [];
+
+                        $namelogin  = $MasterClass->getSession('name') ;
+                        $attributes     = [
+                            'status'          => $data->status,
+                            'approve_by'      => $namelogin,
+                            'tgl_approve'     => date('Y-m-d H:i:s')
+                        ];
+                        
+                        $where     = [
+                            'id' => $data->id,
+                        ];
+                        $saved      = $MasterClass->updateGlobal('simpanan', $attributes,$where );
+                        $status = $saved;
+    
+                        if($status['code'] == $MasterClass::CODE_SUCCESS){
+                            DB::commit();
+                        }else{
+                            DB::rollBack();
+                        }
+            
+                        $results = [
+                            'code' => $status['code'],
+                            'info'  => $status['info'],
+                        ];
+                            
             
             
                     } else {

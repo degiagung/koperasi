@@ -61,7 +61,7 @@ function getListData() {
                     $('#table-list').DataTable().ajax.reload();
                 }
             },
-            { text: ' ', extend: 'excel',  className: 'btndownload iconexcel',  title:'Simpanan Anggota', exportOptions: {columns:[':not(.notdown)']}},
+            { text: ' ', extend: 'excel',  className: 'btndownload iconexcel',  title:'List Simpanan', exportOptions: {columns:[':not(.notdown)']}},
         ],
         columns: [
             {
@@ -79,34 +79,19 @@ function getListData() {
             } },
             { data: "keanggotaan" },
             { render:function (data,type,row) {
-                if (row.simpananpokok > 0)
                 return 'Rp. ' +formatRupiah(row.simpananpokok);
-                else
-                return 'Rp. 0';
             } },
             { render:function (data,type,row) {
-                if (row.simpananwajib > 0)
                 return 'Rp. ' +formatRupiah(row.simpananwajib);
-                else
-                return 'Rp. 0';
             } },
             { render:function (data,type,row) {
-                if (row.sukarela > 0)
                 return 'Rp. ' +formatRupiah(row.sukarela);
-                else
-                return 'Rp. 0';
             } },
             { render:function (data,type,row) {
-                if (row.total > 0)
                 return 'Rp. ' +formatRupiah(row.total);
-                else
-                return 'Rp. 0';
             } },
             { render:function (data,type,row) {
-                if (row.penarikan > 0)
                 return 'Rp. ' +formatRupiah(row.penarikan);
-                else
-                return 'Rp. 0';
             } },
             { render:function (data,type,row) {
                 if (row.saldo > 0)
@@ -141,12 +126,12 @@ function detail(rowData) {
     $("#form-nrp").val(rowData.nrp);
     $("#form-name").val(rowData.name);
     $("#form-tgldinas").val(datetostring2('yymmdd',rowData.tgl_dinas));
-    $("#form-smwajib").val(rowData.simpananpokokwajib);
-    $("#form-smpokok").val(rowData.simpananpokokwajib);
-    $("#form-smsukarela").val(rowData.sukarela);
-    $("#form-tarik").val(rowData.penarikan);
+    $("#form-smwajib").val(formatRupiah(rowData.simpananpokok));
+    $("#form-smpokok").val(formatRupiah(rowData.simpananwajib));
+    $("#form-smsukarela").val(formatRupiah(rowData.sukarela));
+    $("#form-tarik").val(formatRupiah(rowData.penarikan));
     $("#form-tgltarik").val(rowData.tgl_penarikan);
-    $("#form-saldo").val(rowData.saldo);
+    $("#form-saldo").val(formatRupiah(rowData.saldo));
 
 
     $("#modal-data").modal("show");

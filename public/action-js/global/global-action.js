@@ -251,7 +251,7 @@ function formatRupiah(angka, prefix) {
 		rupiah = split[1] != undefined ? minus+rupiah + "." + split[1] : rupiah;
 		return prefix == undefined ? rupiah : rupiah ? "Rp " + rupiah : "";
 	}else{
-		return '';
+		return '0';
 	}
     
 }

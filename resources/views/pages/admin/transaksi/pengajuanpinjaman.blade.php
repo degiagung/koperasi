@@ -41,7 +41,8 @@
                                 <button type="submit" id="filter-btn" class="btn btn-sgn" style="color:#e12a2a;width:100%;height:35px;font-size:14px;margin-top: 27px;"><i class="bi bi-search" style="font-size:12px;" ></i> Cari</button>
                             </div>
                         </div>
-                    </div>
+                    <hr>
+                    <h5><b style="color:red;">UNTUK PENGAJUAN YANG TELAH DI SETUJUI ,SILAHKAN MENGHUBUNGI PIHAK KOPERASI UNTUK PENANDATANGANAN BERKAS DAN TRANSFER</b></h5>
                 </div>
             </div>
             @endif
@@ -51,9 +52,11 @@
                 <div class="card">
                     <div class="card-header mt-2 flex-wrap d-flex justify-content-between">
                         <ul class="nav nav-tabs dzm-tabs" id="myTab-4" role="tablist">
+                            @if ($role == 'anggota') 
                             <li class="nav-item" role="presentation">
                                 <button type="button" id="add-btn" class="nav-link active btn-sgn">Ajukan</button>
                             </li>
+                            @endif
                         </ul>
                     </div>
                     <div class="card-body">
