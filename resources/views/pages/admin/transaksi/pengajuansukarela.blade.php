@@ -37,6 +37,14 @@
                                     <option value="pindah">PINDAH</option>
                                 </select>
                             </div>
+                            <div class="col-sm-3">
+                                <label>Jenis Pengajuan</label>
+                                <select id="filter-jenis" name="filter-jenis" class="select2 ">
+                                    <option value="">Semua Jenis</option>
+                                    <option value="manual">Manual</option>
+                                    <option value="potong gaji">Potong Gaji</option>
+                                </select>
+                            </div>
                             <div class="col-sm-2">
                                 <button type="submit" id="filter-btn" class="btn btn-sgn" style="color:#e12a2a;width:100%;height:35px;font-size:14px;margin-top: 27px;"><i class="bi bi-search" style="font-size:12px;" ></i> Cari</button>
                             </div>
@@ -51,20 +59,25 @@
                 <div class="card">
                     <div class="card-header mt-2 flex-wrap d-flex justify-content-between">
                         <ul class="nav nav-tabs dzm-tabs" id="myTab-4" role="tablist">
-                            @if ($role == 'anggota')
+                            {{-- @if ($role == 'anggota') --}}
                             <li class="nav-item" role="presentation">
-                                <button type="button" id="add-btn" class="nav-link active btn-sgn">Ajukan</button>
+                                <button type="button" id="add-btn" class="nav-link active btn-sgn">Pengajuan Dari Gaji</button>
                             </li>
-                            @endif
+                            <li class="nav-item" role="presentation" style="margin-left :15px;">
+                                <button type="button" id="add-btn-manual" class="nav-link active btn-sgn">Pengajuan Manual</button>
+                            </li>
+                            {{-- @endif --}}
                         </ul>
                     </div>
                     <div class="card-body">
+                        
                         <div class="table-responsive">
                             <table id="table-list" class="table table-bordered table-striped table-lgdatatables">
                                 <thead>
                                     <tr>
                                         <th>No</th>
                                         <th>Status </th>
+                                        <th>Jenis Simpanan</th>
                                         <th>NRP</th>
                                         <th>Nama Anggota</th>
                                         <th>keanggotaan</th>
@@ -73,6 +86,7 @@
                                         <th>Jumlah</th>
                                         <th>Bulan Awal</th>
                                         <th>Durasi Bulan</th>
+                                        <th>Bukti Transaksi</th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -114,6 +128,26 @@
                 </div>
             </div>
         </div>
+        <div class="modal fade" id="modal-bukti" style="display: none;" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered" role="document">
+                <div class="modal-content">
+                    <div class="modal-header headermodal">
+                        <h5 class="modal-title">Bukti Transaksi</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal">
+                        </button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="basic-form buktidiv">
+                            
+                        </div>
+                    </div>
+                    {{-- <div class="modal-footer">
+                        <button type="button" class="btn btn-danger light" data-bs-dismiss="modal">Close</button>
+                        <button type="button" class="btn btn-sgn light" onClick="approval() ">Simpan</button>
+                    </div> --}}
+                </div>
+            </div>
+        </div>
 
         <div class="modal fade" id="modal-data" style="display: none;" aria-hidden="true">
             <div class="modal-dialog modal-dialog-centered" role="document">
@@ -130,7 +164,7 @@
                                 <div class="mb-3 row">
                                     <label class="col-sm-3 col-form-label">Jumlah Simpan </label>
                                     <div class="col-sm-9">
-                                        <input id="form-simpanan" type="number" class="form-control">
+                                        <input id="form-simpanan" type="text" class="form-control" onkeyup="convertrp('form-simpanan')">
                                     </div>
                                 </div>
                                 <div class="mb-3 row">
@@ -152,6 +186,42 @@
                     <div class="modal-footer">
                         <button type="button" class="btn btn-danger light" data-bs-dismiss="modal">Close</button>
                         <button type="button" id="ajukan-btn" class="btn btn-primary">Ajukan</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="modal fade" id="modal-data-manual" style="display: none;" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered" role="document">
+                <div class="modal-content">
+                    <div class="modal-header headermodal">
+                        <h5 class="modal-title">Pengajuan</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal">
+                        </button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="basic-form">
+                                
+                            <div class="mb-3 row">
+                                <label class="col-sm-3 col-form-label">Jumlah Simpan </label>
+                                <div class="col-sm-9">
+                                    <input id="form-simpananmanual" type="text" class="form-control" onkeyup="convertrp('form-simpananmanual')">
+                                </div>
+                            </div>
+                                <div class="mb-3 row">
+                                <label class="col-sm-3 col-form-label">Bukti Transaksi</label>
+                                <div class="col-sm-9">
+                                    <form role="form" class="" id="formbuktimanual" method="post" type="post" enctype="multipart/form-data">
+                                        <input class="form-control" name="buktimanual" id="form-buktimanual" type="file" value="" multiple style="opacity:1;"/>
+                                    </form>
+                                </div>
+                            </div>
+
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-danger light" data-bs-dismiss="modal">Close</button>
+                        <button type="button" id="ajukanmanual-btn" class="btn btn-primary">Ajukan</button>
                     </div>
                 </div>
             </div>

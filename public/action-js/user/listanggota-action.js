@@ -4,13 +4,19 @@ let dtpr;
 
 $(document).ready(function () {
     loadRole();
+    kesatuan();
     getListData();
+    cekrole();
 });
-if(role != 'bendahara koperasi' && role != 'superadmin' ){
+
+function cekrole(){
+    if(role == 'bendahara koperasi' || role == 'superadmin' ){
+        $(".forbdhara").show();
+        $(".forsekertaris").show();
+    }else{
         $(".forbdhara").hide();
-}
-if(role != 'sekertaris koperasi' && role != 'superadmin' ){
-    $(".forsekertaris").hide();
+        $(".forsekertaris").hide();
+    }
 }
 
 $(".select2").select2();
@@ -123,7 +129,7 @@ function getListData() {
 function editdata(rowData) {
     
     isObject = rowData;
-
+    cekrole()
     $("#form-noanggota").val(rowData.no_anggota);
     $("#form-name").val(rowData.name);
     $("#form-pangkat").val(rowData.pangkat);
@@ -133,7 +139,8 @@ function editdata(rowData) {
     $("#form-tgldinas").val(rowData.tgl_dinas);
     $("#form-status").val(rowData.status).trigger("change");
     $("#form-role").val(rowData.role_id).trigger("change");
-    $("#form-limit").val(rowData.limit_pinjaman);
+    $("#form-limit").val(formatRupiah(rowData.limit_pinjaman));
+    $("#form-gaji").val(formatRupiah(rowData.gaji));
     $("#form-password").val();
 
     let $el = $("input:radio[name=form-status]");
@@ -145,8 +152,8 @@ function editdata(rowData) {
 
 $("#add-btn").on("click", function (e) {
     e.preventDefault();
-    
-    
+    $(".forbdhara").hide();
+
     isObject = {};
     isObject["id"] = null;
     isObject["idlimit"] = null;
@@ -154,6 +161,7 @@ $("#add-btn").on("click", function (e) {
     $("#form textarea").val("");
     $("#form-role").val("").trigger("change");
     
+    $("#form-limit").val("50000000");
     $("#modal-data").modal("show");
 });
 
@@ -180,8 +188,8 @@ function checkValidation() {
     if(role == 'sekertaris koperasi' || role == 'superadmin' ){
         if (
             validationSwalFailed(
-                (isObject["noanggota"] = $("#form-noanggota").val()),
-                "No Anggota tidak boleh kosong"
+                (isObject["kesatuan"] = $("#form-kesatuan").val()),
+                "Kesatuan tidak boleh kosong"
             )
         )
             return false;
@@ -229,6 +237,13 @@ function checkValidation() {
             return false;
         if (
             validationSwalFailed(
+                (isObject["gaji"] = $("#form-gaji").val()),
+                "Gaji tidak boleh kosong"
+            )
+        )
+            return false;
+        if (
+            validationSwalFailed(
                 (isObject["status"] = $("#form-status").val()),
                 "Status Anggota tidak boleh kosong"
             )
@@ -243,13 +258,14 @@ function checkValidation() {
             return false;
     }else{
         
-        isObject["noanggota"] = $("#form-noanggota").val();
+        isObject["kesatuan"] = $("#form-kesatuan").val();
         isObject["name"] = $("#form-name").val();
         isObject["pangkat"] = $("#form-pangkat").val();
         isObject["nrp"] = $("#form-nrp").val();
         isObject["alamat"] = $("#form-alamat").val();
         isObject["handphone"] = $("#form-handphone").val();
         isObject["tgldinas"] = $("#form-tgldinas").val();
+        isObject["gaji"] = $("#form-gaji").val();
         isObject["status"] = $("#form-status").val();
         isObject["role_id"] = $("#form-role").val();
     }
@@ -320,7 +336,7 @@ function deleteData(data) {
 function saveData() {
     
     $.ajax({
-        url: baseURL + "/saveUser",
+        url: baseURL + "/saveAnggota",
         type: "POST",
         data: JSON.stringify(isObject),
         dataType: "json",
@@ -375,6 +391,36 @@ async function loadRole() {
         });
 
         $("#form-role").select2({
+            data: res,
+            placeholder: "Please choose an option",
+            dropdownParent: $("#modal-data"),
+        });
+    } catch (error) {
+        sweetAlert("Oops...", error.responseText, "ERROR");
+    }
+}
+async function kesatuan() {
+    try {
+        const response = await $.ajax({
+            url: baseURL + "/kesatuan",
+            type: "POST",
+            dataType: "json",
+            beforeSend: function () {
+                // Swal.fire({
+                //     title: "Loading",
+                //     text: "Please wait...",
+                // });
+            },
+        });
+
+        const res = response.data.map(function (item) {
+            return {
+                id: item.kode,
+                text: item.kesatuan,
+            };
+        });
+
+        $("#form-kesatuan").select2({
             data: res,
             placeholder: "Please choose an option",
             dropdownParent: $("#modal-data"),

@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Session;
 use Illuminate\Support\Facades\DB;
+use App\Models\User;
 use App\Models\MenusAccess;
 use App\Helpers\Master;
 
@@ -53,7 +54,7 @@ class AuthController extends Controller
         //     $field => $login,
         //     'password' => $password
         // ];
-
+        
         if (Auth::attempt($credentials)) {
 
             if(Auth::user()->is_active != '1'){
@@ -73,7 +74,13 @@ class AuthController extends Controller
 
         } else {
             // Jika autentikasi gagal, kembali ke halaman login dengan pesan error
-            return redirect()->back()->withErrors(['errormessage' => 'Akun tidak diketahui']);
+            $nrp = $request->only('nrp')['nrp'] ;
+            $ceknrp = User::where('nrp', $nrp)->first();
+            if($ceknrp){
+                return redirect()->back()->withErrors(['errormessage' => 'Password salah, silahkan hubungi pihak bendahara untuk ubah password']);
+            }else{
+                return redirect()->back()->withErrors(['errormessage' => 'NRP & Password tidak diketahui']);
+            }
         }
     }
     public function logout(Request $request)

@@ -29,7 +29,8 @@ function getListData() {
             dataType: "json",
             data    : {
                 'keanggotaan'   :$('#filter-keanggotaan').val(),
-                'statuspinjam'  :$('#filter-approve').val()
+                'statuspinjam'  :$('#filter-approve').val(),
+                'jenis'         :$('#filter-jenis').val()
             },
             dataSrc: function (response) {
                 if (response.code == 0) {
@@ -79,6 +80,7 @@ function getListData() {
                 else
                     return "<a class='approvalsukarela' style='color:black;cursor:pointer;font-weight:bold;'>WAITING APPROVED</a>";
             } },
+            { data: "jenis" },
             { data: "nrp" },
             { data: "name",render:function (data,type,row) {
                 return row.name;
@@ -95,10 +97,21 @@ function getListData() {
                 return formatRupiah(row.amount);
             } },
             { render:function (data,type,row) {
-                return datetostring2('yymm',row.tgl_awal);
+                if(row.tgl_awal){
+                    return datetostring2('yymm',row.tgl_awal);
+                }else{
+                    return '';
+                }
             } },
             { render:function (data,type,row) {
-                return row.durasi+' BULAN';
+                if(row.durasi){
+                    return row.durasi+' BULAN';
+                }else{
+                    return '';
+                }
+            } },
+            { render:function (data,type,row) {
+                return `<a class="bukti" style="cursor:pointer;">Klik Disini</a>`;
             } },
         ],
         drawCallback: function (settings) {
@@ -123,6 +136,25 @@ function getListData() {
                     var tr = $(this).closest("tr");
                     var rowData = dtpr.row(tr).data();
                     detailpengajuan(rowData);
+                });
+            $(rows)
+                .find(".bukti")
+                .on("click", function () {
+                    var tr = $(this).closest("tr");
+                    var rowData = dtpr.row(tr).data();
+                    $(".buktidiv").empty();
+                    if(rowData.file){
+                        file = rowData.file ;
+                        file = baseURL+file.replaceAll('../public','');
+                        content =`<center>
+                                        <img src="`+file+`" style="width:300px;" alt="">
+                                    <center>
+                        `;
+                        $(".buktidiv").append(content);
+                        $("#modal-bukti").modal('show');
+                    }else{
+                        swalwarning('Anggota belum upload bukti transaksi');
+                    }
                 });
             $(rows)
                 .find(".perjanjian")
@@ -194,17 +226,28 @@ function approval(){
     });
 }
 
+$("#add-btn-manual").on("click", function (e) {
+    e.preventDefault();
+    isObject = {};
+    $("#form-simpananmanual").val("");
+    $("#form-formbuktimanual").val("");
+    $("#modal-data-manual").modal("show");
+});
+
 $("#add-btn").on("click", function (e) {
     e.preventDefault();
     isObject = {};
-    $("#form-pinjaman").val("");
-    $("#form-tenor").val("");
+    $("#form-simpanan").val("");
+    $("#form-bulan").val("");
+    $("#form-durasi").val("");
     $("#modal-data").modal("show");
 });
 
 $("#ajukan-btn").on("click", function (e) {
     e.preventDefault();
-    if ($("#form-simpanan").val() < 50000){
+   
+    jumlah = $("#form-simpanan").val();
+    if (jumlah.replaceAll('.','') < 50000){
         swalwarning('Minimal pengajuan Rp 50000');
         return false;
     }
@@ -218,6 +261,21 @@ $("#ajukan-btn").on("click", function (e) {
     }
 
     ajukanpinjaman();
+});
+
+$("#ajukanmanual-btn").on("click", function (e) {
+    e.preventDefault();
+    jumlah = $("#form-simpananmanual").val();
+    if (jumlah.replaceAll('.','') < 50000){
+        swalwarning('Minimal pengajuan Rp 50000');
+        return false;
+    }
+    if ($("#form-buktimanual").val() == ''){
+        swalwarning('Bukti tidak boleh kosong');
+        return false;
+    }
+
+    ajukanpinjamanmanual();
 });
 
 function ajukanpinjaman(){
@@ -277,5 +335,39 @@ function ajukanpinjaman(){
                 "BATAL !!",
             );
         }
+    });
+}
+
+function ajukanpinjamanmanual() {
+    const formData    = new FormData(document.getElementById("formbuktimanual"));
+    formData.append('jumlah',$('#form-simpananmanual').val());
+
+    $.ajax({
+        url: baseURL + "/actionpengajuansukarelamanual",
+        type: "POST",
+        data: formData,
+        contentType: false,
+        processData: false,
+        beforeSend: function () {
+            Swal.fire({
+                title: "Loading",
+                text: "Please wait...",
+            });
+        },
+        complete: function () {
+            $('#table-list').DataTable().ajax.reload();
+        },
+        success: function (response) {
+            // Handle response sukses
+            if (response.code == 0) {
+                swal("BERHASIL !", response.message, "success");
+                $("#modal-data-manual").modal("hide");
+            } else {
+                sweetAlert("Oops...", response.info, "ERROR");
+            }
+        },
+        error: function (xhr, status, error) {
+            sweetAlert("Oops...", "ERROR", "ERROR");
+        },
     });
 }

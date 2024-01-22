@@ -164,22 +164,8 @@ function checkValidation() {
     // console.log($el);
     if (
         validationSwalFailed(
-            (isObject["noanggota"] = $("#form-noanggota").val()),
-            "No Anggota tidak boleh kosong"
-        )
-    )
-        return false;
-    if (
-        validationSwalFailed(
             (isObject["name"] = $("#form-name").val()),
             "Name tidak boleh kosong"
-        )
-    )
-        return false;
-    if (
-        validationSwalFailed(
-            (isObject["pangkat"] = $("#form-pangkat").val()),
-            "Pangkat tidak boleh kosong"
         )
     )
         return false;
@@ -204,27 +190,6 @@ function checkValidation() {
         )
     )
         return false;
-    if (
-        validationSwalFailed(
-            (isObject["tgldinas"] = $("#form-tgldinas").val()),
-            "Tgl Dinas tidak boleh kosong"
-        )
-    )
-        return false;
-    if (
-        validationSwalFailed(
-            (isObject["status"] = $("#form-status").val()),
-            "Status Anggota tidak boleh kosong"
-        )
-    )
-        return false;
-    // if (
-    //     validationSwalFailed(
-    //         (isObject["is_active"] = $el),
-    //         "Please choose a status."
-    //     )
-    // )
-    //     return false;
     if (
         validationSwalFailed(
             (isObject["role_id"] = $("#form-role").val()),
@@ -328,6 +293,9 @@ async function loadRole() {
             url: baseURL + "/getRole",
             type: "POST",
             dataType: "json",
+            data:{
+                'anggota' : 'no'
+            },
             beforeSend: function () {
                 // Swal.fire({
                 //     title: "Loading",

@@ -152,16 +152,17 @@ class JsonDataController extends Controller
             if($checkAuth['code'] == $MasterClass::CODE_SUCCESS){
                 try {
                     if ($request->isMethod('post')) {
-
-                        $data = json_decode($request->getContent());
-
                         
                         DB::beginTransaction();
                 
                         $status = [];
-                        $where = "" ;
+                        $where = " WHERE role_name is not null " ;
+
                         if($MasterClass->getSession('role_name') != 'superadmin' ){
-                            $where = " WHERE role_name not like '%admin%'";
+                            $where .= " AND role_name not like '%admin%'";
+                        }
+                        if($request->anggota == 'no'){
+                            $where .= " AND role_name != 'anggota'";
                         }
                         $saved = DB::select("SELECT * FROM users_roles ur $where");
                         $saved = $MasterClass->checkErrorModel($saved);
@@ -425,7 +426,68 @@ class JsonDataController extends Controller
             return $MasterClass->Results($results);
 
         }
+        public function kesatuan(Request $request){
+
+            $MasterClass = new Master();
+
+            $checkAuth = $MasterClass->Authenticated($MasterClass->getSession('user_id'));
+            
+            if($checkAuth['code'] == $MasterClass::CODE_SUCCESS){
+                try {
+                    if ($request->isMethod('post')) {
+
+                        $data = json_decode($request->getContent());
+
+                        
+                        DB::beginTransaction();
+                
+                        $status = [];
+                        $saved = DB::select("SELECT * FROM kesatuan");
+                        $saved = $MasterClass->checkErrorModel($saved);
+                        
+                        $status = $saved;
     
+                        // if($status['code'] == $MasterClass::CODE_SUCCESS){
+                        //     DB::commit();
+                        // }else{
+                        //     DB::rollBack();
+                        // }
+            
+                        $results = [
+                            'code' => $status['code'],
+                            'info'  => $status['info'],
+                            'data'  =>  $status['data'],
+                        ];
+                            
+            
+            
+                    } else {
+                        $results = [
+                            'code' => '103',
+                            'info'  => "Method Failed",
+                        ];
+                    }
+                } catch (\Exception $e) {
+                    // Roll back the transaction in case of an exception
+                    $results = [
+                        'code' => '102',
+                        'info'  => $e->getMessage(),
+                    ];
+        
+                }
+            }
+            else {
+        
+                $results = [
+                    'code' => '403',
+                    'info'  => "Unauthorized",
+                ];
+                
+            }
+
+            return $MasterClass->Results($results);
+
+        }
     //USER LIST
         public function getUserList(Request $request){
 
@@ -566,7 +628,8 @@ class JsonDataController extends Controller
                                 END
                             END keanggotaan,
                             lp.id as idlimit,
-                            lp.amount as limit_pinjaman
+                            cast(lp.amount as decimal(18,0)) as limit_pinjaman,
+                            cast(us.gaji as decimal(18,0)) as gaji
                         ";
                         
                         $table = '
@@ -1366,6 +1429,8 @@ class JsonDataController extends Controller
                         $fstatus        = $request->status ;
                         $fkeanggotaan   = $request->keanggotaan ;
                         $fstatuspinjam  = $request->statuspinjam ;
+                        $fjenis         = $request->jenis ;
+
                         $status = [];
                         
                         $select = "
@@ -1385,13 +1450,16 @@ class JsonDataController extends Controller
                                     ELSE 'AKTIF'
                                 END
                             END keanggotaan,
-                            su.id idsukarela,su.status,su.amount,su.created_at tgl_pengajuan,su.tgl_approve,DATE_FORMAT(su.tgl_awal, '%Y%m') as tgl_awal,su.durasi
+                            su.jenis,
+                            su.id idsukarela,su.status,su.amount,su.created_at tgl_pengajuan,su.tgl_approve,DATE_FORMAT(su.tgl_awal, '%Y%m') as tgl_awal,su.durasi,
+                            bt.file
                         ";
                         
                         $table = "
                             users us
                             JOIN users_roles ur ON us.role_id = ur.id
                             JOIN simpanan_sukarela su ON us.id = su.user_id
+                            LEFT JOIN bukti_transaksi bt ON bt.id = su.id_bukti
                         ";
                         
                         
@@ -1418,6 +1486,11 @@ class JsonDataController extends Controller
                         if($fstatuspinjam ){
                             $where .= "
                                  AND (lower(su.status) = '$fstatuspinjam')
+                            ";
+                        }
+                        if($fjenis ){
+                            $where .= "
+                                 AND (lower(su.jenis) = '$fjenis')
                             ";
                         }
 
@@ -1690,8 +1763,16 @@ class JsonDataController extends Controller
                     if ($request->isMethod('post')) {
 
                         DB::beginTransaction();     
-
                         $data = json_decode($request->getContent());
+                        $cekuser = DB::select("select * from users where nrp = '$data->nrp'");
+                        if($cekuser){
+                            $results = [
+                                'code' => '1',
+                                'message'  => "NRP sudah tersedia",
+                            ] ;
+                            return $MasterClass->Results($results);
+
+                        }
                         $now    = date('Y-m-d H:i:s');
                         $status = [];
                         if ($data->password){
@@ -1701,12 +1782,112 @@ class JsonDataController extends Controller
                                 ], 
                                 [
                                     'name' => $data->name,
-                                    'no_anggota'=> $data->noanggota,
+                                    'nrp'=> $data->nrp,
+                                    'alamat'=> $data->alamat,
+                                    'handphone'=> $data->handphone,
+                                    'role_id' => $data->role_id,
+                                    'password' => Hash::make($data->password),
+                                    'is_active' => '1',
+                                    'updated_at' => $now,
+                                ] // Kolom yang akan diisi
+                            );
+
+                        }else{
+                        
+                            $saved = User::updateOrCreate(
+                                [
+                                    'id' => $data->id,
+                                ], 
+                                [
+                                    'name' => $data->name,
+                                    'nrp'=> $data->nrp,
+                                    'alamat'=> $data->alamat,
+                                    'handphone'=> $data->handphone,
+                                    'role_id' => $data->role_id,
+                                    'is_active' => '1',
+                                ] // Kolom yang akan diisi
+                            );
+                            
+                        }
+                        $saved = $MasterClass->checkErrorModel($saved);
+                        
+                        $status  = $saved;
+    
+                        if($status['code'] == $MasterClass::CODE_SUCCESS){
+                            DB::commit();
+                        }else{
+                            DB::rollBack();
+                        }
+            
+                        $results = [
+                            'code' => $status['code'],
+                            'info'  => $status['info'],
+                            'data'  =>  $status['data'],
+                        ];
+                            
+            
+            
+                    } else {
+                        $results = [
+                            'code' => '103',
+                            'info'  => "Method Failed",
+                        ];
+                    }
+                } catch (\Exception $e) {
+                    // Roll back the transaction in case of an exception
+                    $results = [
+                        'code' => '102',
+                        'info'  => $e->getMessage(),
+                    ];
+        
+                }
+            }
+            else {
+        
+                $results = [
+                    'code' => '403',
+                    'info'  => "Unauthorized",
+                ];
+                
+            }
+
+            return $MasterClass->Results($results);
+
+        }
+        public function saveAnggota(Request $request){
+
+            $MasterClass = new Master();
+
+            $checkAuth = $MasterClass->Authenticated($MasterClass->getSession('user_id'));
+            
+            if($checkAuth['code'] == $MasterClass::CODE_SUCCESS){
+                try {
+                    if ($request->isMethod('post')) {
+
+                        DB::beginTransaction();     
+
+                        $data = json_decode($request->getContent());
+                        // dd($data);
+                        $now        = date('Y-m-d H:i:s');
+                        $noanggota  = $data->kesatuan.$MasterClass->getIncrement('users')['data'];
+                        $limit      = str_replace('.','',$data->limit_pinjaman);
+                        $gaji       = str_replace('.','',$data->gaji);
+                        $status = [];
+                        if ($data->password){
+                            $saved = User::updateOrCreate(
+                                [
+                                    'id' => $data->id,
+                                ], 
+                                [
+                                    'name' => $data->name,
+                                    'no_anggota'=> $noanggota,
                                     'pangkat'=> $data->pangkat,
                                     'nrp'=> $data->nrp,
                                     'alamat'=> $data->alamat,
                                     'handphone'=> $data->handphone,
                                     'tgl_dinas'=> $data->tgldinas,
+                                    'gaji' => $gaji,
+                                    'kesatuan' => $data->kesatuan,
                                     'status'=> $data->status,
                                     'role_id' => $data->role_id,
                                     'password' => Hash::make($data->password),
@@ -1723,12 +1904,14 @@ class JsonDataController extends Controller
                                 ], 
                                 [
                                     'name' => $data->name,
-                                    'no_anggota'=> $data->noanggota,
+                                    'no_anggota'=> $noanggota,
                                     'pangkat'=> $data->pangkat,
                                     'nrp'=> $data->nrp,
                                     'alamat'=> $data->alamat,
                                     'handphone'=> $data->handphone,
                                     'tgl_dinas'=> $data->tgldinas,
+                                    'gaji' => $gaji,
+                                    'kesatuan' => $data->kesatuan,
                                     'status'=> $data->status,
                                     'role_id' => $data->role_id,
                                     'is_active' => '1',
@@ -1736,7 +1919,6 @@ class JsonDataController extends Controller
                             );
                             
                         }
-                        $limit = $data->limit_pinjaman;
                         if($limit == null){
                             $limit = 0 ;
                         }
@@ -2039,7 +2221,7 @@ class JsonDataController extends Controller
                         DB::beginTransaction();     
 
                         $data = json_decode($request->getContent());
-                        $jumlah     = $data->jumlah ;
+                        $jumlah     = str_replace('.','',$data->jumlah);
                         $bulan      = $data->bulan.'-01' ;
                         $durasi     = $data->durasi ;
                         $userid     = $MasterClass->getSession('user_id') ;
@@ -2048,7 +2230,7 @@ class JsonDataController extends Controller
                         $cekpengajuan = $MasterClass->selectGlobal(
                             "*",
                             'simpanan_sukarela',
-                            "user_id = $userid and DATE_ADD(tgl_awal, INTERVAL 1 MONTH) >= $bulan");
+                            "user_id = $userid and DATE_ADD(tgl_awal, INTERVAL 1 MONTH) >= $bulan and jenis = 'potong gaji'");
                         if($cekpengajuan['data']){
                             DB::rollBack();
                             $results = [
@@ -2080,6 +2262,106 @@ class JsonDataController extends Controller
                             
             
             
+                    } else {
+                        $results = [
+                            'code' => '103',
+                            'info'  => "Method Failed",
+                        ];
+                    }
+                } catch (\Exception $e) {
+                    // Roll back the transaction in case of an exception
+                    $results = [
+                        'code' => '102',
+                        'info'  => $e->getMessage(),
+                    ];
+        
+                }
+            }
+            else {
+        
+                $results = [
+                    'code' => '403',
+                    'info'  => "Unauthorized",
+                ];
+                
+            }
+
+            return $MasterClass->Results($results);
+
+        }
+        public function actionpengajuansukarelamanual(Request $request){
+
+            $MasterClass = new Master();
+            
+            $checkAuth = $MasterClass->Authenticated($MasterClass->getSession('user_id'));
+            
+            if($checkAuth['code'] == $MasterClass::CODE_SUCCESS){
+                try {
+                    if ($request->isMethod('post')) {
+
+                        DB::beginTransaction();     
+
+                        $jumlah     = str_replace('.','',$request->jumlah) ;
+                        $now        = date('Y-m-d H:i:s');
+                        $userid     = $MasterClass->getSession('user_id') ;
+                        $status = [];
+
+                        $docname            = 'bukti';
+                        if(!empty($_FILES['buktimanual']['name'])){//jika file ada maka masukan file 
+                            
+                            $nama_file          = $_FILES['buktimanual']['name'];
+                            $tmp_name		    = $_FILES['buktimanual']['tmp_name'];
+                            $nama_file_upload   = strtolower(str_replace(' ','_',$docname.'-'.$nama_file));
+                            $alamatfile         = '../public/data/bukti/'; // directory file
+                            $uploaddir          = $alamatfile.$nama_file_upload; // directory file
+                            
+                            if (move_uploaded_file($tmp_name,$uploaddir)){
+                                chmod($uploaddir, 0777);
+    
+                                $attrphoto     = [
+                                    'file'      => $uploaddir,
+                                    'created_at'=> $now,
+                                ];
+                                $savefoto      = $MasterClass->saveGlobal('bukti_transaksi', $attrphoto );
+                                
+                                if($savefoto['code'] != $MasterClass::CODE_SUCCESS){
+                                    DB::rollBack();
+                                    $results = [
+                                        'code' => '1',
+                                        'info'  => "Pengajuan Gagal",
+                                    ];
+                                    return $MasterClass->Results($results);
+                                }
+                            }
+                            
+
+                            $attributes     = [
+                                'user_id'           => $userid,
+                                'jenis'             => 'manual',
+                                'amount'            => $jumlah,
+                                'id_bukti'          => $savefoto['data'],
+                                'created_at'        => $now,
+                            ];
+                            $saved      = $MasterClass->saveGlobal('simpanan_sukarela', $attributes );
+                            $status = $saved;
+        
+                            if($status['code'] != $MasterClass::CODE_SUCCESS){
+                                DB::commit();
+                                $results = [
+                                    'code'      => $status['code'],
+                                    'message'   => 'Pengajuan Gagal',
+                                ];
+                                return $MasterClass->Results($results);
+                            }
+
+
+                            DB::commit();
+                            $results = [
+                                'code'      => $status['code'],
+                                'message'   => 'Pengajuan Berhasil',
+                            ];
+            
+                        }
                     } else {
                         $results = [
                             'code' => '103',

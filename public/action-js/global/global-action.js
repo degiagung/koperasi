@@ -110,33 +110,34 @@ function validationSwalFailed(param, isText) {
 
 function formatRupiah(angka, prefix) {
     // var angka = angka.split(".");
-	if(angka){
-		var seeminus = angka.substr(0,1);
-		if(seeminus == '-'){
-			var minus = '-';
-			var angka = angka.substr(1).replace(/[^,\d]/g, ',');
-		}else{
-			var minus = '';
-			
-			var angka = angka.replace(/[^,\d]/g, ',');
-		}
-		var number_string = angka.toString(),
-			split = number_string.split(","),
-			sisa = split[0].length % 3,
-			rupiah = split[0].substr(0, sisa),
-			ribuan = split[0].substr(sisa).match(/\d{3}/gi);
-		// tambahkan titik jika yang di input sudah menjadi angka ribuan
-		
-		if (ribuan) {
-			separator = sisa ? "," : "";
-			rupiah += separator + ribuan.join(",");
-		}
-	
-		rupiah = split[1] != undefined ? minus+rupiah + "." + split[1] : rupiah;
-		return prefix == undefined ? rupiah : rupiah ? "Rp " + rupiah : "";
-	}else{
-		return '';
-	}
+    if(angka){
+      angka = String(angka);
+      var seeminus = angka.substr(0,1);
+      if(seeminus == '-'){
+        var minus = '-';
+        var angka = angka.substr(1).replace(/[^,\d]/g, '.');
+      }else{
+        var minus = '';
+        
+        var angka = angka.replace(/[^,\d]/g, '.');
+      }
+      var number_string = angka.toString(),
+        split = number_string.split("."),
+        sisa = split[0].length % 3,
+        rupiah = split[0].substr(0, sisa),
+        ribuan = split[0].substr(sisa).match(/\d{3}/gi);
+      // tambahkan titik jika yang di input sudah menjadi angka ribuan
+      
+      if (ribuan) {
+        separator = sisa ? "." : "";
+        rupiah += separator + ribuan.join(".");
+      }
+    
+      rupiah = split[1] != undefined ? minus+rupiah + "." + split[1] : rupiah;
+      return prefix == undefined ? rupiah : rupiah ? "Rp " + rupiah : "";
+    }else{
+      return '0.00';
+    }
     
 }
 function datetostring2(p1,p2,p3){
@@ -223,38 +224,6 @@ function datetostring2(p1,p2,p3){
 		return '';
 	}
 }
-function formatRupiah(angka, prefix) {
-    // var angka = angka.split(".");
-    if(angka){
-    angka = String(angka);
-		var seeminus = angka.substr(0,1);
-		if(seeminus == '-'){
-			var minus = '-';
-			var angka = angka.substr(1).replace(/[^,\d]/g, ',');
-		}else{
-			var minus = '';
-			
-			var angka = angka.replace(/[^,\d]/g, ',');
-		}
-		var number_string = angka.toString(),
-			split = number_string.split(","),
-			sisa = split[0].length % 3,
-			rupiah = split[0].substr(0, sisa),
-			ribuan = split[0].substr(sisa).match(/\d{3}/gi);
-		// tambahkan titik jika yang di input sudah menjadi angka ribuan
-		
-		if (ribuan) {
-			separator = sisa ? "," : "";
-			rupiah += separator + ribuan.join(",");
-		}
-	
-		rupiah = split[1] != undefined ? minus+rupiah + "." + split[1] : rupiah;
-		return prefix == undefined ? rupiah : rupiah ? "Rp " + rupiah : "";
-	}else{
-		return '0';
-	}
-    
-}
 function pembilang(nilai) {
   nilai = Math.floor(Math.abs(nilai));
  
@@ -328,4 +297,24 @@ function getMonthDifference(startDate, endDate) {
     startDate.getMonth() +
     12 * (endDate.getFullYear() - startDate.getFullYear())
   );
+}
+function convertrp(id) {
+    value = $("#"+id).val();
+    $("#"+id).val(keyuprp(value));
+}
+function keyuprp(angka, prefix)
+{
+    var number_string = angka.replace(/[^,\d]/g, '').toString(),
+        split    = number_string.split(','),
+        sisa     = split[0].length % 3,
+        rupiah     = split[0].substr(0, sisa),
+        ribuan     = split[0].substr(sisa).match(/\d{3}/gi);
+        
+    if (ribuan) {
+        separator = sisa ? '.' : '';
+        rupiah += separator + ribuan.join('.');
+    }
+    
+    rupiah = split[1] != undefined ? rupiah + ',' + split[1] : rupiah;
+    return prefix == undefined ? rupiah : (rupiah ? 'Rp. ' + rupiah : '');
 }

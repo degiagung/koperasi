@@ -46,7 +46,7 @@
                         {{-- <div>
                             <h4 class="card-title">List User</h4>
                         </div> --}}
-                        @if ($role == 'sekertaris koperasi')
+                        @if ($role == 'sekertaris koperasi' || $role == 'superadmin')
                             <ul class="nav nav-tabs dzm-tabs" id="myTab-4" role="tablist">
                                 <li class="nav-item" role="presentation">
                                     <button type="button" id="add-btn" class="nav-link active btn-sgn">Add</button>
@@ -95,16 +95,17 @@
                                     <div class="mb-3 row">
                                         <label class="col-sm-3 col-form-label">Limit Pinjaman</label>
                                         <div class="col-sm-9">
-                                            <input id="form-limit" type="number" class="form-control" placeholder="Limit Pinjaman">
+                                            <input id="form-limit" type="text" class="form-control" placeholder="Limit Pinjaman" onkeyup="convertrp('form-limit')">
                                         </div>
                                     </div>
                                 </div>
                                 <div class="forsekertaris">
 
                                     <div class="mb-3 row">
-                                        <label class="col-sm-3 col-form-label">No Aggota</label>
+                                        <label class="col-sm-3 col-form-label">Kesatuan</label>
                                         <div class="col-sm-9">
-                                            <input id="form-noanggota" type="text" class="form-control" placeholder="No Anggota">
+                                            <select id="form-kesatuan" name="form-kesatuan" class="select2add">
+                                            </select>
                                         </div>
                                     </div>
                                     <div class="mb-3 row">
@@ -142,6 +143,12 @@
                                         <label class="col-sm-3 col-form-label">Tgl Dinas</label>
                                         <div class="col-sm-9">
                                             <input type="date" id="form-tgldinas" class="form-control">
+                                        </div>
+                                    </div>
+                                    <div class="mb-3 row">
+                                        <label class="col-sm-3 col-form-label">Gaji</label>
+                                        <div class="col-sm-9">
+                                            <input type="text" id="form-gaji" class="form-control" onkeyup="convertrp('form-gaji')">
                                         </div>
                                     </div>
                                     <div class="mb-3 row">
@@ -185,6 +192,12 @@
 @endsection
 @push('after-script')
     <script> 
+    function handleEvt(e, pid) {
+    if (e.keyCode === 13) {  // where 13 is the enter button
+      var v = e.target.value;
+      alert('it is working:' + v);
+    }
+}
         @foreach ($varJs as $varjsi)
             {!! $varjsi !!}
         @endforeach

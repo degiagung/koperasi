@@ -30,6 +30,8 @@ class User extends Authenticatable
         'alamat',
         'handphone',
         'tgl_dinas',
+        'gaji',
+        'kesatuan',
         'status',
     ];
 

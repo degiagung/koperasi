@@ -95,21 +95,9 @@
                         <div class="basic-form">
                             <form>
                                 <div class="mb-3 row">
-                                    <label class="col-sm-3 col-form-label">No Aggota</label>
-                                    <div class="col-sm-9">
-                                        <input id="form-noanggota" type="text" class="form-control" placeholder="No Anggota">
-                                    </div>
-                                </div>
-                                <div class="mb-3 row">
                                     <label class="col-sm-3 col-form-label">Nama</label>
                                     <div class="col-sm-9">
                                         <input id="form-name" type="text" class="form-control" placeholder="Nama">
-                                    </div>
-                                </div>
-                                <div class="mb-3 row">
-                                    <label class="col-sm-3 col-form-label">Pangkat</label>
-                                    <div class="col-sm-9">
-                                        <input id="form-pangkat" type="text" class="form-control" placeholder="Pangkat">
                                     </div>
                                 </div>
                                 <div class="mb-3 row">
@@ -128,22 +116,6 @@
                                     <label class="col-sm-3 col-form-label">Handphone</label>
                                     <div class="col-sm-9">
                                         <input type="number" min='0' id="form-handphone" class="form-control" placeholder="Handphone">
-                                    </div>
-                                </div>
-                                 <div class="mb-3 row">
-                                    <label class="col-sm-3 col-form-label">Tgl Dinas</label>
-                                    <div class="col-sm-9">
-                                        <input type="date" id="form-tgldinas" class="form-control">
-                                    </div>
-                                </div>
-                                <div class="mb-3 row">
-                                    <label class="col-sm-3 col-form-label">Keanggotaan</label>
-                                    <div class="col-sm-9">
-                                        <select id="form-status" name="form-status" class="select2add">
-                                            <option value="">Semua Status</option>
-                                            <option value="1">AKTIF</option>
-                                            <option value="2">PINDAH</option>
-                                        </select>
                                     </div>
                                 </div>
                                 <div class="mb-3 row">

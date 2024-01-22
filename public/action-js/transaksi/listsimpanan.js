@@ -94,10 +94,7 @@ function getListData() {
                 return 'Rp. ' +formatRupiah(row.penarikan);
             } },
             { render:function (data,type,row) {
-                if (row.saldo > 0)
                 return 'Rp. ' +formatRupiah(row.saldo);
-                else
-                return 'Rp. 0';
             } },
         ],
         drawCallback: function (settings) {
