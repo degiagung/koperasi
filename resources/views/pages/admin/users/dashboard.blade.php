@@ -12,25 +12,41 @@
     </style>
     <section class="section dashboard">
          <div class="row">
-            <h2>Simpanan Anggota</h2>
+            <h2>Dashboard Anggota</h2>
             <br>
             <div class="col-lg-12">
                  <div class="card-filter">
-                    <label style="font-size:18px;">Filter</label>
+                    <label style="font-size:18px;">ANGGOTA</label>
                     <hr>
                         <div class="row">
 
-                            <div class="col-sm-3">
-                                <label>Status Keanggotaan</label>
-                                <select id="filter-keanggotaan" name="filter-keanggotaan" class="select2 ">
-                                    <option value="">Semua Kondisi</option>
-                                    <option value="<= current_date and us.status != '2'">AKTIF</option>
-                                    <option value="> current_date">PENSIUN</option>
-                                    <option value="pindah">PINDAH</option>
-                                </select>
+                            <div class="col-sm-4">
+                                <label>Nama</label>
+                                <input readonly id="name" type="text" class="form-control" >
+
                             </div>
-                            <div class="col-sm-2">
-                                <button type="submit" id="filter-btn" class="btn btn-sgn" style="color:#e12a2a;width:100%;height:35px;font-size:14px;margin-top: 27px;"><i class="bi bi-search" style="font-size:12px;" ></i> Cari</button>
+                            <div class="col-sm-3">
+                                <label>NRP</label>
+                                <input readonly id="nrp" type="text" class="form-control" >
+
+                            </div>
+                            <div class="col-sm-3">
+                                <label>Pangkat</label>
+                                <input readonly id="pangkat" type="text" class="form-control" >
+
+                            </div>
+                        </div>
+                        <div class="row">
+
+                            <div class="col-sm-4">
+                                <label>Tanggal Dinas</label>
+                                <input readonly id="tangggal" type="text" class="form-control" >
+
+                            </div>
+                            <div class="col-sm-3">
+                                <label>Lama Berdinasi (Bulan)</label>
+                                <input readonly id="los" type="text" class="form-control" >
+
                             </div>
                         </div>
                     </div>
@@ -41,46 +57,52 @@
             <div class="col-lg-12">
                 <div class="card">
                     <div class="card-header mt-2 flex-wrap d-flex justify-content-between">
-                        
+                        <label style="font-size:18px;">Pengajuan Pinjaman</label>
                     </div>
                     <div class="card-body">
                         <div class="table-responsive">
-                            {{-- @if ($role == 'anggota')
-                                <table id="table-list" class="datatables">
-                                    <thead>
-                                        <tr>
-                                            <th>No</th>
-                                            <th>Tgl Transaksi</th>
-                                            <th>Nominal</th>
-                                            <th>Keterangan</th>
-                                            <th>Bukti Transaksi</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                    </tbody>
-                                </table>
-                            @else --}}
-                                <table id="table-list" class="table table-bordered datatables">
-                                    <thead>
-                                        <tr>
-                                            <th>No</th>
-                                            <th>NRP</th>
-                                            <th>Nama Anggota</th>
-                                            <th>Tanggal Dinas</th>
-                                            <th>keanggotaan</th>
-                                            <th>Simpanan Pokok</th>
-                                            <th>Simpanan Wajib</th>
-                                            <th>Simpanan Sukarela</th>
-                                            <th>Total Simpan</th>
-                                            <th>Penarikan</th>
-                                            <th>Saldo</th>
-                                            {{-- <th>Bukti</th> --}}
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                    </tbody>
-                                </table>
-                            {{-- @endif --}}
+                            <table id="table-list-pinjaman" class="table table-bordered datatables">
+                                <thead>
+                                    <tr>
+                                        <th>Tgl Pinjam</th>
+                                        <th>Nominal Pinjaman</th>
+                                        <th>Tenor</th>
+                                        <th>Sudah Terbayar</th>
+                                        <th>Sisa Pinjaman</th>
+                                        
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-lg-12">
+                <div class="card">
+                    <div class="card-header mt-2 flex-wrap d-flex justify-content-between">
+                        <label style="font-size:18px;">Simpanan</label>
+                    </div>
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table id="table-list" class="table table-bordered datatables">
+                                <thead>
+                                    <tr>
+                                        <th>No</th>
+                                        <th>Simpanan Pokok</th>
+                                        <th>Simpanan Wajib</th>
+                                        <th>Simpanan Sukarela</th>
+                                        <th>Total Simpan</th>
+                                        <th>Penarikan</th>
+                                        <th>Saldo</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                </tbody>
+                            </table>
                         </div>
                     </div>
                 </div>

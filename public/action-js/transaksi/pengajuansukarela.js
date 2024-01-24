@@ -360,7 +360,7 @@ function ajukanpinjamanmanual() {
         success: function (response) {
             // Handle response sukses
             if (response.code == 0) {
-                swal("BERHASIL !", response.message, "success");
+                swal("BERHASIL !", response.info, "success");
                 $("#modal-data-manual").modal("hide");
             } else {
                 sweetAlert("Oops...", response.info, "ERROR");

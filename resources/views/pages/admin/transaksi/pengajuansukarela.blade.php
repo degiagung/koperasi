@@ -59,14 +59,14 @@
                 <div class="card">
                     <div class="card-header mt-2 flex-wrap d-flex justify-content-between">
                         <ul class="nav nav-tabs dzm-tabs" id="myTab-4" role="tablist">
-                            {{-- @if ($role == 'anggota') --}}
+                            @if ($role == 'anggota')
                             <li class="nav-item" role="presentation">
                                 <button type="button" id="add-btn" class="nav-link active btn-sgn">Pengajuan Dari Gaji</button>
                             </li>
                             <li class="nav-item" role="presentation" style="margin-left :15px;">
                                 <button type="button" id="add-btn-manual" class="nav-link active btn-sgn">Pengajuan Manual</button>
                             </li>
-                            {{-- @endif --}}
+                            @endif
                         </ul>
                     </div>
                     <div class="card-body">

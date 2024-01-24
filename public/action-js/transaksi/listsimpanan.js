@@ -3,8 +3,17 @@
 let dtpr;
 
 $(document).ready(function () {
-    getListData();
+    calllistdata();
 });
+
+function calllistdata(){
+    if(role == 'anggota'){
+        // getListDataAnggota();
+        getListData();
+    }else{
+        getListData();
+    }
+}
 
 $(".select2").select2();
 $(".select2add").select2({

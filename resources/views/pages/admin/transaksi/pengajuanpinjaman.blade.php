@@ -482,7 +482,7 @@
                                 <div class="mb-3 row">
                                     <label class="col-sm-3 col-form-label">Jumlah Pinjaman </label>
                                     <div class="col-sm-9">
-                                        <input id="form-pinjaman" type="number" class="form-control">
+                                        <input id="form-pinjaman" type="text" class="form-control" onkeyup="convertrp('form-pinjaman')">
                                     </div>
                                 </div>
                                 <div class="mb-3 row">

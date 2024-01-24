@@ -33,8 +33,39 @@ class GeneralController extends Controller
         $checkAuth = $MasterClass->AuthenticatedView($request->route()->uri());
         
         if($checkAuth['code'] == $MasterClass::CODE_SUCCESS){
+            $rolename = strtolower($MasterClass->getSession('role_name'))  ;
+            if ($rolename == 'anggota') {
+                $javascriptFiles = [
+                    asset('action-js/global/global-action.js'),
+                    // asset('action-js/generate/generate-action.js'),
+                    asset('action-js/dashboard-action.js'),
+                ];
+            
+                $cssFiles = [
+                    // asset('css/main.css'),
+                    // asset('css/custom.css'),
+                ];
+                $baseURL = url('/');
+                $rolename = strtolower($MasterClass->getSession('role_name'))  ;
+                $varJs = [
+                    'const baseURL = "' . $baseURL . '"',
+                    'const role = "' . $rolename .'"',
 
-            return redirect('/laporan');
+                ];
+        
+                $data = [
+                    'javascriptFiles' => $javascriptFiles,
+                    'cssFiles' => $cssFiles,
+                    'varJs'=> $varJs,
+                    'role'=> $rolename
+                    // Menambahkan base URL ke dalam array
+                ];
+            
+                return view('pages.admin.users.dashboard')
+                ->with($data);
+            }else{
+                return redirect('/laporan');
+            }
 
         }else{
             return redirect('/login');
@@ -186,6 +217,7 @@ class GeneralController extends Controller
                 'javascriptFiles' => $javascriptFiles,
                 'cssFiles' => $cssFiles,
                 'varJs'=> $varJs,
+                'role'=> $rolename,
                  // Menambahkan base URL ke dalam array
             ];
         
@@ -224,6 +256,7 @@ class GeneralController extends Controller
                 'javascriptFiles' => $javascriptFiles,
                 'cssFiles' => $cssFiles,
                 'varJs'=> $varJs,
+                'role'=> $rolename,
                  // Menambahkan base URL ke dalam array
             ];
         

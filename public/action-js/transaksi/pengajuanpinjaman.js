@@ -344,11 +344,13 @@ $("#add-btn").on("click", function (e) {
 
 $("#ajukan-btn").on("click", function (e) {
     e.preventDefault();
-    if ($("#form-pinjaman").val() < 500000){
+    jumlah = $("#form-pinjaman").val();
+    jumlah = jumlah.replaceAll('.','');
+    if (jumlah < 500000){
         swalwarning('Minimal pengajuan Rp 500.000');
         return false;
     }
-    if (parseFloat($("#form-pinjaman").val()) > parseFloat(islimit)){
+    if (parseFloat(jumlah) > parseFloat(islimit)){
         swalwarning('Limit Pinjaman tidak cukup');
         return false;
     }
@@ -366,6 +368,7 @@ $("#ajukan-btn").on("click", function (e) {
 
 function ajukanpinjaman(){
     pinjaman = $("#form-pinjaman").val() ;
+    pinjaman = pinjaman.replaceAll('.','');
     tenor = $("#form-tenor").val() ;
     keperluan = $("#form-keperluan").val() ;
     title = 'Pinjaman Rp.'+formatRupiah(pinjaman)+' dengan tenor '+tenor+' Bulan ?';

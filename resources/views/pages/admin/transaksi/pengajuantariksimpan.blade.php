@@ -136,7 +136,7 @@
                                 <div class="mb-3 row">
                                     <label class="col-sm-3 col-form-label">Jumlah Pengajuan </label>
                                     <div class="col-sm-9">
-                                        <input id="form-pengajuan" type="number" class="form-control">
+                                        <input id="form-pengajuan" type="text" class="form-control" onkeyup="convertrp('form-pengajuan')">
                                     </div>
                                 </div>
 

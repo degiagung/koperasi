@@ -52,25 +52,45 @@
                     </div>
                     <div class="card-body">
                         <div class="table-responsive">
-                            <table id="table-list" class="table table-bordered table-striped table-lgdatatables">
-                                <thead>
-                                    <tr>
-                                        <th>No</th>
-                                        <th>Status </th>
-                                        <th>NRP</th>
-                                        <th>Nama Anggota</th>
-                                        <th>Tanggal Dinas</th>
-                                        <th>keanggotaan</th>
-                                        <th>Total Limit</th>
-                                        <th>Pengajuan Tenor & Pinjaman</th>
-                                        <th>Total Pembayaran</th>
-                                        <th>Sisa Limit</th>
-                                        <th>Sisa Tenor & Pinjaman</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                </tbody>
-                            </table>
+                            @if ($role != 'anggota')
+                                <table id="table-list" class="table table-bordered table-striped table-lgdatatables">
+                                    <thead>
+                                        <tr>
+                                            <th>No</th>
+                                            <th>Status </th>
+                                            <th>NRP</th>
+                                            <th>Nama Anggota</th>
+                                            <th>Tanggal Dinas</th>
+                                            <th>keanggotaan</th>
+                                            <th>Total Limit</th>
+                                            <th>Pengajuan Tenor & Pinjaman</th>
+                                            <th>Total Pembayaran</th>
+                                            <th>Sisa Limit</th>
+                                            <th>Sisa Tenor & Pinjaman</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                    </tbody>
+                                </table>
+                            @endif
+                            @if ($role == 'anggota')
+                                <table id="table-list" class="table table-bordered table-striped table-lgdatatables">
+                                    <thead>
+                                        <tr>
+                                            <th>No</th>
+                                            <th>Status</th>
+                                            <th>Tgl Pinjam</th>
+                                            <th>Tgl Pembayaran</th>
+                                            <th>Nominal</th>
+                                            <th>Tenor</th>
+                                            <th>Cicilan Ke</th>
+                                            <th>Bukti Cicilan</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                    </tbody>
+                                </table>
+                            @endif
                         </div>
                     </div>
                 </div>
@@ -185,6 +205,88 @@
                     <div class="modal-footer">
                         <button type="button" class="btn btn-danger light" data-bs-dismiss="modal">Close</button>
                         <button type="button" class="btn btn-sgn light" onClick="approval() ">Simpan</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="modal fade" id="modal-detail" style="display: none;" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered" role="document">
+                <div class="modal-content">
+                    <div class="modal-header headermodal">
+                        <h5 class="modal-title">Bukti Transaksi</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal">
+                        </button>
+                    </div>
+                    <div class="modal-body">
+                        <table id="table-list" class="table table-bordered table-striped table-lgdatatables">
+                            <thead>
+                                <tr>
+                                    <th>Tenor</th>
+                                    <th>Nominal</th>
+                                    <th>Cicilan Ke</th>
+                                    <th>Bukti Cicilan</th>
+                                </tr>
+                            </thead>
+                            <tbody id="detailbukti">
+
+                            </tbody>
+                        </table>
+                    </div>
+                    {{-- <div class="modal-footer">
+                        <button type="button" class="btn btn-danger light" data-bs-dismiss="modal">Close</button>
+                        <button type="button" class="btn btn-sgn light" onClick="approval() ">Simpan</button>
+                    </div> --}}
+                </div>
+            </div>
+        </div>
+
+        <div class="modal fade" id="modal-bukti" style="display: none;" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered" role="document">
+                <div class="modal-content">
+                    <div class="modal-header headermodal">
+                        <h5 class="modal-title">Bukti Transaksi</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal">
+                        </button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="basic-form buktidiv">
+                            
+                        </div>
+                    </div>
+                    {{-- <div class="modal-footer">
+                        <button type="button" class="btn btn-danger light" data-bs-dismiss="modal">Close</button>
+                        <button type="button" class="btn btn-sgn light" onClick="approval() ">Simpan</button>
+                    </div> --}}
+                </div>
+            </div>
+        </div>
+
+        <div class="modal fade" id="modal-upload" style="display: none;" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered" role="document">
+                <div class="modal-content">
+                    <div class="modal-header headermodal">
+                        <h5 class="modal-title">Upload Bukti</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal">
+                        </button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="basic-form">
+                                
+                            <div class="mb-3 row">
+                                <label class="col-sm-3 col-form-label">Bukti Transaksi</label>
+                                <div class="col-sm-9">
+                                    <form role="form" class="" id="formbukti" method="post" type="post" enctype="multipart/form-data">
+                                        <input class="form-control" name="bukti" id="form-bukti" type="file" value="" multiple style="opacity:1;"/>
+                                    </form>
+                                </div>
+                            </div>
+
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-danger light" data-bs-dismiss="modal">Close</button>
+                        <button type="button" id="simpanbukti-btn" class="btn btn-primary">Simpan</button>
                     </div>
                 </div>
             </div>

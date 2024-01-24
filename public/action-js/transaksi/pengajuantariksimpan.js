@@ -205,7 +205,9 @@ $("#add-btn").on("click", function (e) {
 
 $("#ajukan-btn").on("click", function (e) {
     e.preventDefault();
-    if ($("#form-pengajuan").val() < 100000){
+    jumlah = $("#form-pinjaman").val();
+    jumlah = jumlah.replaceAll('.','');
+    if (jumlah < 100000){
         swalwarning('Minimal Penarikan Rp 100000');
         return false;
     }
@@ -219,6 +221,7 @@ $("#ajukan-btn").on("click", function (e) {
 
 function ajukanpinjaman(){
     jumlah      = $("#form-pengajuan").val() ;
+    jumlah      = jumlah.replaceAll('.','');
     title = 'Penarikan Rp.'+formatRupiah(jumlah) +' ? ';
     swal({
         title: title,
