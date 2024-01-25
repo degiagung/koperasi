@@ -67,6 +67,7 @@
                                             <th>Total Pembayaran</th>
                                             <th>Sisa Limit</th>
                                             <th>Sisa Tenor & Pinjaman</th>
+                                            <th>Bukti Cicilan</th>
                                         </tr>
                                     </thead>
                                     <tbody>

@@ -126,6 +126,9 @@ function getListData() {
                     else
                     return row.sisatenor+' BLN & Rp.0';
             } },
+            { render:function (data,type,row) {
+                return `<a class="bukti" style="cursor:pointer;">Klik Disini</a>`;
+            } },
         ],
         drawCallback: function (settings) {
             var api = this.api();
@@ -150,6 +153,18 @@ function getListData() {
                     var tr = $(this).closest("tr");
                     var rowData = dtpr.row(tr).data();
                     detail(rowData);
+                });
+
+            $(rows)
+                .find(".bukti")
+                .on("click", function () {
+                    var tr = $(this).closest("tr");
+                    var rowData = dtpr.row(tr).data();
+                    $(".buktidiv").empty();
+                    isObject    = {};
+                    isObject    = rowData ;
+                    getlistbukti(rowData)
+                    
                 });
         },
     });
@@ -393,7 +408,11 @@ async function getlistbukti(rowData) {
         for (let i = 0; i < rowData.totaltenor; i++) {
             no = i+1 ;
             file = '';
-            jenis= 'Upload Bukti';
+            if (role == 'anggota') {
+                jenis= 'Upload Bukti';
+            }else{
+                jenis= 'Belum Upload';
+            }
             content += `
                 <tr>
                     <td>`+tenor+`</td>
@@ -421,6 +440,7 @@ async function getlistbukti(rowData) {
 }
 
 function bukti(file,no) {
+    
     if(file){
         $(".buktidiv").empty();
         file = file ;
@@ -432,6 +452,9 @@ function bukti(file,no) {
         $(".buktidiv").append(content);
         $("#modal-bukti").modal('show');
     }else{
+        if (role != 'anggota') {
+            return false ;
+        }
         $("#modal-upload").modal('show');
         isObject['nobukti'] = no ;
     }   

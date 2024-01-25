@@ -5,6 +5,7 @@ let dtpr;
 $(document).ready(function () {
     getListData();
     getListDataAnggota();
+    profileanggota();
 });
 
 $(".select2").select2();
@@ -232,4 +233,27 @@ function detail(rowData) {
 
 
     $("#modal-data").modal("show");
+}
+
+async function profileanggota() {
+    try {
+        const response = await $.ajax({
+            url: baseURL + "/profileanggota",
+            type: "POST",
+            dataType: "json",
+            beforeSend: function () {
+                
+            },
+        });
+
+        $("#name").val(response.data[0].name);
+        $("#nrp").val(response.data[0].nrp);
+        $("#pangkat").val(response.data[0].pangkat);
+        $("#tangggal").val(datetostring2('yymmdd',response.data[0].tgl_dinas));
+        $("#los").val(response.data[0].los+' BULAN');
+        console.log()
+        
+    } catch (error) {
+        sweetAlert("Oops...", error.responseText, "ERROR");
+    }
 }

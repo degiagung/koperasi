@@ -1774,7 +1774,7 @@ class JsonDataController extends Controller
                         $status = [];
                         $id     = $request->id ;
                         $userid = $MasterClass->getSession('user_id') ;
-                        $saved  = DB::select("SELECT a.* FROM bukti_transaksi a where id_parent = $id AND user_id = $userid ORDER BY created_at desc");
+                        $saved  = DB::select("SELECT a.* FROM bukti_transaksi a where id_parent = $id  ORDER BY created_at desc");
                         $saved  = $MasterClass->checkErrorModel($saved);
                         
                         $status = $saved;
@@ -1996,6 +1996,61 @@ class JsonDataController extends Controller
                             'code'  => $result['code'],
                             'info'  => $result['info'],
                             'data'  => $result['data'],
+                        ];
+                            
+            
+            
+                    } else {
+                        $results = [
+                            'code' => '103',
+                            'info'  => "Method Failed",
+                        ];
+                    }
+                } catch (\Exception $e) {
+                    // Roll back the transaction in case of an exception
+                    $results = [
+                        'code' => '102',
+                        'info'  => $e->getMessage(),
+                    ];
+        
+                }
+            }
+            else {
+        
+                $results = [
+                    'code' => '403',
+                    'info'  => "Unauthorized",
+                ];
+                
+            }
+
+            return $MasterClass->Results($results);
+
+        }
+        public function profileanggota(Request $request){
+
+            $MasterClass = new Master();
+
+            $checkAuth = $MasterClass->Authenticated($MasterClass->getSession('user_id'));
+            
+            if($checkAuth['code'] == $MasterClass::CODE_SUCCESS){
+                try {
+                    if ($request->isMethod('post')) {
+                        
+                        DB::beginTransaction();
+                
+                        $status = [];
+                        $id     = $MasterClass->getSession('user_id') ;
+                        $userid = $MasterClass->getSession('user_id') ;
+                        $saved  = DB::select("SELECT PERIOD_DIFF(DATE_FORMAT(SYSDATE(), '%Y%m'),DATE_FORMAT(tgl_dinas, '%Y%m')) los,a.* FROM users a where id = $id");
+                        $saved  = $MasterClass->checkErrorModel($saved);
+                        
+                        $status = $saved;
+            
+                        $results = [
+                            'code' => $status['code'],
+                            'info'  => $status['info'],
+                            'data'  =>  $status['data'],
                         ];
                             
             
