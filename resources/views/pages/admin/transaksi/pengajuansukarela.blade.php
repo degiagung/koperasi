@@ -153,7 +153,7 @@
             <div class="modal-dialog modal-dialog-centered" role="document">
                 <div class="modal-content">
                     <div class="modal-header headermodal">
-                        <h5 class="modal-title">Pengajuan</h5>
+                        <h5 class="modal-title">Pengajuan Dari Gaji</h5>
                         <button type="button" class="btn-close" data-bs-dismiss="modal">
                         </button>
                     </div>
@@ -195,7 +195,7 @@
             <div class="modal-dialog modal-dialog-centered" role="document">
                 <div class="modal-content">
                     <div class="modal-header headermodal">
-                        <h5 class="modal-title">Pengajuan</h5>
+                        <h5 class="modal-title">Pengajuan Manual / Mandiri</h5>
                         <button type="button" class="btn-close" data-bs-dismiss="modal">
                         </button>
                     </div>
