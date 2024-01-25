@@ -1582,7 +1582,7 @@ class JsonDataController extends Controller
                                 
                         ");
                         $saved = $MasterClass->checkErrorModel($saved);
-                        
+                        dd($saved);
                         $status = $saved;
             
                         $results = [
@@ -1719,7 +1719,7 @@ class JsonDataController extends Controller
                         $where.="
                             GROUP BY
                                 us.name,us.id,us.nrp,us.tgl_dinas,us.no_anggota,us.pangkat,
-                                sm.created_at,sm.tgl_approve,sm.amount,sm.id,sm.status
+                                sm.created_at,sm.tgl_approve,sm.amount,sm.id,sm.status,us.is_active
                             ORDER BY coalesce(sm.status,'waiting') desc,sm.created_at desc
                         ";
                         $result = $MasterClass->selectGlobal($select,$table,$where);
