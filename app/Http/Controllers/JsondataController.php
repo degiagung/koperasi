@@ -1582,7 +1582,7 @@ class JsonDataController extends Controller
                                 
                         ");
                         $saved = $MasterClass->checkErrorModel($saved);
-                        dd($saved);
+                        
                         $status = $saved;
             
                         $results = [

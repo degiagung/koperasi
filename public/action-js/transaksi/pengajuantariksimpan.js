@@ -291,10 +291,10 @@ async function gettotalsimpanan() {
                 // });
             },
         });
-        const res = response.data.map(function (item) {
-            $("#form-simpanan").val('Rp. '+formatRupiah(item.amount));
-            issimpanan = item.amount ;
-        });
+        // const res = response.data.map(function (item) {
+        //     $("#form-simpanan").val('Rp. '+formatRupiah(item.amount));
+        //     issimpanan = item.amount ;
+        // });
 
     } catch (error) {
         sweetAlert("Oops...", error.responseText, "ERROR");
