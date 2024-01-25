@@ -12,10 +12,10 @@ $(document).ready(function () {
 function cekrole(){
     if(role == 'bendahara koperasi' || role == 'superadmin' ){
         $(".forbdhara").show();
-        $(".forsekertaris").show();
-    }else{
-        $(".forbdhara").hide();
         $(".forsekertaris").hide();
+    }else{
+        $(".forsekertaris").show();
+        $(".forbdhara").hide();
     }
 }
 
