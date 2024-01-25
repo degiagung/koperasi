@@ -740,7 +740,7 @@ class JsonDataController extends Controller
                             
                             COALESCE(PERIOD_DIFF(DATE_FORMAT(SYSDATE(), '%Y%m'),DATE_FORMAT(us.tgl_dinas, '%Y%m')),0) jmldinas, 
                             coalesce(sum(su.amount),0.00),
-                            coalesce(sum(ss.amount),0.00) as sukarela,
+                            '1' as sukarela,
 
                             (
                                 cast(( 50000 * COALESCE(PERIOD_DIFF(DATE_FORMAT(SYSDATE(), '%Y%m'),DATE_FORMAT(us.tgl_dinas, '%Y%m')),0) / COALESCE(PERIOD_DIFF(DATE_FORMAT(SYSDATE(), '%Y%m'),DATE_FORMAT(us.tgl_dinas, '%Y%m')),0)) as decimal(18,2))
