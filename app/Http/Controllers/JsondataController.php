@@ -1581,6 +1581,7 @@ class JsonDataController extends Controller
                                 
                                 
                         ");
+                        dd($saved);
                         $saved = $MasterClass->checkErrorModel($saved);
                         
                         $status = $saved;
