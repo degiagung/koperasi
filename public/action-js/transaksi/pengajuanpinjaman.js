@@ -11,6 +11,9 @@ $(".select2").select2();
 $(".select2add").select2({
     dropdownParent: $("#modal-approval"),
 });
+$(".select2add1").select2({
+    dropdownParent: $("#modal-data"),
+});
 $("#form-tenor").select2({
     dropdownParent: $("#modal-data"),
 });

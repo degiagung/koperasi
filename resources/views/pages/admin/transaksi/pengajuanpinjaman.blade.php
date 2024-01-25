@@ -503,7 +503,7 @@
                                 <div class="mb-3 row">
                                     <label class="col-sm-3 col-form-label">Keperluan</label>
                                     <div class="col-sm-9">
-                                        <select id="form-keperluan" name="form-keperluan" class="select2add">
+                                        <select id="form-keperluan" name="form-keperluan" class="select2add1">
                                             <option value="" disabled>Pilih Keperluan</option>
                                             <option value="pendidikan">Pendidikan</option>
                                             <option value="kesejahteraan">Kesejahteraan</option>
