@@ -192,12 +192,12 @@
 @endsection
 @push('after-script')
     <script> 
-    function handleEvt(e, pid) {
-    if (e.keyCode === 13) {  // where 13 is the enter button
-      var v = e.target.value;
-      alert('it is working:' + v);
-    }
-}
+    // function handleEvt(e, pid) {
+    //     if (e.keyCode === 13) {  // where 13 is the enter button
+    //     var v = e.target.value;
+    //     alert('it is working:' + v);
+    //     }
+    // }
         @foreach ($varJs as $varjsi)
             {!! $varjsi !!}
         @endforeach
