@@ -1546,10 +1546,8 @@ class JsonDataController extends Controller
                 
                         $status = [];
                         $userid= $MasterClass->getSession('user_id') ;
-                        $saved = DB::select("
-                            select 
-	
-                                COALESCE(PERIOD_DIFF(DATE_FORMAT(SYSDATE(), '%Y%m'),DATE_FORMAT(us.tgl_dinas, '%Y%m')),0) jmldinas,
+                        
+                        $select = "COALESCE(PERIOD_DIFF(DATE_FORMAT(SYSDATE(), '%Y%m'),DATE_FORMAT(us.tgl_dinas, '%Y%m')),0) jmldinas,
                                 ( 50000 * COALESCE(PERIOD_DIFF(DATE_FORMAT(SYSDATE(), '%Y%m'),DATE_FORMAT(us.tgl_dinas, '%Y%m')),0) / COALESCE(PERIOD_DIFF(DATE_FORMAT(SYSDATE(), '%Y%m'),DATE_FORMAT(us.tgl_dinas, '%Y%m')),0))
                                 +
                                 (50000 * COALESCE(PERIOD_DIFF(DATE_FORMAT(SYSDATE(), '%Y%m'),DATE_FORMAT(us.tgl_dinas, '%Y%m')),0))
@@ -1557,8 +1555,8 @@ class JsonDataController extends Controller
                                 coalesce(sum(su.amount),0)
                                 +
                                 coalesce(sum(ss.amount),0.00)
-                                as amount
-                            FROM
+                                as amount";
+                        $table  = "
                                 users us
                                 left join (
                                     select 
@@ -1576,16 +1574,10 @@ class JsonDataController extends Controller
                                     where su.jenis = 'potong gaji' and su.status = 'approve'
                                 ) as su ON su.user_id = us.id
                                 LEFT JOIN simpanan_sukarela ss ON ss.user_id = us.id AND ss.jenis = 'manual' and ss.status = 'approve'
-                            WHERE
-                                us.id = $userid
-                                
-                                
-                        ");
-                        dd($saved);
-                        $saved = $MasterClass->checkErrorModel($saved);
-                        
-                        $status = $saved;
-            
+                        ";
+                        $result = $MasterClass->selectGlobal($select,$table,"us.id = $userid");
+
+                        $status = $result;
                         $results = [
                             'code' => $status['code'],
                             'info'  => $status['info'],
