@@ -739,7 +739,7 @@ class JsonDataController extends Controller
                             cast(COALESCE(PERIOD_DIFF(DATE_FORMAT(SYSDATE(), '%Y%m'),DATE_FORMAT(us.tgl_dinas, '%Y%m')),0) * 50000 as decimal(18,2)) as simpananwajib,
                             
                             COALESCE(PERIOD_DIFF(DATE_FORMAT(SYSDATE(), '%Y%m'),DATE_FORMAT(us.tgl_dinas, '%Y%m')),0) jmldinas, 
-                            coalesce(sum(su.amount),0)+coalesce(sum(ss.amount),0.00) as sukarela,
+                            coalesce(sum(su.amount),0.00)+coalesce(sum(ss.amount),0.00) as sukarela,
 
                             (
                                 cast(( 50000 * COALESCE(PERIOD_DIFF(DATE_FORMAT(SYSDATE(), '%Y%m'),DATE_FORMAT(us.tgl_dinas, '%Y%m')),0) / COALESCE(PERIOD_DIFF(DATE_FORMAT(SYSDATE(), '%Y%m'),DATE_FORMAT(us.tgl_dinas, '%Y%m')),0)) as decimal(18,2))
@@ -749,7 +749,7 @@ class JsonDataController extends Controller
                                 COALESCE(PERIOD_DIFF(DATE_FORMAT(SYSDATE(), '%Y%m'),DATE_FORMAT(us.tgl_dinas, '%Y%m')),0) * 50000
                             )
                             +
-                            coalesce(sum(su.amount),0)
+                            coalesce(sum(su.amount),0.00)
                             +
                             coalesce(sum(ss.amount),0.00)
                             as total,
@@ -762,7 +762,7 @@ class JsonDataController extends Controller
                                 COALESCE(PERIOD_DIFF(DATE_FORMAT(SYSDATE(), '%Y%m'),DATE_FORMAT(us.tgl_dinas, '%Y%m')),0) * 50000
                             )
                             +
-                            coalesce(sum(su.amount),0)
+                            coalesce(sum(su.amount),0.00)
                             +
                             coalesce(sum(ss.amount),0.00)
                             -
@@ -1196,7 +1196,7 @@ class JsonDataController extends Controller
                             +
                             (50000 * COALESCE(PERIOD_DIFF(DATE_FORMAT(SYSDATE(), '%Y%m'),DATE_FORMAT(us.tgl_dinas, '%Y%m')),0))
                             + 
-                            coalesce(sum(su.amount),0)
+                            coalesce(sum(su.amount),0.00)
                             as sukarela,
 
                             (
@@ -1207,7 +1207,7 @@ class JsonDataController extends Controller
                                 COALESCE(PERIOD_DIFF(DATE_FORMAT(SYSDATE(), '%Y%m'),DATE_FORMAT(us.tgl_dinas, '%Y%m')),0) * 50000
                             )
                             +
-                            coalesce(sum(su.amount),0)
+                            coalesce(sum(su.amount),0.00)
                             +
                             coalesce(sum(ss.amount),0.00)
                             as simpanan,
@@ -1221,7 +1221,7 @@ class JsonDataController extends Controller
                                 COALESCE(PERIOD_DIFF(DATE_FORMAT(SYSDATE(), '%Y%m'),DATE_FORMAT(us.tgl_dinas, '%Y%m')),0) * 50000
                             )
                             +
-                            coalesce(sum(su.amount),0) 
+                            coalesce(sum(su.amount),0.00) 
                             +
                             coalesce(sum(ss.amount),0.00)
                             -
@@ -1552,7 +1552,7 @@ class JsonDataController extends Controller
                                 +
                                 (50000 * COALESCE(PERIOD_DIFF(DATE_FORMAT(SYSDATE(), '%Y%m'),DATE_FORMAT(us.tgl_dinas, '%Y%m')),0))
                                 + 
-                                coalesce(sum(su.amount),0)
+                                coalesce(sum(su.amount),0.00)
                                 +
                                 coalesce(sum(ss.amount),0.00)
                                 as amount";
@@ -1656,7 +1656,7 @@ class JsonDataController extends Controller
                             +
                             (50000 * COALESCE(PERIOD_DIFF(DATE_FORMAT(SYSDATE(), '%Y%m'),DATE_FORMAT(us.tgl_dinas, '%Y%m')),0))
                             + 
-                            coalesce(sum(su.amount),0)
+                            coalesce(sum(su.amount),0.00)
                             +
                             coalesce(sum(ss.amount),0.00)
                             as decimal(18,2))
@@ -2808,7 +2808,7 @@ class JsonDataController extends Controller
                                 +
                                 (50000 * COALESCE(PERIOD_DIFF(DATE_FORMAT(SYSDATE(), '%Y%m'),DATE_FORMAT(us.tgl_dinas, '%Y%m')),0))
                                 + 
-                                coalesce(sum(su.amount),0)
+                                coalesce(sum(su.amount),0.00)
                                 -
                                 coalesce(sum(sm.amount),0)
                                 as amount
