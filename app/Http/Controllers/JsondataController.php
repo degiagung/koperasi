@@ -2237,12 +2237,8 @@ class JsonDataController extends Controller
                         $limit      = str_replace('.','',$data->limit_pinjaman);
                         $gaji       = str_replace('.','',$data->gaji);
                         $status = [];
-                        if ($data->password){
-                            $saved = User::updateOrCreate(
-                                [
-                                    'id' => $data->id,
-                                ], 
-                                [
+
+                        $attr       = [
                                     'name' => $data->name,
                                     'no_anggota'=> $noanggota,
                                     'pangkat'=> $data->pangkat,
@@ -2257,32 +2253,20 @@ class JsonDataController extends Controller
                                     'password' => Hash::make($data->password),
                                     'is_active' => '1',
                                     'updated_at' => $now,
-                                ] // Kolom yang akan diisi
-                            );
-
-                        }else{
-                        
-                            $saved = User::updateOrCreate(
-                                [
-                                    'id' => $data->id,
-                                ], 
-                                [
-                                    'name' => $data->name,
-                                    'no_anggota'=> $noanggota,
-                                    'pangkat'=> $data->pangkat,
-                                    'nrp'=> $data->nrp,
-                                    'alamat'=> $data->alamat,
-                                    'handphone'=> $data->handphone,
-                                    'tgl_dinas'=> $data->tgldinas,
-                                    'gaji' => $gaji,
-                                    'kesatuan' => $data->kesatuan,
-                                    'status'=> $data->status,
-                                    'role_id' => $data->role_id,
-                                    'is_active' => '1',
-                                ] // Kolom yang akan diisi
-                            );
-                            
+                                ] ;// Kolom yang akan diisi 
+                                
+                        if (!$data->password){
+                            unset($attr['password']);  
                         }
+                        if ($data->save == '0'){
+                            unset($attr['no_anggota']);  
+                        }
+                        $saved = User::updateOrCreate(
+                            [
+                                'id' => $data->id,
+                            ], 
+                            $attr
+                        );
                         if($limit == null){
                             $limit = 0 ;
                         }

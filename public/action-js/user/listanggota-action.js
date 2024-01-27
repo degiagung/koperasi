@@ -129,6 +129,8 @@ function getListData() {
 function editdata(rowData) {
     
     isObject = rowData;
+    isObject["save"] = '0';
+
     cekrole()
     $("#form-noanggota").val(rowData.no_anggota);
     $("#form-name").val(rowData.name);
@@ -157,6 +159,7 @@ $("#add-btn").on("click", function (e) {
     isObject = {};
     isObject["id"] = null;
     isObject["idlimit"] = null;
+    isObject["save"] = '1';
     $("#form input").val("");
     $("#form textarea").val("");
     $("#form-role").val("").trigger("change");
