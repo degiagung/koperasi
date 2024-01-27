@@ -80,11 +80,11 @@ function getListData() {
                 else
                     return "<a class='approvalsukarela' style='color:black;cursor:pointer;font-weight:bold;'>WAITING APPROVED</a>";
             } },
-            { data: "nrp" },
-            { data: "name",render:function (data,type,row) {
+            { visible:false,class:"notanggota",data: "nrp" },
+            { visible:false,class:"notanggota",data: "name",render:function (data,type,row) {
                 return row.name;
             } },
-            { data: "keanggotaan" },
+            { visible:false,class:"notanggota",data: "keanggotaan" },
             
             { render:function (data,type,row) {
                 return datetostring2('yymmdd',row.tgl_pengajuan);
@@ -139,8 +139,12 @@ function getListData() {
         },
     });
     var action    = dtpr.columns(".action");
+    var notanggota  = dtpr.columns(".notanggota");
     if(role == 'sekertaris koperasi' || role == 'superadmin' ){
         action.visible(true);
+    }
+    if(role != 'anggota'){
+        notanggota.visible(true);
     }
 }
 
@@ -211,7 +215,7 @@ $("#ajukan-btn").on("click", function (e) {
         swalwarning('Minimal Penarikan Rp 100000');
         return false;
     }
-    if (parseFloat($("#form-pengajuan").val()) > parseFloat(issimpanan) ){
+    if (parseFloat(jumlah) > parseFloat(issimpanan) ){
         swalwarning('Simpanan tidak mencukupi');
         return false;
     }

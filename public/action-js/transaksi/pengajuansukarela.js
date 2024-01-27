@@ -81,11 +81,11 @@ function getListData() {
                     return "<a class='approvalsukarela' style='color:black;cursor:pointer;font-weight:bold;'>WAITING APPROVED</a>";
             } },
             { data: "jenis" },
-            { data: "nrp" },
-            { data: "name",render:function (data,type,row) {
+            { visibe:false,class:"notanggota",data: "nrp" },
+            { visibe:false,class:"notanggota",data: "name",render:function (data,type,row) {
                 return row.name;
             } },
-            { data: "keanggotaan" },
+            { visibe:false,class:"notanggota",data: "keanggotaan" },
             
             { render:function (data,type,row) {
                 return datetostring2('yymmdd',row.tgl_pengajuan);
@@ -170,9 +170,14 @@ function getListData() {
         },
     });
     var action    = dtpr.columns(".action");
+    var notanggota  = dtpr.columns(".notanggota");
     if(role == 'sekertaris koperasi' || role == 'superadmin' ){
         action.visible(true);
     }
+    if(role != 'anggota'){
+        notanggota.visible(true);
+    }
+    
 }
 
 function approval(){

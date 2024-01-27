@@ -79,14 +79,14 @@ function getListData() {
                     return meta.row + meta.settings._iDisplayStart + 1;
                 },
             },
-            { data: "nrp" },
-            { data: "name",render:function (data,type,row) {
+            { visible:false,class:"notanggota",data: "nrp" },
+            { visible:false,class:"notanggota",data: "name",render:function (data,type,row) {
                 return "<a class='detail' style='cursor:pointer;'>"+row.name+"</a>";
             } },
             { render:function (data,type,row) {
                 return datetostring2('yymmdd',row.tgl_dinas);
             } },
-            { data: "keanggotaan" },
+            {  visible:false,data: "keanggotaan" },
             { render:function (data,type,row) {
                 return 'Rp. ' +formatRupiah(row.simpananpokok);
             } },
@@ -120,9 +120,13 @@ function getListData() {
                 });
         },
     });
-    var action    = dtpr.columns(".action");
+    var action      = dtpr.columns(".action");
+    var notanggota  = dtpr.columns(".notanggota");
     if(role == 'sekertaris koperasi' || role == 'superadmin' ){
         action.visible(true);
+    }
+    if(role != 'anggota'){
+        notanggota.visible(true);
     }
 }
 

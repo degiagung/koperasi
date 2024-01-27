@@ -86,14 +86,14 @@ function getListData() {
                 else
                     return "<a class='approvalpinjaman' style='color:black;cursor:pointer;font-weight:bold;'>WAITING APPROVED</a>";
             } },
-            { data: "nrp" },
-            { data: "name",render:function (data,type,row) {
+            { visible:false,class:"notanggota",data: "nrp" },
+            { visible:false,class:"notanggota",data: "name",render:function (data,type,row) {
                 return row.name;
             } },
             { render:function (data,type,row) {
                 return datetostring2('yymmdd',row.tgl_approve);
             } },
-            { data: "keanggotaan" },
+            { visible:false,class:"notanggota",data: "keanggotaan" },
             { render:function (data,type,row) {
                 if (row.limitpinjaman > 0)
                 return 'Rp. ' +formatRupiah(row.limitpinjaman);
@@ -166,8 +166,12 @@ function getListData() {
         },
     });
     var action    = dtpr.columns(".action");
+    var notanggota  = dtpr.columns(".notanggota");
     if(role == 'sekertaris koperasi' || role == 'superadmin' ){
         action.visible(true);
+    }
+    if(role != 'anggota'){
+        notanggota.visible(true);
     }
 }
 
