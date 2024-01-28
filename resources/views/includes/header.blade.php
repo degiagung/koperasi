@@ -68,6 +68,24 @@
                     </form>
                     
                 </ul><!-- End Profile Dropdown Items -->
+                <ul id="drpnotif" class="dropdown-menu dropdown-menu-end dropdown-menu-arrow" style="display: block;width:320px;right:20px">
+                    <li class="dropdown-header">
+                      <h6 ><b>NOTIFIKASI</b></h6>
+                      <hr>
+                      <span id="notifpinjaman"></span><br>
+                      <span id="notifsimpanan"></span>
+                    </li>
+                    <li>
+                    <hr class="dropdown-divider">
+                    </li>
+        
+                    <li>
+                        <button type="submit" onclick="closenotif()" class="dropdown-item d-flex align-items-center">
+                            <span class="ms-2">Close </span>
+                        </button>
+                    </li>
+                    
+                </ul><!-- End Profile Dropdown Items -->
             @endauth
 
         </li><!-- End Profile Nav -->

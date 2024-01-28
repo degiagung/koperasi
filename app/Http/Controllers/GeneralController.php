@@ -130,8 +130,11 @@ class GeneralController extends Controller
                 // asset('css/custom.css'),
             ];
             $baseURL = url('/');
+            $rolename = strtolower($MasterClass->getSession('role_name'))  ;
             $varJs = [
                 'const baseURL = "' . $baseURL . '"',
+                'const role = "' . $rolename .'"',
+
             ];
 
             $data = [

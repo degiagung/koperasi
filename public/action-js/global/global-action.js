@@ -318,3 +318,61 @@ function keyuprp(angka, prefix)
     rupiah = split[1] != undefined ? rupiah + ',' + split[1] : rupiah;
     return prefix == undefined ? rupiah : (rupiah ? 'Rp. ' + rupiah : '');
 }
+
+function closenotif() {
+  $("#drpnotif").hide();  
+}
+function shownotif() {
+  $("#drpnotif").show();  
+}
+
+if(role == 'bendahara koperasi' || role == 'superadmin'){
+  gasnotif();
+    let counter = 0 ;
+    setInterval(() => {
+      jml = counter++ 
+      if(jml == 300){
+        counter = 0 ;
+            gasnotif();
+    }
+  }, 1000);
+}
+    
+function gasnotif(){
+  closenotif();
+    $("#notifpinjaman").empty();
+    $("#notifsimpanan").empty();
+    $.ajax({
+      url: baseURL + "/getnotif",
+      type: "POST",
+      dataType: "json",
+      contentType: "application/json",
+      beforeSend: function () {
+          // Swal.fire({
+          //     title: "Loading",
+          //     text: "Please wait...",
+          //     showConfirmButton: false, // Menyembunyikan tombol OK
+          // });
+      },
+      complete: function (response) {
+        
+      },
+      success: function (response) {
+          
+        pinjaman = response.data[0].pinjaman;
+        simpanan = response.data[0].simpanan;
+
+        if(pinjaman >= 1 || simpanan >= 1){
+          shownotif();
+        }
+
+        if(pinjaman >= 1){
+          $("#notifpinjaman").html(pinjaman+" Pengajuan Pinjaman perlu tindakan");
+        }
+
+        if(simpanan >= 1){
+          $("#notifsimpanan").html(simpanan+" Pengajuan Simpanan perlu tindakan");
+        }
+      }
+    })
+}

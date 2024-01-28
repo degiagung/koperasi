@@ -54,6 +54,8 @@
 <script src="../assets2/vendor/simple-datatables/simple-datatables.js"></script>
 <script src="../assets2/vendor/tinymce/tinymce.min.js"></script>
 <script src="../assets2/vendor/php-email-form/validate.js"></script>
+<script src="../assets2/vendor/pnotify/components_notifications_pnotify.js"></script>
+<script src="../assets2/vendor/pnotify/pnotify.min.js"></script>
 
 <!-- Template Main JS File -->
 <script src="../assets2/js/main.js"></script>

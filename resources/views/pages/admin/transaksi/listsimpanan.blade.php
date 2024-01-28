@@ -14,7 +14,7 @@
          <div class="row">
             <h2>Simpanan Anggota</h2>
             <br>
-            <div class="col-lg-12">
+            {{-- <div class="col-lg-12">
                  <div class="card-filter">
                     <label style="font-size:18px;">Filter</label>
                     <hr>
@@ -35,7 +35,7 @@
                         </div>
                     </div>
                 </div>
-            </div>
+            </div> --}}
         </div><br>
         <div class="row">
             <div class="col-lg-12">
@@ -151,6 +151,118 @@
                     </div>
                     <div class="modal-footer">
                         <button type="button" class="btn btn-danger light" data-bs-dismiss="modal">Close</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="modal fade" id="modal-detail-sukarela" style="display: none;" aria-hidden="true">
+            <div class="modal-dialog modal-lg" role="document">
+                <div class="modal-content">
+                    <div class="modal-header headermodal">
+                        <h5 class="modal-title">Detail Sukarela</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal">
+                        </button>
+                    </div>
+                    <div class="modal-body">
+                        <table id="table-detail-sukarela" class="table table-bordered table-striped table-lgdatatables">
+                            <thead>
+                                <tr>
+                                    <th>No</th>
+                                    <th>Jenis</th>
+                                    <th>Nominal</th>
+                                    <th>tgl awal potong gaji</th>
+                                    <th>durasi potong gaji</th>
+                                </tr>
+                            </thead>
+                            {{-- <tfoot>
+                                <td>Total</td>
+                                <td class="totaldetailsimpanan"></td>
+                                <td></td>
+                            </tfoot> --}}
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="modal fade" id="modal-detail" style="display: none;">
+            <div class="modal-dialog modal-dialog-centered" role="document">
+                <div class="modal-content">
+                    <div class="modal-header headermodal">
+                        <h5 class="modal-title">Bukti Transaksi</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal">
+                        </button>
+                    </div>
+                    <div class="modal-body">
+                        <table id="table-list" class="table table-bordered table-striped table-lgdatatables">
+                            <thead>
+                                <tr>
+                                    <th>Simpanan Ke</th>
+                                    <th>Nominal</th>
+                                    <th></th>
+                                </tr>
+                            </thead>
+                            <tbody id="detailbukti">
+
+                            </tbody>
+                            <tfoot>
+                                <td>Total</td>
+                                <td class="totalbukti"></td>
+                                <td></td>
+                            </tfoot>
+                        </table>
+                    </div>
+                    {{-- <div class="modal-footer">
+                        <button type="button" class="btn btn-danger light" data-bs-dismiss="modal">Close</button>
+                        <button type="button" class="btn btn-sgn light" onClick="approval() ">Simpan</button>
+                    </div> --}}
+                </div>
+            </div>
+        </div>
+        <div class="modal fade" id="modal-bukti" style="display: none;">
+            <div class="modal-dialog modal-dialog-centered" role="document">
+                <div class="modal-content">
+                    <div class="modal-header headermodal">
+                        <h5 class="modal-title">Bukti Transaksi</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal">
+                        </button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="basic-form buktidiv">
+                            
+                        </div>
+                    </div>
+                    {{-- <div class="modal-footer">
+                        <button type="button" class="btn btn-danger light" data-bs-dismiss="modal">Close</button>
+                        <button type="button" class="btn btn-sgn light" onClick="approval() ">Simpan</button>
+                    </div> --}}
+                </div>
+            </div>
+        </div>
+        <div class="modal fade modal-upload" id="modal-upload" style="display: none;" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered" role="document">
+                <div class="modal-content">
+                    <div class="modal-header headermodal">
+                        <h5 class="modal-title">Upload Bukti</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal">
+                        </button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="basic-form">
+                                
+                            <div class="mb-3 row">
+                                <label class="col-sm-3 col-form-label">Bukti Transaksi</label>
+                                <div class="col-sm-9">
+                                    <form role="form" class="" id="formbukti" method="post" type="post" enctype="multipart/form-data">
+                                        <input class="form-control" name="bukti" id="form-bukti" type="file" value="" multiple style="opacity:1;"/>
+                                    </form>
+                                </div>
+                            </div>
+
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-danger light" data-bs-dismiss="modal">Close</button>
+                        <button type="button" id="simpanbukti-btn" class="btn btn-primary">Simpan</button>
                     </div>
                 </div>
             </div>

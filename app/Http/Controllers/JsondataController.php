@@ -1847,6 +1847,171 @@ class JsonDataController extends Controller
             return $MasterClass->Results($results);
 
         }
+        public function getbuktisimpanan(Request $request){
+
+            $MasterClass = new Master();
+
+            $checkAuth = $MasterClass->Authenticated($MasterClass->getSession('user_id'));
+            
+            if($checkAuth['code'] == $MasterClass::CODE_SUCCESS){
+                try {
+                    if ($request->isMethod('post')) {
+                        
+                        DB::beginTransaction();
+                
+                        $status = [];
+                        $id     = $request->id ;
+                        $userid = $MasterClass->getSession('user_id') ;
+                        $saved  = DB::select("SELECT a.* FROM bukti_transaksi a where user_id = $id AND keterangan = 'wajib' ORDER BY created_at desc");
+                        $saved  = $MasterClass->checkErrorModel($saved);
+                        
+                        $status = $saved;
+            
+                        $results = [
+                            'code' => $status['code'],
+                            'info'  => $status['info'],
+                            'data'  =>  $status['data'],
+                        ];
+                            
+            
+            
+                    } else {
+                        $results = [
+                            'code' => '103',
+                            'info'  => "Method Failed",
+                        ];
+                    }
+                } catch (\Exception $e) {
+                    // Roll back the transaction in case of an exception
+                    $results = [
+                        'code' => '102',
+                        'info'  => $e->getMessage(),
+                    ];
+        
+                }
+            }
+            else {
+        
+                $results = [
+                    'code' => '403',
+                    'info'  => "Unauthorized",
+                ];
+                
+            }
+
+            return $MasterClass->Results($results);
+
+        }
+        public function getbuktipokok(Request $request){
+
+            $MasterClass = new Master();
+
+            $checkAuth = $MasterClass->Authenticated($MasterClass->getSession('user_id'));
+            
+            if($checkAuth['code'] == $MasterClass::CODE_SUCCESS){
+                try {
+                    if ($request->isMethod('post')) {
+                        
+                        DB::beginTransaction();
+                
+                        $status = [];
+                        $id     = $request->id ;
+                        
+                        $saved  = DB::select("SELECT a.* FROM bukti_transaksi a where user_id = $id and keterangan = 'pokok'  ORDER BY created_at desc");
+                        $saved  = $MasterClass->checkErrorModel($saved);
+                        
+                        $status = $saved;
+            
+                        $results = [
+                            'code' => $status['code'],
+                            'info'  => $status['info'],
+                            'data'  =>  $status['data'],
+                        ];
+                            
+            
+            
+                    } else {
+                        $results = [
+                            'code' => '103',
+                            'info'  => "Method Failed",
+                        ];
+                    }
+                } catch (\Exception $e) {
+                    // Roll back the transaction in case of an exception
+                    $results = [
+                        'code' => '102',
+                        'info'  => $e->getMessage(),
+                    ];
+        
+                }
+            }
+            else {
+        
+                $results = [
+                    'code' => '403',
+                    'info'  => "Unauthorized",
+                ];
+                
+            }
+
+            return $MasterClass->Results($results);
+
+        }
+        public function getbuktimanual(Request $request){
+
+            $MasterClass = new Master();
+
+            $checkAuth = $MasterClass->Authenticated($MasterClass->getSession('user_id'));
+            
+            if($checkAuth['code'] == $MasterClass::CODE_SUCCESS){
+                try {
+                    if ($request->isMethod('post')) {
+                        
+                        DB::beginTransaction();
+                
+                        $status = [];
+                        $userid = $request->userid ;
+                        $id     = $request->id ;
+                        $saved  = DB::select("SELECT a.* FROM bukti_transaksi a where id = $id AND user_id = $userid AND keterangan = 'manual' ");
+                        $saved  = $MasterClass->checkErrorModel($saved);
+                        
+                        $status = $saved;
+            
+                        $results = [
+                            'code' => $status['code'],
+                            'info'  => $status['info'],
+                            'data'  =>  $status['data'],
+                        ];
+                            
+            
+            
+                    } else {
+                        $results = [
+                            'code' => '103',
+                            'info'  => "Method Failed",
+                        ];
+                    }
+                } catch (\Exception $e) {
+                    // Roll back the transaction in case of an exception
+                    $results = [
+                        'code' => '102',
+                        'info'  => $e->getMessage(),
+                    ];
+        
+                }
+            }
+            else {
+        
+                $results = [
+                    'code' => '403',
+                    'info'  => "Unauthorized",
+                ];
+                
+            }
+
+            return $MasterClass->Results($results);
+
+        }
         public function getSimpananbyanggota(Request $request){
 
             $MasterClass = new Master();
@@ -2086,6 +2251,190 @@ class JsonDataController extends Controller
                             'data'  =>  $status['data'],
                         ];
                             
+            
+            
+                    } else {
+                        $results = [
+                            'code' => '103',
+                            'info'  => "Method Failed",
+                        ];
+                    }
+                } catch (\Exception $e) {
+                    // Roll back the transaction in case of an exception
+                    $results = [
+                        'code' => '102',
+                        'info'  => $e->getMessage(),
+                    ];
+        
+                }
+            }
+            else {
+        
+                $results = [
+                    'code' => '403',
+                    'info'  => "Unauthorized",
+                ];
+                
+            }
+
+            return $MasterClass->Results($results);
+
+        }
+        public function getdetailsimpanan(Request $request){
+
+            $MasterClass = new Master();
+
+            $checkAuth = $MasterClass->Authenticated($MasterClass->getSession('user_id'));
+            
+            if($checkAuth['code'] == $MasterClass::CODE_SUCCESS){
+                try {
+                    if ($request->isMethod('post')) {
+
+                        DB::beginTransaction();     
+                        $id     = $request->id ;
+                        
+                        $result = DB::select("
+                            SELECT 
+                                *,
+                                 CASE
+                                    WHEN DATE_ADD(tgl_awal, INTERVAL durasi MONTH) >= CURRENT_DATE() THEN 
+                                        COALESCE(PERIOD_DIFF(DATE_FORMAT(SYSDATE(), '%Y%m'),
+                                        DATE_FORMAT(tgl_awal, '%Y%m')),0) 
+                                    ELSE 
+                                        durasi
+                                END durasi2
+                            FROM
+                                simpanan_sukarela
+                            WHERE
+                                status = 'approve'
+                                AND user_id = $id
+                            ORDER BY id desc
+                        ");
+                        $result = $MasterClass->checkErrorModel($result);
+                        $results = [
+                            'code'  => $result['code'],
+                            'info'  => $result['info'],
+                            'data'  => $result['data'],
+                        ];
+                            
+            
+            
+                    } else {
+                        $results = [
+                            'code' => '103',
+                            'info'  => "Method Failed",
+                        ];
+                    }
+                } catch (\Exception $e) {
+                    // Roll back the transaction in case of an exception
+                    $results = [
+                        'code' => '102',
+                        'info'  => $e->getMessage(),
+                    ];
+        
+                }
+            }
+            else {
+        
+                $results = [
+                    'code' => '403',
+                    'info'  => "Unauthorized",
+                ];
+                
+            }
+
+            return $MasterClass->Results($results);
+
+        }
+        public function getlistbuktipotonggaji(Request $request){
+
+            $MasterClass = new Master();
+
+            $checkAuth = $MasterClass->Authenticated($MasterClass->getSession('user_id'));
+            
+            if($checkAuth['code'] == $MasterClass::CODE_SUCCESS){
+                try {
+                    if ($request->isMethod('post')) {
+                        
+                        DB::beginTransaction();
+                
+                        $status = [];
+                        $id     = $request->id ;
+                        $saved  = DB::select("SELECT a.* FROM bukti_transaksi a where user_id = $id AND keterangan = 'potong gaji' ORDER BY created_at desc");
+                        $saved  = $MasterClass->checkErrorModel($saved);
+                        $status = $saved;
+            
+                        $results = [
+                            'code' => $status['code'],
+                            'info'  => $status['info'],
+                            'data'  =>  $status['data'],
+                        ];
+                            
+            
+            
+                    } else {
+                        $results = [
+                            'code' => '103',
+                            'info'  => "Method Failed",
+                        ];
+                    }
+                } catch (\Exception $e) {
+                    // Roll back the transaction in case of an exception
+                    $results = [
+                        'code' => '102',
+                        'info'  => $e->getMessage(),
+                    ];
+        
+                }
+            }
+            else {
+        
+                $results = [
+                    'code' => '403',
+                    'info'  => "Unauthorized",
+                ];
+                
+            }
+
+            return $MasterClass->Results($results);
+
+        }
+        public function getnotif(Request $request){
+
+            $MasterClass = new Master();
+
+            $checkAuth = $MasterClass->Authenticated($MasterClass->getSession('user_id'));
+            
+            if($checkAuth['code'] == $MasterClass::CODE_SUCCESS){
+                try {
+                    if ($request->isMethod('post')) {
+                        
+                        DB::beginTransaction();
+                
+                        $status = [];
+                        if($MasterClass->getSession('role_name') == 'superadmin' || $MasterClass->getSession('role_name') == 'bendahara koperasi'){
+                            $saved  = DB::select("
+                                SELECT 
+                                    count(pj.id) pinjaman,count(sm.id) simpanan 
+                                FROM 
+                                    users us
+                                    LEFT JOIN pinjaman pj ON us.id = pj.user_id and pj.status is null and pj.status_pinjaman != 'lunas'
+                                    LEFT JOIN simpanan sm ON us.id = sm.user_id and sm.status is null
+                            ");
+                            $saved  = $MasterClass->checkErrorModel($saved);
+                            $status = $saved;
+                            $results = [
+                                'code' => $status['code'],
+                                'info' => $status['info'],
+                                'data' =>  $status['data'],
+                            ];
+                        }else{
+                            $results = [
+                                'code' => '0',
+                                'info' => 'ok',
+                                'data' => null,
+                            ];
+                        }
             
             
                     } else {
@@ -2669,6 +3018,7 @@ class JsonDataController extends Controller
                                 $attrphoto     = [
                                     'file'      => $uploaddir,
                                     'user_id'   => $userid,
+                                    'keterangan'=> 'manual',
                                     'created_at'=> $now,
                                 ];
                                 $savefoto      = $MasterClass->saveGlobal('bukti_transaksi', $attrphoto );
@@ -3179,6 +3529,90 @@ class JsonDataController extends Controller
                                     'tenor'     => $no,
                                     'created_at'=> $now,
                                 ];
+                                $savefoto      = $MasterClass->saveGlobal('bukti_transaksi', $attrphoto );
+                                if($savefoto['code'] != $MasterClass::CODE_SUCCESS){
+                                    DB::rollBack();
+                                    $results = [
+                                        'code' => '1',
+                                        'info'  => "Upload Gagal",
+                                    ];
+                                    return $MasterClass->Results($results);
+                                }
+                            }
+
+                            DB::commit();
+                            $results = [
+                                'code'      => $MasterClass::CODE_SUCCESS,
+                                'info'      => 'Upload Berhasil',
+                            ];
+            
+                        }
+                    } else {
+                        $results = [
+                            'code' => '103',
+                            'info'  => "Method Failed",
+                        ];
+                    }
+                } catch (\Exception $e) {
+                    // Roll back the transaction in case of an exception
+                    $results = [
+                        'code' => '102',
+                        'info'  => $e->getMessage(),
+                    ];
+        
+                }
+            }
+            else {
+        
+                $results = [
+                    'code' => '403',
+                    'info'  => "Unauthorized",
+                ];
+                
+            }
+
+            return $MasterClass->Results($results);
+
+        }
+        public function saveBuktiSimpanan(Request $request){
+
+            $MasterClass = new Master();
+            
+            $checkAuth = $MasterClass->Authenticated($MasterClass->getSession('user_id'));
+            
+            if($checkAuth['code'] == $MasterClass::CODE_SUCCESS){
+                try {
+                    if ($request->isMethod('post')) {
+
+                        DB::beginTransaction();     
+                        $id         = $request->id ;
+                        $no         = $request->no ;
+                        $jenis      = $request->jenis ;
+                        $now        = date('Y-m-d H:i:s');
+                        $status = [];
+                        
+                        $docname            = 'bukti';
+                        if(!empty($_FILES['bukti']['name'])){//jika file ada maka masukan file 
+                            
+                            $nama_file          = $_FILES['bukti']['name'];
+                            $tmp_name		    = $_FILES['bukti']['tmp_name'];
+                            $nama_file_upload   = strtolower(str_replace(' ','_',$docname.'-'.$nama_file));
+                            $alamatfile         = '../public/data/bukti/'; // directory file
+                            $uploaddir          = $alamatfile.$nama_file_upload; // directory file
+                            
+                            if (move_uploaded_file($tmp_name,$uploaddir)){
+                                chmod($uploaddir, 0777);
+    
+                                $attrphoto     = [
+                                    'file'      => $uploaddir,
+                                    'user_id'   => $id,
+                                    'keterangan'=> $jenis,
+                                    'tenor'     => $no,
+                                    'created_at'=> $now,
+                                ];
+                                if($jenis == 'pokok'){
+                                    unset($attrphoto['tenor']);
+                                }
                                 $savefoto      = $MasterClass->saveGlobal('bukti_transaksi', $attrphoto );
                                 if($savefoto['code'] != $MasterClass::CODE_SUCCESS){
                                     DB::rollBack();
