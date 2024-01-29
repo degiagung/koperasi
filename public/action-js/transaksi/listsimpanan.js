@@ -188,7 +188,7 @@ async function buktipokok(id) {
                 
             },
         });
-
+        
         if( response.data.length >=1){
             file = response.data[0].file ;
             file = baseURL+file.replaceAll('../public','');
