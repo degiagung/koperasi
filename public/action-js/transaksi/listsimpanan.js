@@ -199,9 +199,11 @@ async function buktipokok(id) {
             $(".buktidiv").append(content);
             $("#modal-bukti").modal('show');
         }else{
-            $("#form-bukti").val('');
-            $("#modal-upload").modal('show');
-            isObject['jenis'] = 'pokok';
+            if (role == 'bendahara koperasi' || role == 'superadmin') {
+                $("#form-bukti").val('');
+                $("#modal-upload").modal('show');
+                isObject['jenis'] = 'pokok';
+            }
         }
         
     } catch (error) {
