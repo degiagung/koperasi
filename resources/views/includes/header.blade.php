@@ -68,7 +68,7 @@
                     </form>
                     
                 </ul><!-- End Profile Dropdown Items -->
-                <ul id="drpnotif" class="dropdown-menu dropdown-menu-end dropdown-menu-arrow" style="display: block;width:320px;right:20px">
+                <ul id="drpnotif" class="dropdown-menu dropdown-menu-end dropdown-menu-arrow" style="width:320px;right:20px">
                     <li class="dropdown-header">
                       <h6 ><b>NOTIFIKASI</b></h6>
                       <hr>
