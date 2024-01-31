@@ -6,7 +6,6 @@ use App\Models\MenusAccess;
 use Illuminate\Http\Request;
 use App\Http\Controllers\GeneralController;
 use App\Http\Controllers\JsonDataController;
-
 use Illuminate\Support\Facades\DB;
 use ReflectionClass;
 use ReflectionMethod;
