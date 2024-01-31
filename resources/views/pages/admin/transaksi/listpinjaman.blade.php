@@ -61,6 +61,7 @@
                                             <th>NRP</th>
                                             <th>Nama Anggota</th>
                                             <th>Tanggal Dinas</th>
+                                            <th>Tanggal Transaksi</th>
                                             <th>keanggotaan</th>
                                             <th>Total Limit</th>
                                             <th>Pengajuan Tenor & Pinjaman</th>

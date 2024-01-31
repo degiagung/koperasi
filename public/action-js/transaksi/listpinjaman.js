@@ -69,7 +69,7 @@ function getListData() {
                     $('#table-list').DataTable().ajax.reload();
                 }
             },
-            { text: ' ', extend: 'excel',  className: 'btndownload iconexcel',  title:'List Pinjaman', exportOptions: {columns:[':not(.notdown)']}},
+            { text: ' ', extend: 'excel',  className: 'btndownload iconexcel',  title:'List Pinjaman '+datenow(new Date), exportOptions: {columns:[':not(.notdown)']}},
         ],
         columns: [
             {
@@ -90,6 +90,9 @@ function getListData() {
             } },
             { render:function (data,type,row) {
                 return datetostring2('yymmdd',row.tgl_dinas);
+            } },
+            { render:function (data,type,row) {
+                return datetostring2('yymmdd',row.tglaju);
             } },
             { data: "keanggotaan" },
             { render:function (data,type,row) {
@@ -216,7 +219,7 @@ function getListDataAnggota() {
                     $('#table-list-pinjam').DataTable().ajax.reload();
                 }
             },
-            { text: ' ', extend: 'excel',  className: 'btndownload iconexcel',  title:'List Pinjaman', exportOptions: {columns:[':not(.notdown)']}},
+            { text: ' ', extend: 'excel',  className: 'btndownload iconexcel',  title:'List Pinjaman '+datenow(new Date), exportOptions: {columns:[':not(.notdown)']}},
         ],
         columns: [
             {

@@ -1551,7 +1551,7 @@ class JsonDataController extends Controller
 
         }
         public function getsimpananperson(Request $request){
-
+            
             $MasterClass = new Master();
 
             $checkAuth = $MasterClass->Authenticated($MasterClass->getSession('user_id'));
@@ -1615,7 +1615,7 @@ class JsonDataController extends Controller
                             'data'  =>  $status['data'],
                         ];
                             
-            
+
             
                     } else {
                         $results = [
@@ -2302,7 +2302,9 @@ class JsonDataController extends Controller
                                         DATE_FORMAT(tgl_awal, '%Y%m')),0) 
                                     ELSE 
                                         durasi
-                                END durasi2
+                                END durasi2,
+                                DATE_ADD(tgl_awal, INTERVAL durasi MONTH) tgl_akhir,
+                                DATE_ADD(tgl_awal, INTERVAL 1 MONTH) as tgl_awal1
                             FROM
                                 simpanan_sukarela
                             WHERE

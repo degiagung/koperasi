@@ -63,7 +63,7 @@ function getListData() {
                     $('#table-list').DataTable().ajax.reload();
                 }
             },
-            { text: ' ', extend: 'excel',  className: 'btndownload iconexcel',  title:'List Pengajuan Simpanan Sukarela', exportOptions: {columns:[':not(.notdown)']}},
+            { text: ' ', extend: 'excel',  className: 'btndownload iconexcel',  title:'List Pengajuan Simpanan Sukarela '+datenow(new Date), exportOptions: {columns:[':not(.notdown)']}},
         ],
         columns: [
             {

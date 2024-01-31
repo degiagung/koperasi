@@ -170,6 +170,7 @@
                                     <th>No</th>
                                     <th>Jenis</th>
                                     <th>Nominal</th>
+                                    <th>tgl Transaksi</th>
                                     <th>tgl awal potong gaji</th>
                                     <th>durasi potong gaji</th>
                                 </tr>
@@ -185,7 +186,7 @@
             </div>
         </div>
         <div class="modal fade" id="modal-detail" style="display: none;">
-            <div class="modal-dialog modal-dialog-centered" role="document">
+            <div class="modal-dialog modal-lg" role="document">
                 <div class="modal-content">
                     <div class="modal-header headermodal">
                         <h5 class="modal-title">Bukti Transaksi</h5>
@@ -193,9 +194,10 @@
                         </button>
                     </div>
                     <div class="modal-body">
-                        <table id="table-list" class="table table-bordered table-striped table-lgdatatables">
+                        <table id="table-list" class="table table-bordered table-striped datatables">
                             <thead>
                                 <tr>
+                                    <th>Tgl Transaksi</th>
                                     <th>Simpanan Ke</th>
                                     <th>Nominal</th>
                                     <th></th>

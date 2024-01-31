@@ -70,7 +70,7 @@ function getListData() {
                     $('#table-list').DataTable().ajax.reload();
                 }
             },
-            { footer: true, text: ' ', extend: 'excel',  className: 'btndownload iconexcel',  title:'Laporan', exportOptions: {columns:[':not(.notdown)']}},
+            { footer: true, text: ' ', extend: 'excel',  className: 'btndownload iconexcel',  title:'Laporan '+datenow(new Date), exportOptions: {columns:[':not(.notdown)']}},
         ],
         columns: [
             {

@@ -70,7 +70,7 @@ function getListData() {
                     $('#table-list').DataTable().ajax.reload();
                 }
             },
-            { text: ' ', extend: 'excel',  className: 'btndownload iconexcel',  title:'List Simpanan', exportOptions: {columns:[':not(.notdown)']}},
+            { text: ' ', extend: 'excel',  className: 'btndownload iconexcel',  title:'List Simpanan '+datenow(new Date), exportOptions: {columns:[':not(.notdown)']}},
         ],
         columns: [
             {
@@ -238,6 +238,7 @@ async function getlistbukti(rowData) {
             }
             content += `
                 <tr>
+                    <td>`+datesimpanan(rowData.tgl_dinas,no)+`</td>
                     <td>`+no+`</td>
                     <td>Rp. 50.000.00</td>
             `;
@@ -382,7 +383,7 @@ function detailsukarela() {
                     $('#table-detail-sukarela').DataTable().ajax.reload();
                 }
             },
-            { text: ' ', extend: 'excel',  className: 'btndownload iconexcel',  title:'Detail Simpanan', exportOptions: {columns:[':not(.notdown)']}},
+            { text: ' ', extend: 'excel',  className: 'btndownload iconexcel',  title:'Detail Simpanan '+datenow(new Date), exportOptions: {columns:[':not(.notdown)']}},
         ],
         columns: [
             {
@@ -395,11 +396,18 @@ function detailsukarela() {
                 return "<a class='detail' style='cursor:pointer;'>Rp."+formatRupiah(row.amount)+"</a>";
             } },
             { render:function (data,type,row) {
-                if(row.tgl_awal)
-                    return datetostring2('yymmdd',row.tgl_awal);
+                if(row.tgl_approve)
+                    return datetostring2('yymmdd',row.tgl_approve);
                 else
                     return '';
             } },
+            { render:function (data,type,row) {
+                if(row.tgl_awal1)
+                    return datetostring2('yymmdd',row.tgl_awal1);
+                else
+                    return '';
+            } },
+            
             { render:function (data,type,row) {
                 if(row.durasi)
                     return row.durasi;
@@ -497,6 +505,7 @@ async function getlistbuktipotonggaji() {
             }
             content += `
                 <tr>
+                    <td>`+datesimpananptgj(isObject['tgl_awal1'],i)+`</td>
                     <td>`+no+`</td>
                     <td>Rp.`+formatRupiah(jumlah)+`</td>
             `;

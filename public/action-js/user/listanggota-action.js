@@ -74,7 +74,7 @@ function getListData() {
                     $('#table-list').DataTable().ajax.reload();
                 }
             },
-            { text: ' ', extend: 'excel',  className: 'btndownload iconexcel',  title:'List Anggota', exportOptions: {columns:[':not(.notdown)']}},
+            { text: ' ', extend: 'excel',  className: 'btndownload iconexcel',  title:'List Anggota '+datenow(new Date), exportOptions: {columns:[':not(.notdown)']}},
         ],
         columns: [
             {

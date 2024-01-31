@@ -376,3 +376,51 @@ function gasnotif(){
       }
     })
 }
+
+
+function datenow(date) {
+    var d = new Date(date),
+        month = '' + (d.getMonth() + 1),
+        day = '' + d.getDate(),
+        year = d.getFullYear();
+
+    if (month.length < 2) 
+        month = '0' + month;
+    if (day.length < 2) 
+        day = '0' + day;
+
+    return [year, month, day].join('-');
+}
+
+function datesimpanan(p,p1){
+  if(p){
+    var threeMonthsAgo = moment(p, "YYYY-MM-DD").subtract(p1, 'months');
+    var mm2     = threeMonthsAgo.format('MM');
+    var yyyy2   = threeMonthsAgo.format('YYYY');
+    var perisel = window.datetostring2('yymmdd',yyyy2+""+mm2+"01");
+    
+    return perisel;
+  }else{
+    return ''
+  }
+}
+function datesimpananptgj(p,p1){
+  if(p){
+    var d = moment(p,"YYYY-MM-DD").add(p1, 'months').calendar() ;
+    var dt= new Date(d) ;
+    var y = dt.getFullYear() ;
+    var m = ("0" + (dt.getMonth() + 1)).slice(-2) ;
+    var d = ("0" + dt.getDate()).slice(-2) ;
+    return window.datetostring2('yymmdd',y+"-"+m+"-"+d)
+  }else{
+    return ''
+  }
+}
+
+
+// moment.addRealMonth = function addRealMonth(d) {
+//   var fm = moment(d).add(1, 'M');
+//   var fmEnd = moment(fm).endOf('month');
+//   var v = d.date() != fm.date() && fm.isSame(fmEnd.format('YYYY-MM-DD')) ? fm.add(1, 'd') : fm;  
+// }
+
