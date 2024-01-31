@@ -14,7 +14,7 @@ use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Session;
 
-class JsonDataController extends Controller
+class jsondatacontroller extends Controller
 {   
     // for list menu side bar
         public function getAccessMenu(Request $request){
