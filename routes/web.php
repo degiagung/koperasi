@@ -53,7 +53,7 @@ Route::middleware(['auth'])->group(function () { // harus login terlebih dahulu
                 if ($routeData->param_type == "VIEW"){
                     Route::get($routeData->url, [GeneralController::class, $routeData->method])->name($routeData->name);
                 }else{
-                    Route::post($routeData->url, [jsondataController::class, $routeData->method])->name($routeData->name);
+                    Route::post($routeData->url, [JsonDataController::class, $routeData->method])->name($routeData->name);
                 }
             // });
         }

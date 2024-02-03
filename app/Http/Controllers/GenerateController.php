@@ -78,7 +78,7 @@ class GenerateController extends Controller
                 if ($request->isMethod('post')) {
 
                     $generalController  = GeneralController::class;
-                    $jsonDataController = jsondataController::class;
+                    $jsonDataController = JsonDataController::class;
             
                     $results    = $this->processControllerMethods($generalController, "VIEW");
                     
