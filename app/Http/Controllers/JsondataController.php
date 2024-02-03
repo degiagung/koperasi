@@ -781,7 +781,7 @@ class JsonDataController extends Controller
                             END keanggotaan,
                             PERIOD_DIFF(DATE_FORMAT(SYSDATE(), '%Y%m'),DATE_FORMAT(us.tgl_dinas, '%Y%m')) as los,
                             
-                            cast(( 50000 * COALESCE(PERIOD_DIFF(DATE_FORMAT(SYSDATE(), '%Y%m'),DATE_FORMAT(us.tgl_dinas, '%Y%m')),0) / COALESCE(PERIOD_DIFF(DATE_FORMAT(SYSDATE(), '%Y%m'),DATE_FORMAT(us.tgl_dinas, '%Y%m')),0)) as decimal(18,2)) as simpananpokok,
+                            cast(cast(coalesce(( 50000 * COALESCE(PERIOD_DIFF(DATE_FORMAT(SYSDATE(), '%Y%m'),DATE_FORMAT(us.tgl_dinas, '%Y%m')),0) / COALESCE(PERIOD_DIFF(DATE_FORMAT(SYSDATE(), '%Y%m'),DATE_FORMAT(us.tgl_dinas, '%Y%m')),0)),0)as decimal(18,2)) as decimal(18,2)) as simpananpokok,
                             
                             cast(COALESCE(PERIOD_DIFF(DATE_FORMAT(SYSDATE(), '%Y%m'),DATE_FORMAT(us.tgl_dinas, '%Y%m')),0) * 50000 as decimal(18,2)) as simpananwajib,
                             
@@ -789,7 +789,7 @@ class JsonDataController extends Controller
                             coalesce(sum(su.amount),0.00)+coalesce(sum(ss.amount),0.00) as sukarela,
 
                             (
-                                cast(( 50000 * COALESCE(PERIOD_DIFF(DATE_FORMAT(SYSDATE(), '%Y%m'),DATE_FORMAT(us.tgl_dinas, '%Y%m')),0) / COALESCE(PERIOD_DIFF(DATE_FORMAT(SYSDATE(), '%Y%m'),DATE_FORMAT(us.tgl_dinas, '%Y%m')),0)) as decimal(18,2))
+                                cast(cast(coalesce(( 50000 * COALESCE(PERIOD_DIFF(DATE_FORMAT(SYSDATE(), '%Y%m'),DATE_FORMAT(us.tgl_dinas, '%Y%m')),0) / COALESCE(PERIOD_DIFF(DATE_FORMAT(SYSDATE(), '%Y%m'),DATE_FORMAT(us.tgl_dinas, '%Y%m')),0)),0)as decimal(18,2)) as decimal(18,2))
                             )
                             +
                             (
@@ -802,7 +802,7 @@ class JsonDataController extends Controller
                             as total,
                             coalesce(sum(st.amount),0) penarikan,
                             cast((
-                                ( 50000 * COALESCE(PERIOD_DIFF(DATE_FORMAT(SYSDATE(), '%Y%m'),DATE_FORMAT(us.tgl_dinas, '%Y%m')),0) / COALESCE(PERIOD_DIFF(DATE_FORMAT(SYSDATE(), '%Y%m'),DATE_FORMAT(us.tgl_dinas, '%Y%m')),0))
+                                cast(coalesce(( 50000 * COALESCE(PERIOD_DIFF(DATE_FORMAT(SYSDATE(), '%Y%m'),DATE_FORMAT(us.tgl_dinas, '%Y%m')),0) / COALESCE(PERIOD_DIFF(DATE_FORMAT(SYSDATE(), '%Y%m'),DATE_FORMAT(us.tgl_dinas, '%Y%m')),0)),0)as decimal(18,2))
                             )
                             +
                             (
@@ -1340,7 +1340,7 @@ class JsonDataController extends Controller
                                 END
                             END keanggotaan,
                             COALESCE(PERIOD_DIFF(DATE_FORMAT(SYSDATE(), '%Y%m'),DATE_FORMAT(us.tgl_dinas, '%Y%m')),0) jmldinas,
-                            ( 50000 * COALESCE(PERIOD_DIFF(DATE_FORMAT(SYSDATE(), '%Y%m'),DATE_FORMAT(us.tgl_dinas, '%Y%m')),0) / COALESCE(PERIOD_DIFF(DATE_FORMAT(SYSDATE(), '%Y%m'),DATE_FORMAT(us.tgl_dinas, '%Y%m')),0))
+                            cast(coalesce(( 50000 * COALESCE(PERIOD_DIFF(DATE_FORMAT(SYSDATE(), '%Y%m'),DATE_FORMAT(us.tgl_dinas, '%Y%m')),0) / COALESCE(PERIOD_DIFF(DATE_FORMAT(SYSDATE(), '%Y%m'),DATE_FORMAT(us.tgl_dinas, '%Y%m')),0)),0)as decimal(18,2))
                             +
                             (50000 * COALESCE(PERIOD_DIFF(DATE_FORMAT(SYSDATE(), '%Y%m'),DATE_FORMAT(us.tgl_dinas, '%Y%m')),0))
                             + 
@@ -1348,7 +1348,7 @@ class JsonDataController extends Controller
                             as sukarela,
 
                             (
-                                cast(( 50000 * COALESCE(PERIOD_DIFF(DATE_FORMAT(SYSDATE(), '%Y%m'),DATE_FORMAT(us.tgl_dinas, '%Y%m')),0) / COALESCE(PERIOD_DIFF(DATE_FORMAT(SYSDATE(), '%Y%m'),DATE_FORMAT(us.tgl_dinas, '%Y%m')),0)) as decimal(18,2))
+                                cast(cast(coalesce(( 50000 * COALESCE(PERIOD_DIFF(DATE_FORMAT(SYSDATE(), '%Y%m'),DATE_FORMAT(us.tgl_dinas, '%Y%m')),0) / COALESCE(PERIOD_DIFF(DATE_FORMAT(SYSDATE(), '%Y%m'),DATE_FORMAT(us.tgl_dinas, '%Y%m')),0)),0)as decimal(18,2)) as decimal(18,2))
                             )
                             +
                             (
@@ -1362,7 +1362,7 @@ class JsonDataController extends Controller
 
                             coalesce(sum(st.amount),0) tariksimpanan,
                             cast((
-                                ( 50000 * COALESCE(PERIOD_DIFF(DATE_FORMAT(SYSDATE(), '%Y%m'),DATE_FORMAT(us.tgl_dinas, '%Y%m')),0) / COALESCE(PERIOD_DIFF(DATE_FORMAT(SYSDATE(), '%Y%m'),DATE_FORMAT(us.tgl_dinas, '%Y%m')),0))
+                                cast(coalesce(( 50000 * COALESCE(PERIOD_DIFF(DATE_FORMAT(SYSDATE(), '%Y%m'),DATE_FORMAT(us.tgl_dinas, '%Y%m')),0) / COALESCE(PERIOD_DIFF(DATE_FORMAT(SYSDATE(), '%Y%m'),DATE_FORMAT(us.tgl_dinas, '%Y%m')),0)),0)as decimal(18,2))
                             )
                             +
                             (
@@ -1876,7 +1876,8 @@ class JsonDataController extends Controller
                             cast(sm.amount as decimal(18,2) ) as jml_pengajuan,
                             sm.id as idpenarikan,
                             sm.status,
-                            cast(( 50000 * COALESCE(PERIOD_DIFF(DATE_FORMAT(SYSDATE(), '%Y%m'),DATE_FORMAT(us.tgl_dinas, '%Y%m')),0) / COALESCE(PERIOD_DIFF(DATE_FORMAT(SYSDATE(), '%Y%m'),DATE_FORMAT(us.tgl_dinas, '%Y%m')),0))
+                            cast(
+                            cast(coalesce(( 50000 * COALESCE(PERIOD_DIFF(DATE_FORMAT(SYSDATE(), '%Y%m'),DATE_FORMAT(us.tgl_dinas, '%Y%m')),0) / COALESCE(PERIOD_DIFF(DATE_FORMAT(SYSDATE(), '%Y%m'),DATE_FORMAT(us.tgl_dinas, '%Y%m')),0)),0)as decimal(18,2))
                             +
                             (50000 * COALESCE(PERIOD_DIFF(DATE_FORMAT(SYSDATE(), '%Y%m'),DATE_FORMAT(us.tgl_dinas, '%Y%m')),0))
                             + 
@@ -3491,20 +3492,20 @@ class JsonDataController extends Controller
                         $status = [];
 
                         // simpanan pokok
-                        // ( 50000 * COALESCE(PERIOD_DIFF(DATE_FORMAT(SYSDATE(), '%Y%m'),DATE_FORMAT(us.tgl_dinas, '%Y%m')),0) / COALESCE(PERIOD_DIFF(DATE_FORMAT(SYSDATE(), '%Y%m'),DATE_FORMAT(us.tgl_dinas, '%Y%m')),0))
-                        //         +
-                        $cekpengajuan = DB::select("
-                            select 
-	
-                                COALESCE(PERIOD_DIFF(DATE_FORMAT(SYSDATE(), '%Y%m'),DATE_FORMAT(us.tgl_dinas, '%Y%m')),0) jmldinas,
-                                
-                                (50000 * COALESCE(PERIOD_DIFF(DATE_FORMAT(SYSDATE(), '%Y%m'),DATE_FORMAT(us.tgl_dinas, '%Y%m')),0))
-                                + 
-                                coalesce(sum(su.amount),0.00)
-                                -
-                                coalesce(sum(sm.amount),0)
-                                as amount
-                            FROM
+                        // cast(coalesce(( 50000 * COALESCE(PERIOD_DIFF(DATE_FORMAT(SYSDATE(), '%Y%m'),DATE_FORMAT(us.tgl_dinas, '%Y%m')),0) / COALESCE(PERIOD_DIFF(DATE_FORMAT(SYSDATE(), '%Y%m'),DATE_FORMAT(us.tgl_dinas, '%Y%m')),0)),0)as decimal(18,2))
+                        //
+                        $select = "COALESCE(PERIOD_DIFF(DATE_FORMAT(SYSDATE(), '%Y%m'),DATE_FORMAT(us.tgl_dinas, '%Y%m')),0) jmldinas,
+                                cast(
+                                    
+                                    (50000 * COALESCE(PERIOD_DIFF(DATE_FORMAT(SYSDATE(), '%Y%m'),DATE_FORMAT(us.tgl_dinas, '%Y%m')),0))
+                                    + 
+                                    coalesce(sum(su.amount),0.00)
+                                    +
+                                    coalesce(sum(ss.amount),0.00)
+                                    -
+                                    coalesce(sum(st.amount),0) as decimal(18,2)
+                                ) as amount";
+                        $table  = "
                                 users us
                                 left join (
                                     select 
@@ -3519,8 +3520,26 @@ class JsonDataController extends Controller
                                         END amount
                                     from 
                                         simpanan_sukarela su 
+                                    where su.jenis = 'potong gaji' and su.status = 'approve'
                                 ) as su ON su.user_id = us.id
-                                left join simpanan sm on sm.user_id = us.id and (sm.status != '' or sm.status is not null) and sm.jenis = 'tarik'
+                                LEFT JOIN simpanan st ON st.user_id = us.id AND st.jenis = 'tarik' AND (st.status is not null or st.status != '')
+                                LEFT JOIN (
+                                select 
+                                    ss.user_id,sum(amount) as amount
+                                from
+                                    simpanan_sukarela ss
+                                where
+                                    ss.jenis = 'manual' and ss.status = 'approve'
+                                group by
+                                    ss.user_id
+                            ) ss ON ss.user_id = us.id
+                        ";         
+                        $cekpengajuan = DB::select("
+                            select 
+	
+                                $select
+                            FROM
+                                $table
                             WHERE
                                 us.id = $userid
                                 
