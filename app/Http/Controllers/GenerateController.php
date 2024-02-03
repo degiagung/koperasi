@@ -5,7 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\MenusAccess;
 use Illuminate\Http\Request;
 use App\Http\Controllers\GeneralController;
-use App\Http\Controllers\JsonDataController;
+use App\Http\Controllers\jsondataController;
 use Illuminate\Support\Facades\DB;
 use ReflectionClass;
 use ReflectionMethod;
@@ -78,7 +78,7 @@ class GenerateController extends Controller
                 if ($request->isMethod('post')) {
 
                     $generalController  = GeneralController::class;
-                    $jsonDataController = JsonDataController::class;
+                    $jsonDataController = jsondataController::class;
             
                     $results    = $this->processControllerMethods($generalController, "VIEW");
                     

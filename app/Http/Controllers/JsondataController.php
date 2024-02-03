@@ -14,7 +14,7 @@ use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Session;
 
-class JsonDataController extends Controller
+class jsondataController extends Controller
 {   
     // for list menu side bar
         public function getAccessMenu(Request $request){
@@ -3352,6 +3352,8 @@ class JsonDataController extends Controller
                                 'user_id'           => $userid,
                                 'jenis'             => 'manual',
                                 'amount'            => $jumlah,
+                                'status'            => 'approve',
+                                'tgl_approve'       => $now,
                                 'id_bukti'          => $savefoto['data'],
                                 'created_at'        => $now,
                             ];
