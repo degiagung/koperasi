@@ -3176,7 +3176,7 @@ class JsonDataController extends Controller
                         $status = $saved;
     
                         if($status['code'] == $MasterClass::CODE_SUCCESS){
-                            DB::select("update limit_pinjaman set amount = amount - $pinjaman where user_id = $userid");
+                            DB::select("update limit_pinjaman set amount = amount - $pinjaman where user_id = $userid ");
                             DB::commit();
                         }else{
                             DB::rollBack();
