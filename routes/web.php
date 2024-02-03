@@ -2,7 +2,7 @@
 
 use App\Http\Controllers\GeneralController;
 use App\Http\Controllers\InvoiceController;
-use App\Http\Controllers\jsondataController;
+use App\Http\Controllers\JsonDataController;
 use App\Models\MenusAccess;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
