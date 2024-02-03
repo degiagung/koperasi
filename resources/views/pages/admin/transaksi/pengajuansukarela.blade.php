@@ -86,7 +86,7 @@
                                     <tr>
                                         <th>No</th>
                                         {{-- <th>Status </th> --}}
-                                        <th>Jenis Simpanan</th>
+                                        <th>Metode Pembayaran</th>
                                         <th>NRP</th>
                                         <th>Nama Anggota</th>
                                         <th>keanggotaan</th>

@@ -414,7 +414,7 @@ function ajukanpinjaman(){
                 },
                 complete: function () {
                     $('#table-list').DataTable().ajax.reload();
-
+                    getdatlimitpinjaman();
                 },
                 success: function (response) {
                     // Handle response sukses
