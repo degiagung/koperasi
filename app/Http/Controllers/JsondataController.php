@@ -32,7 +32,7 @@ class JsonDataController extends Controller
                         $data = json_decode($request->getContent());
                         $status = [];
                         $role_id = $MasterClass->getSession('role_id');
-                        $saved = DB::select("SELECT * FROM menus_access ma LEFT JOIN users_access ua ON ma.id = ua.menu_access_id WHERE ua.role_id =".$role_id. " AND ua.i_view=1 order by coalesce(ma.urutan,10),ma.menu_name asc");
+                        $saved = DB::select("SELECT * FROM menus_access ma LEFT JOIN users_access ua ON ma.id = ua.menu_access_id WHERE ua.role_id =".$role_id. " AND ua.i_view=1 order by ma.menu_name asc");
 
                         $saved = $MasterClass->checkErrorModel($saved);
                         
@@ -1726,8 +1726,7 @@ class JsonDataController extends Controller
                         
                         $select = "COALESCE(PERIOD_DIFF(DATE_FORMAT(SYSDATE(), '%Y%m'),DATE_FORMAT(us.tgl_dinas, '%Y%m')),0) jmldinas,
                                 cast(
-                                    ( 50000 * COALESCE(PERIOD_DIFF(DATE_FORMAT(SYSDATE(), '%Y%m'),DATE_FORMAT(us.tgl_dinas, '%Y%m')),0) / COALESCE(PERIOD_DIFF(DATE_FORMAT(SYSDATE(), '%Y%m'),DATE_FORMAT(us.tgl_dinas, '%Y%m')),0))
-                                    +
+                                    
                                     (50000 * COALESCE(PERIOD_DIFF(DATE_FORMAT(SYSDATE(), '%Y%m'),DATE_FORMAT(us.tgl_dinas, '%Y%m')),0))
                                     + 
                                     coalesce(sum(su.amount),0.00)
