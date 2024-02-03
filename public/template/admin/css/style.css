@@ -37807,7 +37807,7 @@ thead{
   color        : #fff !important;   
 }
 .btn-sgn{
-  color: #ffffff !important;
+  color: black !important;
   background: linear-gradient(268deg, #6484b5 -4.36%, #79accb 103.01%) !important;
   box-shadow: 0px 6px 16px rgba(229, 88, 108, 0.16);
   border-radius : 5px;
@@ -37880,5 +37880,5 @@ thead{
 }
 
 .table>thead>tr>th{
-  color:#fff;
+  /* color:#fff; */
 }

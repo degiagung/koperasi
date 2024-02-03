@@ -219,6 +219,13 @@ function datetostring2(p1,p2,p3){
 			var s		= String(a.getSeconds()).padStart(2, '0');
 			return tgl+' '+bulan+' '+tahun+' '+h+':'+m+':'+s ;
 		}
+    if(p1 == 'mm'){
+      var bulan   = month[parseInt(p2)-1]
+			if(bulan == -1){
+				bulan = 0;
+			}
+      return bulan
+    }
 		
 	}else{
 		return '';
@@ -416,11 +423,25 @@ function datesimpananptgj(p,p1){
     return ''
   }
 }
+filteryears()
+function filteryears(){
+  content = '<option value="">Semua Tahun</option>';
+  for(a = 0 ; a < 5 ; a++){
+    date = new Date();
+    yyyy2= date.getFullYear() - a ;
 
-
-// moment.addRealMonth = function addRealMonth(d) {
-//   var fm = moment(d).add(1, 'M');
-//   var fmEnd = moment(fm).endOf('month');
-//   var v = d.date() != fm.date() && fm.isSame(fmEnd.format('YYYY-MM-DD')) ? fm.add(1, 'd') : fm;  
-// }
+    content     += "<option value="+yyyy2+">"+yyyy2+"</option>";
+  }
+  $("#filter-tahun").append(content);
+}
+filtermonth();
+function filtermonth(){
+  content = '<option value="">Semua Bulan</option>';
+  for(a = 1 ; a < 13 ; a++){
+    var mm2     = a ;
+    var perisel = window.datetostring2('mm',+mm2);
+    content     += "<option value="+mm2+">"+perisel+"</option>";
+  }
+  $("#filter-bulan").append(content);
+}
 

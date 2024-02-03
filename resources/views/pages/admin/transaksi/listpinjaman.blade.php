@@ -36,6 +36,14 @@
                                     <option value="pindah">PINDAH</option>
                                 </select>
                             </div>
+                            <div class="col-sm-3">
+                                <label>Tahun Transaksi</label>
+                                <select  class="select2" id="filter-tahun"></select>
+                            </div>
+                            <div class="col-sm-3">
+                                <label>Bulan Transaksi</label>
+                                <select  class="select2" id="filter-bulan"></select>
+                            </div>
                             <div class="col-sm-2">
                                 <button type="submit" id="filter-btn" class="btn btn-sgn" style="color:#e12a2a;width:100%;height:35px;font-size:14px;margin-top: 27px;"><i class="bi bi-search" style="font-size:12px;" ></i> Cari</button>
                             </div>
@@ -190,18 +198,24 @@
                     </div>
                     <div class="modal-body">
                         <div class="basic-form">
-                            <form>
-                                <div class="mb-3 row">
-                                    <label class="col-sm-5 col-form-label ">Status Pinjaman</label>
-                                    <div class="col-sm-7">
-                                        <select class="select2add" id="form-statuslunas">
-                                            <option value="belum lunas">Belum Lunas</option>
-                                            <option value="lunas">Lunas</option>
-                                        </select>
-                                    </div>
-                                </div>
+                            <div class="mb-3 row">
+                                <label class="col-sm-5 col-form-label ">Status Pinjaman</label>
+                                <div class="col-sm-7">
+                                    <select class="select2add" id="form-statuslunas">
+                                        <option value="lunas">Lunas</option>
+                                    </select>
 
-                            </form>
+                                </div>
+                            </div>
+                            <div class="mb-3 row">
+                                <label class="col-sm-5 col-form-label">Kwitansi</label>
+                                <div class="col-sm-7">
+                                    <form role="form" class="" id="formbukti" method="post" type="post" enctype="multipart/form-data">
+                                        <input class="form-control" name="bukti" id="form-bukti" type="file" value="" multiple style="opacity:1;"/>
+                                    </form>
+                                </div>
+                            </div>
+
                         </div>
                     </div>
                     <div class="modal-footer">

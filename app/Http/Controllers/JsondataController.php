@@ -32,7 +32,7 @@ class JsonDataController extends Controller
                         $data = json_decode($request->getContent());
                         $status = [];
                         $role_id = $MasterClass->getSession('role_id');
-                        $saved = DB::select("SELECT * FROM menus_access ma LEFT JOIN users_access ua ON ma.id = ua.menu_access_id WHERE ua.role_id =".$role_id. " AND ua.i_view=1 order by ma.menu_name asc");
+                        $saved = DB::select("SELECT * FROM menus_access ma LEFT JOIN users_access ua ON ma.id = ua.menu_access_id WHERE ua.role_id =".$role_id. " AND ua.i_view=1 order by coalesce(ma.urutan,10),ma.menu_name asc");
 
                         $saved = $MasterClass->checkErrorModel($saved);
                         
@@ -629,7 +629,8 @@ class JsonDataController extends Controller
                             END keanggotaan,
                             lp.id as idlimit,
                             cast(lp.amount as decimal(18,0)) as limit_pinjaman,
-                            cast(us.gaji as decimal(18,0)) as gaji
+                            cast(us.gaji as decimal(18,0)) as gaji,
+                            PERIOD_DIFF(DATE_FORMAT(SYSDATE(), '%Y%m'),DATE_FORMAT(us.tgl_dinas, '%Y%m')) * cast(us.gaji as decimal(18,0)) as totalgaji
                         ";
                         
                         $table = '
@@ -714,7 +715,53 @@ class JsonDataController extends Controller
                         $fstatus     = $request->status ;
                         $fkeanggotaan= $request->keanggotaan ;
                         $status = [];
+                        $ftahun         = $request->tahun ;
+                        $fbulan         = $request->bulan ;
                         
+                        if($fbulan >= 1 && $fbulan <= 9){
+                            $fbulan = "0".$fbulan ;
+                        }
+                        $wherefdate  = "";
+                        $wherefdate1 = "";
+                        $wherefdate2 = "";
+                        $wherefdate3 = "";
+                        $wherefdate4 = "";
+                        if($ftahun){
+                            
+                            $wherefdate .= "
+                                and DATE_FORMAT(tgl_approve, '%Y') = '$ftahun' 
+                            ";
+                            $wherefdate1 .= "
+                                AND DATE_FORMAT(pj1.tgl_approve, '%Y') = '$ftahun' 
+                            ";
+                            $wherefdate2 .= "
+                                AND DATE_FORMAT(st.tgl_approve, '%Y') = '$ftahun' 
+                            ";
+                            $wherefdate3 .= "
+                                AND DATE_FORMAT(ss.tgl_approve, '%Y') = '$ftahun' 
+                            ";
+                            $wherefdate4 .= "
+                                AND DATE_FORMAT(su.tgl_approve, '%Y') = '$ftahun' 
+                            ";
+                        }
+                        if($fbulan){
+                            $fbulan = $ftahun.$fbulan ;
+                            $wherefdate .= "
+                                and DATE_FORMAT(tgl_approve, '%Y%m') = '$fbulan'
+                            ";
+                            $wherefdate1 .= "
+                                AND DATE_FORMAT(pj1.tgl_approve, '%Y%m') = '$fbulan'
+                            ";
+                            $wherefdate2 .= "
+                                AND DATE_FORMAT(st.tgl_approve, '%Y%m') = '$fbulan'
+                            ";
+                            $wherefdate3 .= "
+                                AND DATE_FORMAT(ss.tgl_approve, '%Y%m') = '$fbulan'
+                            ";
+                            $wherefdate4 .= "
+                                AND DATE_FORMAT(su.tgl_approve, '%Y%m') = '$fbulan'
+                            ";
+                        }
                         $select = "
                             us.name,us.id as user,us.nrp,us.tgl_dinas,
                             case 
@@ -786,16 +833,16 @@ class JsonDataController extends Controller
                                         END amount
                                     from 
                                         simpanan_sukarela su 
-                                    where su.jenis = 'potong gaji' and su.status = 'approve'
+                                    where su.jenis = 'potong gaji' and su.status = 'approve' $wherefdate4
                                 ) as su ON su.user_id = us.id
-                            LEFT JOIN simpanan st ON st.user_id = us.id AND st.jenis = 'tarik' AND (st.status is not null or st.status != '')
+                            LEFT JOIN simpanan st ON st.user_id = us.id AND st.jenis = 'tarik' AND (st.status is not null or st.status != '') $wherefdate2
                             LEFT JOIN (
                                 select 
                                     ss.user_id,sum(amount) as amount
                                 from
                                     simpanan_sukarela ss
                                 where
-                                    ss.jenis = 'manual' and ss.status = 'approve'
+                                    ss.jenis = 'manual' and ss.status = 'approve' $wherefdate3
                                 group by
                                     ss.user_id
                             ) ss ON ss.user_id = us.id                         
@@ -883,6 +930,30 @@ class JsonDataController extends Controller
                         $fstatus        = $request->status ;
                         $fkeanggotaan   = $request->keanggotaan ;
                         $fstatuspinjam  = $request->statuspinjam ;
+                        $ftahun         = $request->tahun ;
+                        $fbulan         = $request->bulan ;
+                        
+                        if($fbulan >= 1 && $fbulan <= 9){
+                            $fbulan = "0".$fbulan ;
+                        }
+                        $wherefdate  = "";
+                        $wherefdate1 = "";
+                        $wherefdate2 = "";
+                        $wherefdate3 = "";
+                        $wherefdate4 = "";
+                        if($ftahun){
+                            
+                            $wherefdate .= "
+                                and DATE_FORMAT(pj.created_at, '%Y') = '$ftahun' 
+                            ";
+                        }
+                        if($fbulan){
+                            $fbulan = $ftahun.$fbulan ;
+                            $wherefdate .= "
+                                and DATE_FORMAT(pj.created_at, '%Y%m') = '$fbulan'
+                            ";
+                        }
+
                         $status = [];
                         
                         $select = "
@@ -944,7 +1015,7 @@ class JsonDataController extends Controller
                         $table = "
                             users us
                             JOIN users_roles ur ON us.role_id = ur.id
-                            JOIN pinjaman pj ON pj.user_id = us.id AND pj.status = 'approve'
+                            JOIN pinjaman pj ON pj.user_id = us.id AND pj.status = 'approve' $wherefdate
                             LEFT JOIN limit_pinjaman lp ON lp.user_id = us.id 
                         ";
                         
@@ -1041,7 +1112,26 @@ class JsonDataController extends Controller
                         $fkeanggotaan   = $request->keanggotaan ;
                         $fstatuspinjam  = $request->statuspinjam ;
                         $status = [];
+                        $ftahun         = $request->tahun ;
+                        $fbulan         = $request->bulan ;
+                        if($fbulan >= 1 && $fbulan <= 9){
+                            $fbulan = "0".$fbulan ;
+                        }
+                        $status = [];
                         
+                        $wherefdate  = "";
+                        if($ftahun){
+                            
+                            $wherefdate .= "
+                                and DATE_FORMAT(pj.tgl_approve, '%Y') = '$ftahun' 
+                            ";
+                        }
+                        if($fbulan){
+                            $fbulan = $ftahun.$fbulan ;
+                            $wherefdate .= "
+                                and DATE_FORMAT(pj.tgl_approve, '%Y%m') = '$fbulan'
+                            ";
+                        }
                         $select = "
                             us.name,us.id as user,us.nrp,us.tgl_dinas,us.no_anggota,us.pangkat,
                             case 
@@ -1090,7 +1180,7 @@ class JsonDataController extends Controller
                         $table = "
                             users us
                             JOIN users_roles ur ON us.role_id = ur.id
-                            JOIN pinjaman pj ON pj.user_id = us.id
+                            JOIN pinjaman pj ON pj.user_id = us.id $wherefdate
                             LEFT JOIN limit_pinjaman lp ON lp.user_id = us.id 
                         ";
                         
@@ -1181,8 +1271,57 @@ class JsonDataController extends Controller
                         $fstatus        = $request->status ;
                         $fkeanggotaan   = $request->keanggotaan ;
                         $fstatuspinjam  = $request->statuspinjam ;
+                        $ftahun         = $request->tahun ;
+                        $fbulan         = $request->bulan ;
+                        if($fbulan >= 1 && $fbulan <= 9){
+                            $fbulan = "0".$fbulan ;
+                        }
                         $status = [];
                         
+                        $wherefdate  = "";
+                        $wherefdate1 = "";
+                        $wherefdate2 = "";
+                        $wherefdate3 = "";
+                        $wherefdate4 = "";
+                        if($ftahun){
+                            
+                            $wherefdate .= "
+                                and DATE_FORMAT(tgl_approve, '%Y') = '$ftahun' 
+                            ";
+                            $wherefdate1 .= "
+                                AND DATE_FORMAT(pj1.tgl_approve, '%Y') = '$ftahun' 
+                            ";
+                            $wherefdate2 .= "
+                                AND DATE_FORMAT(st.tgl_approve, '%Y') = '$ftahun' 
+                            ";
+                            $wherefdate3 .= "
+                                AND DATE_FORMAT(ss.tgl_approve, '%Y') = '$ftahun' 
+                            ";
+                            $wherefdate4 .= "
+                                AND DATE_FORMAT(su.tgl_approve, '%Y') = '$ftahun' 
+                            ";
+                        }
+                        if($fbulan){
+                            $fbulan = $ftahun.$fbulan ;
+                            $wherefdate .= "
+                                and DATE_FORMAT(tgl_approve, '%Y%m') = '$fbulan'
+                            ";
+                            $wherefdate1 .= "
+                                AND DATE_FORMAT(pj1.tgl_approve, '%Y%m') = '$fbulan'
+                            ";
+                            $wherefdate2 .= "
+                                AND DATE_FORMAT(st.tgl_approve, '%Y%m') = '$fbulan'
+                            ";
+                            $wherefdate3 .= "
+                                AND DATE_FORMAT(ss.tgl_approve, '%Y%m') = '$fbulan'
+                            ";
+                            $wherefdate4 .= "
+                                AND DATE_FORMAT(su.tgl_approve, '%Y%m') = '$fbulan'
+                            ";
+                        }
+
+                        // dd($wherefdate);
+
                         $select = "
                             us.name,us.id as user,us.nrp,us.tgl_dinas,
                             case 
@@ -1250,10 +1389,10 @@ class JsonDataController extends Controller
                                     sum(amount) amount,
                                     user_id
                                 from pinjaman
-                                where status = 'approve'
+                                where status = 'approve' $wherefdate
                                 group by user_id
                             ) pj ON pj.user_id = us.id 
-                            LEFT JOIN pinjaman pj1 ON pj1.user_id = us.id AND pj1.status = 'approve' and pj1.status_pinjaman != 'lunas' and COALESCE(PERIOD_DIFF(DATE_FORMAT(SYSDATE(), '%Y%m'),DATE_FORMAT(pj1.tgl_approve, '%Y%m')),0) < pj1.tenor 
+                            LEFT JOIN pinjaman pj1 ON pj1.user_id = us.id AND pj1.status = 'approve' and pj1.status_pinjaman != 'lunas' and COALESCE(PERIOD_DIFF(DATE_FORMAT(SYSDATE(), '%Y%m'),DATE_FORMAT(pj1.tgl_approve, '%Y%m')),0) < pj1.tenor $wherefdate1
                             LEFT JOIN (
                                     select 
                                         user_id,
@@ -1266,16 +1405,16 @@ class JsonDataController extends Controller
                                         END amount
                                     from 
                                         simpanan_sukarela su 
-                                    where su.jenis = 'potong gaji' and su.status = 'approve'
+                                    where su.jenis = 'potong gaji' and su.status = 'approve' $wherefdate4
                             ) as su ON su.user_id = us.id                          
-                            LEFT JOIN simpanan st ON st.user_id = us.id AND st.jenis = 'tarik' AND (st.status is not null or st.status != '')
+                            LEFT JOIN simpanan st ON st.user_id = us.id AND st.jenis = 'tarik' AND (st.status is not null or st.status != '') $wherefdate2
                             LEFT JOIN (
                                 select 
                                     ss.user_id,sum(amount) as amount
                                 from
                                     simpanan_sukarela ss
                                 where
-                                    ss.jenis = 'manual' and ss.status = 'approve'
+                                    ss.jenis = 'manual' and ss.status = 'approve' $wherefdate3
                                 group by
                                     ss.user_id
                             ) ss ON ss.user_id = us.id
@@ -1449,6 +1588,26 @@ class JsonDataController extends Controller
 
                         $status = [];
                         
+                        $ftahun         = $request->tahun ;
+                        $fbulan         = $request->bulan ;
+                        
+                        if($fbulan >= 1 && $fbulan <= 9){
+                            $fbulan = "0".$fbulan ;
+                        }
+                        $wherefdate  = "";
+                        if($ftahun){
+                            
+                            $wherefdate .= "
+                                and DATE_FORMAT(su.tgl_approve, '%Y') = '$ftahun' 
+                            ";
+                        }
+                        if($fbulan){
+                            $fbulan = $ftahun.$fbulan ;
+                            $wherefdate .= "
+                                and DATE_FORMAT(su.tgl_approve, '%Y%m') = '$fbulan'
+                            ";
+                        }
+
                         $select = "
                             us.name,us.id as user,us.nrp,us.tgl_dinas,us.no_anggota,us.pangkat,
                             case 
@@ -1474,7 +1633,7 @@ class JsonDataController extends Controller
                         $table = "
                             users us
                             JOIN users_roles ur ON us.role_id = ur.id
-                            JOIN simpanan_sukarela su ON us.id = su.user_id
+                            JOIN simpanan_sukarela su ON us.id = su.user_id $wherefdate
                             LEFT JOIN bukti_transaksi bt ON bt.id = su.id_bukti
                         ";
                         
@@ -1660,7 +1819,42 @@ class JsonDataController extends Controller
                         $fstatus        = $request->status ;
                         $fkeanggotaan   = $request->keanggotaan ;
                         $status = [];
+                        $ftahun         = $request->tahun ;
+                        $fbulan         = $request->bulan ;
                         
+                        if($fbulan >= 1 && $fbulan <= 9){
+                            $fbulan = "0".$fbulan ;
+                        }
+                        $wherefdate  = "";
+                        $wherefdate1 = "";
+                        $wherefdate2 = "";
+                        $wherefdate3 = "";
+                        $wherefdate4 = "";
+                        if($ftahun){
+                            
+                            $wherefdate .= "
+                                and DATE_FORMAT(sm.tgl_approve, '%Y') = '$ftahun' 
+                            ";
+                            $wherefdate1 .= "
+                                AND DATE_FORMAT(su.tgl_approve, '%Y') = '$ftahun' 
+                            ";
+                            $wherefdate2 .= "
+                                AND DATE_FORMAT(ss.tgl_approve, '%Y') = '$ftahun' 
+                            ";
+                            
+                        }
+                        if($fbulan){
+                            $fbulan = $ftahun.$fbulan ;
+                            $wherefdate .= "
+                                and DATE_FORMAT(sm.tgl_approve, '%Y%m') = '$fbulan'
+                            ";
+                            $wherefdate1 .= "
+                                AND DATE_FORMAT(su.tgl_approve, '%Y%m') = '$fbulan'
+                            ";
+                            $wherefdate2 .= "
+                                AND DATE_FORMAT(ss.tgl_approve, '%Y%m') = '$fbulan'
+                            ";
+                        }
                         $select = "
                             us.name,us.id as user,us.nrp,us.tgl_dinas,us.no_anggota,us.pangkat,
                             case 
@@ -1699,7 +1893,7 @@ class JsonDataController extends Controller
                         $table = "
                             users us
                             JOIN users_roles ur ON us.role_id = ur.id
-                            JOIN simpanan sm ON sm.user_id = us.id and sm.jenis = 'tarik'
+                            JOIN simpanan sm ON sm.user_id = us.id and sm.jenis = 'tarik' $wherefdate
                             LEFT JOIN simpanan sm1 ON sm1.user_id = us.id and sm1.jenis = 'tarik' and (sm1.status != '' or sm1.status is not null)
                             LEFT JOIN (
                                     select 
@@ -1713,7 +1907,7 @@ class JsonDataController extends Controller
                                         END amount
                                     from 
                                         simpanan_sukarela su 
-                                    where su.jenis = 'potong gaji' and su.status = 'approve'
+                                    where su.jenis = 'potong gaji' and su.status = 'approve' $wherefdate1
                                 ) as su ON su.user_id = us.id
                             LEFT JOIN (
                                 select 
@@ -1721,7 +1915,7 @@ class JsonDataController extends Controller
                                 from
                                     simpanan_sukarela ss
                                 where
-                                    ss.jenis = 'manual' and ss.status = 'approve'
+                                    ss.jenis = 'manual' and ss.status = 'approve' $wherefdate2
                                 group by
                                     ss.user_id
                             ) ss ON ss.user_id = us.id
@@ -1920,6 +2114,117 @@ class JsonDataController extends Controller
                         $saved  = DB::select("SELECT a.* FROM bukti_transaksi a where user_id = $id and keterangan = 'pokok'  ORDER BY created_at desc");
                         $saved  = $MasterClass->checkErrorModel($saved);
                         
+                        $status = $saved;
+            
+                        $results = [
+                            'code' => $status['code'],
+                            'info'  => $status['info'],
+                            'data'  =>  $status['data'],
+                        ];
+                            
+            
+            
+                    } else {
+                        $results = [
+                            'code' => '103',
+                            'info'  => "Method Failed",
+                        ];
+                    }
+                } catch (\Exception $e) {
+                    // Roll back the transaction in case of an exception
+                    $results = [
+                        'code' => '102',
+                        'info'  => $e->getMessage(),
+                    ];
+        
+                }
+            }
+            else {
+        
+                $results = [
+                    'code' => '403',
+                    'info'  => "Unauthorized",
+                ];
+                
+            }
+
+            return $MasterClass->Results($results);
+
+        }
+        public function getbuktitarik(Request $request){
+
+            $MasterClass = new Master();
+
+            $checkAuth = $MasterClass->Authenticated($MasterClass->getSession('user_id'));
+            
+            if($checkAuth['code'] == $MasterClass::CODE_SUCCESS){
+                try {
+                    if ($request->isMethod('post')) {
+                        
+                        DB::beginTransaction();
+                
+                        $status = [];
+                        $idprnt = $request->id ;
+                        $userid = $request->userid ;
+                        
+                        $saved  = DB::select("SELECT a.* FROM bukti_transaksi a where user_id = $userid and keterangan = 'tarik' and id_parent = $idprnt  ORDER BY created_at desc");
+                        $saved  = $MasterClass->checkErrorModel($saved);
+                        
+                        $status = $saved;
+            
+                        $results = [
+                            'code' => $status['code'],
+                            'info'  => $status['info'],
+                            'data'  =>  $status['data'],
+                        ];
+                            
+            
+            
+                    } else {
+                        $results = [
+                            'code' => '103',
+                            'info'  => "Method Failed",
+                        ];
+                    }
+                } catch (\Exception $e) {
+                    // Roll back the transaction in case of an exception
+                    $results = [
+                        'code' => '102',
+                        'info'  => $e->getMessage(),
+                    ];
+        
+                }
+            }
+            else {
+        
+                $results = [
+                    'code' => '403',
+                    'info'  => "Unauthorized",
+                ];
+                
+            }
+
+            return $MasterClass->Results($results);
+
+        }
+        public function buktilunas(Request $request){
+
+            $MasterClass = new Master();
+
+            $checkAuth = $MasterClass->Authenticated($MasterClass->getSession('user_id'));
+            
+            if($checkAuth['code'] == $MasterClass::CODE_SUCCESS){
+                try {
+                    if ($request->isMethod('post')) {
+                        
+                        DB::beginTransaction();
+                
+                        $status = [];
+                        $id = $request->id ;
+                        $userid = $request->userid ;
+                        
+                        $saved  = DB::select("SELECT a.* FROM bukti_transaksi a,pinjaman b where a.id = b.bukti and a.user_id = $userid and a.keterangan = 'bukti lunas pinjaman' and b.id = $id  ORDER BY created_at desc");
+                        $saved  = $MasterClass->checkErrorModel($saved);
                         $status = $saved;
             
                         $results = [
@@ -2837,6 +3142,7 @@ class JsonDataController extends Controller
                         $jenis      = $data->keperluan ;
                         $userid     = $MasterClass->getSession('user_id') ;
                         $idtrans    = 'trans-'.date('YmdHis').$userid ;
+                        $now        = date('Y-m-d H:i:s') ;
                         $status = [];
 
                         $cekpengajuan = $MasterClass->selectGlobal(
@@ -2862,12 +3168,15 @@ class JsonDataController extends Controller
                             'status_pinjaman'   => 'belum lunas',
                             'jenis'             => $jenis,
                             'tenor'             => $tenor,
-                            'created_at'        => date('Y-m-d H:i:s'),
+                            'status'            => 'approve',
+                            'tgl_approve'       => $now,
+                            'created_at'        => $now,
                         ];
                         $saved      = $MasterClass->saveGlobal('pinjaman', $attributes );
                         $status = $saved;
     
                         if($status['code'] == $MasterClass::CODE_SUCCESS){
+                            DB::select("update limit_pinjaman set amount = amount - $pinjaman where user_id = $userid");
                             DB::commit();
                         }else{
                             DB::rollBack();
@@ -2924,6 +3233,7 @@ class JsonDataController extends Controller
                         $bulan      = $data->bulan.'-01' ;
                         $durasi     = $data->durasi ;
                         $userid     = $MasterClass->getSession('user_id') ;
+                        $now        = date('Y-m-d H:i:s') ;
                         $status = [];
 
                         $cekpengajuan = $MasterClass->selectGlobal(
@@ -2943,7 +3253,9 @@ class JsonDataController extends Controller
                             'amount'            => $jumlah,
                             'tgl_awal'          => $bulan,
                             'durasi'            => $durasi,
-                            'created_at'        => date('Y-m-d H:i:s'),
+                            'status'            => 'approve',
+                            'tgl_approve'       => $now,
+                            'created_at'        => $now,
                         ];
                         $saved      = $MasterClass->saveGlobal('simpanan_sukarela', $attributes );
                         $status = $saved;
@@ -3174,14 +3486,17 @@ class JsonDataController extends Controller
                         $data = json_decode($request->getContent());
                         $jumlah     = $data->jumlah ;
                         $userid     = $MasterClass->getSession('user_id') ;
+                        $now        = date('Y-m-d H:i:s') ;
                         $status = [];
 
+                        // simpanan pokok
+                        // ( 50000 * COALESCE(PERIOD_DIFF(DATE_FORMAT(SYSDATE(), '%Y%m'),DATE_FORMAT(us.tgl_dinas, '%Y%m')),0) / COALESCE(PERIOD_DIFF(DATE_FORMAT(SYSDATE(), '%Y%m'),DATE_FORMAT(us.tgl_dinas, '%Y%m')),0))
+                        //         +
                         $cekpengajuan = DB::select("
                             select 
 	
                                 COALESCE(PERIOD_DIFF(DATE_FORMAT(SYSDATE(), '%Y%m'),DATE_FORMAT(us.tgl_dinas, '%Y%m')),0) jmldinas,
-                                ( 50000 * COALESCE(PERIOD_DIFF(DATE_FORMAT(SYSDATE(), '%Y%m'),DATE_FORMAT(us.tgl_dinas, '%Y%m')),0) / COALESCE(PERIOD_DIFF(DATE_FORMAT(SYSDATE(), '%Y%m'),DATE_FORMAT(us.tgl_dinas, '%Y%m')),0))
-                                +
+                                
                                 (50000 * COALESCE(PERIOD_DIFF(DATE_FORMAT(SYSDATE(), '%Y%m'),DATE_FORMAT(us.tgl_dinas, '%Y%m')),0))
                                 + 
                                 coalesce(sum(su.amount),0.00)
@@ -3225,7 +3540,9 @@ class JsonDataController extends Controller
                             'user_id'           => $userid,
                             'jenis'             => 'tarik',
                             'amount'            => $jumlah,
-                            'created_at'        => date('Y-m-d H:i:s'),
+                            'status'            => 'approve',
+                            'tgl_approve'       => $now,
+                            'created_at'        => $now,
                         ];
                         $saved      = $MasterClass->saveGlobal('simpanan', $attributes );
                         $status = $saved;
@@ -3617,6 +3934,177 @@ class JsonDataController extends Controller
                                 }
                                 $savefoto      = $MasterClass->saveGlobal('bukti_transaksi', $attrphoto );
                                 if($savefoto['code'] != $MasterClass::CODE_SUCCESS){
+                                    DB::rollBack();
+                                    $results = [
+                                        'code' => '1',
+                                        'info'  => "Upload Gagal",
+                                    ];
+                                    return $MasterClass->Results($results);
+                                }
+                            }
+
+                            DB::commit();
+                            $results = [
+                                'code'      => $MasterClass::CODE_SUCCESS,
+                                'info'      => 'Upload Berhasil',
+                            ];
+            
+                        }
+                    } else {
+                        $results = [
+                            'code' => '103',
+                            'info'  => "Method Failed",
+                        ];
+                    }
+                } catch (\Exception $e) {
+                    // Roll back the transaction in case of an exception
+                    $results = [
+                        'code' => '102',
+                        'info'  => $e->getMessage(),
+                    ];
+        
+                }
+            }
+            else {
+        
+                $results = [
+                    'code' => '403',
+                    'info'  => "Unauthorized",
+                ];
+                
+            }
+
+            return $MasterClass->Results($results);
+
+        }
+        public function saveBuktitarik(Request $request){
+
+            $MasterClass = new Master();
+            
+            $checkAuth = $MasterClass->Authenticated($MasterClass->getSession('user_id'));
+            
+            if($checkAuth['code'] == $MasterClass::CODE_SUCCESS){
+                try {
+                    if ($request->isMethod('post')) {
+
+                        DB::beginTransaction();     
+                        $id         = $request->id ;
+                        $userid     = $request->userid ;
+                        $now        = date('Y-m-d H:i:s');
+                        $idlogin    = $MasterClass->getSession('user_id') ;
+                        $status = [];
+
+                        $docname            = 'bukti';
+                        if(!empty($_FILES['bukti']['name'])){//jika file ada maka masukan file 
+                            
+                            $nama_file          = $_FILES['bukti']['name'];
+                            $tmp_name		    = $_FILES['bukti']['tmp_name'];
+                            $nama_file_upload   = strtolower(str_replace(' ','_',$docname.'-'.$nama_file));
+                            $alamatfile         = '../public/data/bukti/'; // directory file
+                            $uploaddir          = $alamatfile.$nama_file_upload; // directory file
+                            
+                            if (move_uploaded_file($tmp_name,$uploaddir)){
+                                chmod($uploaddir, 0777);
+    
+                                $attrphoto     = [
+                                    'file'      => $uploaddir,
+                                    'user_id'   => $userid,
+                                    'id_parent' => $id,
+                                    'keterangan'=> 'tarik',
+                                    'created_at'=> $now,
+                                ];
+                                $savefoto      = $MasterClass->saveGlobal('bukti_transaksi', $attrphoto );
+                                if($savefoto['code'] != $MasterClass::CODE_SUCCESS){
+                                    DB::rollBack();
+                                    $results = [
+                                        'code' => '1',
+                                        'info'  => "Upload Gagal",
+                                    ];
+                                    return $MasterClass->Results($results);
+                                }
+                            }
+
+                            DB::commit();
+                            $results = [
+                                'code'      => $MasterClass::CODE_SUCCESS,
+                                'info'      => 'Upload Berhasil',
+                            ];
+            
+                        }
+                    } else {
+                        $results = [
+                            'code' => '103',
+                            'info'  => "Method Failed",
+                        ];
+                    }
+                } catch (\Exception $e) {
+                    // Roll back the transaction in case of an exception
+                    $results = [
+                        'code' => '102',
+                        'info'  => $e->getMessage(),
+                    ];
+        
+                }
+            }
+            else {
+        
+                $results = [
+                    'code' => '403',
+                    'info'  => "Unauthorized",
+                ];
+                
+            }
+
+            return $MasterClass->Results($results);
+
+        }
+        public function lunasipinjaman(Request $request){
+
+            $MasterClass = new Master();
+            
+            $checkAuth = $MasterClass->Authenticated($MasterClass->getSession('user_id'));
+            
+            if($checkAuth['code'] == $MasterClass::CODE_SUCCESS){
+                try {
+                    if ($request->isMethod('post')) {
+
+                        DB::beginTransaction();     
+                        $id         = $request->id ;
+                        $now        = date('Y-m-d H:i:s');
+                        $idlogin    = $MasterClass->getSession('user_id') ;
+                        $status = [];
+                        
+                        $docname            = 'bukti';
+                        if(!empty($_FILES['bukti']['name'])){//jika file ada maka masukan file 
+                            
+                            $nama_file          = $_FILES['bukti']['name'];
+                            $tmp_name		    = $_FILES['bukti']['tmp_name'];
+                            $nama_file_upload   = strtolower(str_replace(' ','_',$docname.'-'.$nama_file));
+                            $alamatfile         = '../public/data/bukti/'; // directory file
+                            $uploaddir          = $alamatfile.$nama_file_upload; // directory file
+                            
+                            if (move_uploaded_file($tmp_name,$uploaddir)){
+                                chmod($uploaddir, 0777);
+    
+                                $attrphoto     = [
+                                    'file'      => $uploaddir,
+                                    'user_id'   => $idlogin,
+                                    'keterangan'=> 'bukti lunas pinjaman',
+                                    'created_at'=> $now,
+                                ];
+                                $savefoto      = $MasterClass->saveGlobal('bukti_transaksi', $attrphoto );
+                                
+                                $attributes     = [
+                                    'status_pinjaman' => 'lunas',
+                                    'updated_at'      => $now,
+                                    'bukti'        => $savefoto['data']
+                                ];
+                                $where     = [
+                                    'id' => $id
+                                ];
+                                $savepinjam      = $MasterClass->updateGlobal('pinjaman', $attributes,$where );
+                                
+                                if($savefoto['code'] != $MasterClass::CODE_SUCCESS || $savepinjam['code'] != $MasterClass::CODE_SUCCESS){
                                     DB::rollBack();
                                     $results = [
                                         'code' => '1',

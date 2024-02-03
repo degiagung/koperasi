@@ -9,33 +9,46 @@
         #table-list{
             white-space: nowrap;
         }
+        .ui-datepicker-calendar {
+            display: none;
+        }​
     </style>
     <section class="section dashboard">
          <div class="row">
             <h2>Laporan Simpan Pinjam</h2>
             <br>
-            @if ($role != 'anggota')
                 <div class="col-lg-12">
                     <div class="card-filter">
                         <label style="font-size:18px;">Filter</label>
                         <hr>
                             <div class="row">
+                                @if ($role != 'anggota')
+
+                                    <div class="col-sm-3">
+                                        <label>Status Pinjaman</label>
+                                        <select id="filter-status" name="filter-keanggotaan" class="select2 ">
+                                            <option value="">Semua Status</option>
+                                            <option value="1">LUNAS</option>
+                                            <option value="2">BELUM LUNAS</option>
+                                        </select>
+                                    </div>
+                                    <div class="col-sm-3">
+                                        <label>Status Keanggotaan</label>
+                                        <select id="filter-keanggotaan" name="filter-keanggotaan" class="select2 ">
+                                            <option value="">Semua Kondisi</option>
+                                            <option value="<= current_date and us.status != '2'">AKTIF</option>
+                                            <option value="> current_date">PENSIUN</option>
+                                            <option value="pindah">PINDAH</option>
+                                        </select>
+                                    </div>
+                                @endif
                                 <div class="col-sm-3">
-                                    <label>Status Pinjaman</label>
-                                    <select id="filter-status" name="filter-keanggotaan" class="select2 ">
-                                        <option value="">Semua Status</option>
-                                        <option value="1">LUNAS</option>
-                                        <option value="2">BELUM LUNAS</option>
-                                    </select>
+                                    <label>Tahun Transaksi</label>
+                                    <select  class="select2" id="filter-tahun"></select>
                                 </div>
                                 <div class="col-sm-3">
-                                    <label>Status Keanggotaan</label>
-                                    <select id="filter-keanggotaan" name="filter-keanggotaan" class="select2 ">
-                                        <option value="">Semua Kondisi</option>
-                                        <option value="<= current_date and us.status != '2'">AKTIF</option>
-                                        <option value="> current_date">PENSIUN</option>
-                                        <option value="pindah">PINDAH</option>
-                                    </select>
+                                    <label>Bulan Transaksi</label>
+                                    <select  class="select2" id="filter-bulan"></select>
                                 </div>
                                 <div class="col-sm-2">
                                     <button type="submit" id="filter-btn" class="btn btn-sgn" style="color:#e12a2a;width:100%;height:35px;font-size:14px;margin-top: 27px;"><i class="bi bi-search" style="font-size:12px;" ></i> Cari</button>
@@ -44,7 +57,6 @@
                         </div>
                     </div>
                 </div>
-            @endif
         </div><br>
         <div class="row">
             <div class="col-lg-12">

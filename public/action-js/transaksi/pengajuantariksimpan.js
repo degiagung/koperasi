@@ -13,6 +13,10 @@ $(".select2add").select2({
 });
 
 $("#filter-btn").on('click',function(e){
+    if($("#filter-tahun").val() == '' && $("#filter-bulan").val()){
+        swalwarning('filter tahun harus diisi');
+        return false ;
+    };
     $('#table-list').dataTable().fnClearTable();
     $('#table-list').dataTable().fnDraw();
     $('#table-list').dataTable().fnDestroy();
@@ -30,7 +34,9 @@ function getListData() {
             dataType: "json",
             data    : {
                 'keanggotaan'   :$('#filter-keanggotaan').val(),
-                'statuspinjam'  :$('#filter-approve').val()
+                'statuspinjam'  :$('#filter-approve').val(),
+                'tahun'         :$('#filter-tahun').val(),
+                'bulan'         :$('#filter-bulan').val(),
             },
             dataSrc: function (response) {
                 if (response.code == 0) {
@@ -63,7 +69,7 @@ function getListData() {
                     $('#table-list').DataTable().ajax.reload();
                 }
             },
-            { text: ' ', extend: 'excel',  className: 'btndownload iconexcel',  title:'List Penarikan Simpanan '+datenow(new Date), exportOptions: {columns:[':not(.notdown)']}},
+            { text: ' ', extend: 'excel',  className: 'btndownload iconexcel',  title:'List Penarikan Simpanan Periode transaksi('+$('#filter-tahun').val()+''+$('#filter-bulan').val()+')_date'+datenow(new Date), exportOptions: {columns:[':not(.notdown)']}},
         ],
         columns: [
             {
@@ -72,23 +78,23 @@ function getListData() {
                     return meta.row + meta.settings._iDisplayStart + 1;
                 },
             },
-            { render:function (data,type,row) {
-                if(row.status == 'approve')
-                    return "<a class='approvalsukarela' style='color:green;cursor:pointer;font-weight:bold;' >APPROVED</a>";
-                else if(row.status == 'reject')
-                    return "<a class='approvalsukarela' style='color:red;cursor:pointer;font-weight:bold;'>REJECTED</a>";
-                else
-                    return "<a class='approvalsukarela' style='color:black;cursor:pointer;font-weight:bold;'>WAITING APPROVED</a>";
-            } },
+            // { render:function (data,type,row) {
+            //     if(row.status == 'approve')
+            //         return "<a class='approvalsukarela' style='color:green;cursor:pointer;font-weight:bold;' >APPROVED</a>";
+            //     else if(row.status == 'reject')
+            //         return "<a class='approvalsukarela' style='color:red;cursor:pointer;font-weight:bold;'>REJECTED</a>";
+            //     else
+            //         return "<a class='approvalsukarela' style='color:black;cursor:pointer;font-weight:bold;'>WAITING APPROVED</a>";
+            // } },
             { visible:false,class:"notanggota",data: "nrp" },
             { visible:false,class:"notanggota",data: "name",render:function (data,type,row) {
                 return row.name;
             } },
             { visible:false,class:"notanggota",data: "keanggotaan" },
             
-            { render:function (data,type,row) {
-                return datetostring2('yymmdd',row.tgl_pengajuan);
-            } },
+            // { render:function (data,type,row) {
+            //     return datetostring2('yymmdd',row.tgl_pengajuan);
+            // } },
             { render:function (data,type,row) {
                 return datetostring2('yymmdd',row.tgl_approve);
             } },
@@ -101,6 +107,10 @@ function getListData() {
             { render:function (data,type,row) {
                 return formatRupiah(row.simpanan - row.jml_pengajuan);
             } },
+            { render:function (data,type,row) {
+                return `<a class="bukti" style="cursor:pointer;">Klik Disini</a>`;
+            } },
+            
         ],
         drawCallback: function (settings) {
             var api = this.api();
@@ -135,6 +145,15 @@ function getListData() {
                         return false;
                     }
                     detailperjanjian(rowData);
+                });
+            $(rows)
+                .find(".bukti")
+                .on("click", function () {
+                    isObject = {};
+                    var tr = $(this).closest("tr");
+                    var rowData = dtpr.row(tr).data();
+                    isObject = rowData;
+                    buktitarik();
                 });
         },
     });
@@ -306,4 +325,92 @@ async function gettotalsimpanan() {
     } catch (error) {
         sweetAlert("Oops...", error.responseText, "ERROR");
     }
+}
+
+async function buktitarik() {
+
+    $(".buktidiv").empty();
+    try {
+        const response = await $.ajax({
+            url: baseURL + "/getbuktitarik",
+            type: "POST",
+            dataType: "json",
+            data:{
+                id      : isObject.idpenarikan ,
+                userid  : isObject.user ,
+            },
+            beforeSend: function () {
+                
+            },
+        });
+        
+        if( response.data.length >=1){
+            file = response.data[0].file ;
+            file = baseURL+file.replaceAll('../public','');
+            content =`<center>
+                            <img src="`+file+`" style="width:300px;" alt="">
+                        <center>
+            `;
+            $(".buktidiv").append(content);
+            $("#modal-bukti").modal('show');
+        }else{
+            if (role == 'bendahara koperasi' || role == 'superadmin') {
+                $("#form-bukti").val('');
+                $("#modal-upload").modal('show');
+            }
+        }
+        
+    } catch (error) {
+        sweetAlert("Oops...", error.responseText, "ERROR");
+    }
+}
+
+$("#simpanbukti-btn").on("click", function (e) {
+    e.preventDefault();
+
+    if ($("#form-bukti").val() == ''){
+        swalwarning('Bukti tidak boleh kosong');
+        return false;
+    }
+
+    simpanbukti();
+});
+
+function simpanbukti() {
+    const formData    = new FormData(document.getElementById("formbukti"));
+    formData.append('id',isObject.idpenarikan);
+    formData.append('userid',isObject.user);
+
+    $.ajax({
+        url: baseURL + "/saveBuktitarik",
+        type: "POST",
+        data: formData,
+        contentType: false,
+        processData: false,
+        beforeSend: function () {
+            Swal.fire({
+                title: "Loading",
+                text: "Please wait...",
+            });
+        },
+        complete: function () {
+            $('#table-list').DataTable().ajax.reload();
+        },
+        success: function (response) {
+            // Handle response sukses
+            if (response.code == 0) {
+                swal("BERHASIL !", response.info, "success");
+                $("#modal-upload").modal("hide");
+                $("#modal-bukti").modal("hide");
+                $("#modal-detail").modal("hide");
+                
+                isObject = {};
+            } else {
+                sweetAlert("Oops...", response.info, "ERROR");
+            }
+        },
+        error: function (xhr, status, error) {
+            sweetAlert("Oops...", "ERROR", "ERROR");
+        },
+    });
 }

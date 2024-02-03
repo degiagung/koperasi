@@ -12,6 +12,10 @@ $(".select2add").select2({
 });
 
 $("#filter-btn").on('click',function(e){
+    if($("#filter-tahun").val() == '' && $("#filter-bulan").val()){
+        swalwarning('filter tahun harus diisi');
+        return false ;
+    };
     $('#table-list').dataTable().fnClearTable();
     $('#table-list').dataTable().fnDraw();
     $('#table-list').dataTable().fnDestroy();
@@ -30,7 +34,9 @@ function getListData() {
             data    : {
                 'keanggotaan'   :$('#filter-keanggotaan').val(),
                 'statuspinjam'  :$('#filter-approve').val(),
-                'jenis'         :$('#filter-jenis').val()
+                'jenis'         :$('#filter-jenis').val(),
+                'tahun'         :$('#filter-tahun').val(),
+                'bulan'         :$('#filter-bulan').val(),
             },
             dataSrc: function (response) {
                 if (response.code == 0) {
@@ -63,7 +69,7 @@ function getListData() {
                     $('#table-list').DataTable().ajax.reload();
                 }
             },
-            { text: ' ', extend: 'excel',  className: 'btndownload iconexcel',  title:'List Pengajuan Simpanan Sukarela '+datenow(new Date), exportOptions: {columns:[':not(.notdown)']}},
+            { text: ' ', extend: 'excel',  className: 'btndownload iconexcel',  title:'List Pengajuan Simpanan Sukarela Periode transaksi('+$('#filter-tahun').val()+''+$('#filter-bulan').val()+')_date'+datenow(new Date), exportOptions: {columns:[':not(.notdown)']}},
         ],
         columns: [
             {
@@ -72,24 +78,32 @@ function getListData() {
                     return meta.row + meta.settings._iDisplayStart + 1;
                 },
             },
-            { render:function (data,type,row) {
-                if(row.status == 'approve')
-                    return "<a class='approvalsukarela' style='color:green;cursor:pointer;font-weight:bold;' >APPROVED</a>";
-                else if(row.status == 'reject')
-                    return "<a class='approvalsukarela' style='color:red;cursor:pointer;font-weight:bold;'>REJECTED</a>";
-                else
-                    return "<a class='approvalsukarela' style='color:black;cursor:pointer;font-weight:bold;'>WAITING APPROVED</a>";
+            // { render:function (data,type,row) {
+            //     if(row.status == 'approve')
+            //         return "<a class='approvalsukarela' style='color:green;cursor:pointer;font-weight:bold;' >APPROVED</a>";
+            //     else if(row.status == 'reject')
+            //         return "<a class='approvalsukarela' style='color:red;cursor:pointer;font-weight:bold;'>REJECTED</a>";
+            //     else
+            //         return "<a class='approvalsukarela' style='color:black;cursor:pointer;font-weight:bold;'>WAITING APPROVED</a>";
+            // } },
+            { visibe:false,class:"notanggota",data: "name",render:function (data,type,row) {
+                if(row.jenis == 'manual'){
+                    return 'Transfer';
+                }else if(row.jenis == 'potong gaji'){
+                    return 'Potong dari gaji';
+                }else{
+                    return ''
+                }
             } },
-            { data: "jenis" },
             { visibe:false,class:"notanggota",data: "nrp" },
             { visibe:false,class:"notanggota",data: "name",render:function (data,type,row) {
                 return row.name;
             } },
             { visibe:false,class:"notanggota",data: "keanggotaan" },
             
-            { render:function (data,type,row) {
-                return datetostring2('yymmdd',row.tgl_pengajuan);
-            } },
+            // { render:function (data,type,row) {
+            //     return datetostring2('yymmdd',row.tgl_pengajuan);
+            // } },
             { render:function (data,type,row) {
                 return datetostring2('yymmdd',row.tgl_approve);
             } },

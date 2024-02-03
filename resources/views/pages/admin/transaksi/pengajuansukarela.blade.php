@@ -14,36 +14,46 @@
          <div class="row">
             <h2>Simpan Sukarela</h2>
             <br>
-            @if ($role != 'anggota')
             <div class="col-lg-12">
                  <div class="card-filter">
                     <label style="font-size:18px;">Filter</label>
                     <hr>
                         <div class="row">
+                            @if ($role != 'anggota')
+
+                                {{-- <div class="col-sm-3">
+                                    <label>Status Approve</label>
+                                    <select id="filter-approve" name="filter-keanggotaan" class="select2 ">
+                                        <option value="">Semua Status</option>
+                                        <option value="approve">Approved</option>
+                                        <option value="reject">Rejected</option>
+                                    </select>
+                                </div> --}}
+                                <div class="col-sm-3">
+                                    <label>Status Keanggotaan</label>
+                                    <select id="filter-keanggotaan" name="filter-keanggotaan" class="select2 ">
+                                        <option value="">Semua Kondisi</option>
+                                        <option value="<= current_date and us.status != '2'">AKTIF</option>
+                                        <option value="> current_date">PENSIUN</option>
+                                        <option value="pindah">PINDAH</option>
+                                    </select>
+                                </div>
+                                <div class="col-sm-3">
+                                    <label>Jenis Pengajuan</label>
+                                    <select id="filter-jenis" name="filter-jenis" class="select2 ">
+                                        <option value="">Semua Jenis</option>
+                                        <option value="manual">Transfer</option>
+                                        <option value="potong gaji">Potong Dari Gaji</option>
+                                    </select>
+                                </div>
+                            @endif
                             <div class="col-sm-3">
-                                <label>Status Approve</label>
-                                <select id="filter-approve" name="filter-keanggotaan" class="select2 ">
-                                    <option value="">Semua Status</option>
-                                    <option value="approve">Approved</option>
-                                    <option value="reject">Rejected</option>
-                                </select>
+                                <label>Tahun Transaksi</label>
+                                <select  class="select2" id="filter-tahun"></select>
                             </div>
                             <div class="col-sm-3">
-                                <label>Status Keanggotaan</label>
-                                <select id="filter-keanggotaan" name="filter-keanggotaan" class="select2 ">
-                                    <option value="">Semua Kondisi</option>
-                                    <option value="<= current_date and us.status != '2'">AKTIF</option>
-                                    <option value="> current_date">PENSIUN</option>
-                                    <option value="pindah">PINDAH</option>
-                                </select>
-                            </div>
-                            <div class="col-sm-3">
-                                <label>Jenis Pengajuan</label>
-                                <select id="filter-jenis" name="filter-jenis" class="select2 ">
-                                    <option value="">Semua Jenis</option>
-                                    <option value="manual">Manual</option>
-                                    <option value="potong gaji">Potong Gaji</option>
-                                </select>
+                                <label>Bulan Transaksi</label>
+                                <select  class="select2" id="filter-bulan"></select>
                             </div>
                             <div class="col-sm-2">
                                 <button type="submit" id="filter-btn" class="btn btn-sgn" style="color:#e12a2a;width:100%;height:35px;font-size:14px;margin-top: 27px;"><i class="bi bi-search" style="font-size:12px;" ></i> Cari</button>
@@ -52,7 +62,6 @@
                     </div>
                 </div>
             </div>
-            @endif
         </div><br>
         <div class="row">
             <div class="col-lg-12">
@@ -61,10 +70,10 @@
                         <ul class="nav nav-tabs dzm-tabs" id="myTab-4" role="tablist">
                             @if ($role == 'anggota')
                             <li class="nav-item" role="presentation">
-                                <button type="button" id="add-btn" class="nav-link active btn-sgn">Pengajuan Dari Gaji</button>
+                                <button type="button" id="add-btn" class="nav-link active btn-sgn">Pengajuan Potong Dari Gaji</button>
                             </li>
                             <li class="nav-item" role="presentation" style="margin-left :15px;">
-                                <button type="button" id="add-btn-manual" class="nav-link active btn-sgn">Pengajuan Manual</button>
+                                <button type="button" id="add-btn-manual" class="nav-link active btn-sgn">Pengajuan Transfer</button>
                             </li>
                             @endif
                         </ul>
@@ -76,13 +85,13 @@
                                 <thead>
                                     <tr>
                                         <th>No</th>
-                                        <th>Status </th>
+                                        {{-- <th>Status </th> --}}
                                         <th>Jenis Simpanan</th>
                                         <th>NRP</th>
                                         <th>Nama Anggota</th>
                                         <th>keanggotaan</th>
-                                        <th>Tanggal Pengajuan</th>
-                                        <th>Tanggal Approve</th>
+                                        <th>Tanggal Transaksi</th>
+                                        {{-- <th>Tanggal Approve</th> --}}
                                         <th>Jumlah</th>
                                         <th>Bulan Awal</th>
                                         <th>Durasi Bulan</th>
@@ -153,7 +162,7 @@
             <div class="modal-dialog modal-dialog-centered" role="document">
                 <div class="modal-content">
                     <div class="modal-header headermodal">
-                        <h5 class="modal-title">Pengajuan Dari Gaji</h5>
+                        <h5 class="modal-title">Potong Dari Gaji</h5>
                         <button type="button" class="btn-close" data-bs-dismiss="modal">
                         </button>
                     </div>
@@ -162,7 +171,7 @@
                             <form id="form">
                                 
                                 <div class="mb-3 row">
-                                    <label class="col-sm-3 col-form-label">Jumlah Simpan </label>
+                                    <label class="col-sm-3 col-form-label">Simpanan Sukarela </label>
                                     <div class="col-sm-9">
                                         <input id="form-simpanan" type="text" class="form-control" onkeyup="convertrp('form-simpanan')">
                                     </div>
@@ -195,7 +204,7 @@
             <div class="modal-dialog modal-dialog-centered" role="document">
                 <div class="modal-content">
                     <div class="modal-header headermodal">
-                        <h5 class="modal-title">Pengajuan Manual / Mandiri</h5>
+                        <h5 class="modal-title">Transfer</h5>
                         <button type="button" class="btn-close" data-bs-dismiss="modal">
                         </button>
                     </div>
@@ -203,7 +212,7 @@
                         <div class="basic-form">
                                 
                             <div class="mb-3 row">
-                                <label class="col-sm-3 col-form-label">Jumlah Simpan </label>
+                                <label class="col-sm-3 col-form-label">Simpanan Sukarela </label>
                                 <div class="col-sm-9">
                                     <input id="form-simpananmanual" type="text" class="form-control" onkeyup="convertrp('form-simpananmanual')">
                                 </div>

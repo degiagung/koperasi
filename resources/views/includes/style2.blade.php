@@ -23,7 +23,8 @@
     <link href="../assets2/vendor/quill/quill.bubble.css" rel="stylesheet">
     <link href="../assets2/vendor/remixicon/remixicon.css" rel="stylesheet">
     <link href="../assets2/vendor/simple-datatables/style.css" rel="stylesheet">
-  
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.9.0/css/bootstrap-datepicker.min.css" />
+
     <!-- Template Main CSS File -->
     <link href="../assets2/css/style.css" rel="stylesheet">
   

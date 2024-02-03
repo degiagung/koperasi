@@ -2,6 +2,13 @@
 
 let dtpr;
 
+var datePickerOptions = {
+  dateFormat: 'd/m/yy',
+  firstDay: 1,
+  changeMonth: true,
+  changeYear: true
+}
+
 $(document).ready(function () {
     getListData();
 });
@@ -13,6 +20,10 @@ $(".select2add").select2({
 });
 
 $("#filter-btn").on('click',function(e){
+    if($("#filter-tahun").val() == '' && $("#filter-bulan").val()){
+        swalwarning('filter tahun harus diisi');
+        return false ;
+    };
     $('#table-list').dataTable().fnClearTable();
     $('#table-list').dataTable().fnDraw();
     $('#table-list').dataTable().fnDestroy();
@@ -30,7 +41,9 @@ function getListData() {
             dataType: "json",
             data    : {
                 'keanggotaan'   :$('#filter-keanggotaan').val(),
-                'statuspinjam'  :$('#filter-status').val()
+                'statuspinjam'  :$('#filter-status').val(),
+                'tahun'         :$('#filter-tahun').val(),
+                'bulan'         :$('#filter-bulan').val(),
             },
             dataSrc: function (response) {
                 if (response.code == 0) {
@@ -70,7 +83,7 @@ function getListData() {
                     $('#table-list').DataTable().ajax.reload();
                 }
             },
-            { footer: true, text: ' ', extend: 'excel',  className: 'btndownload iconexcel',  title:'Laporan '+datenow(new Date), exportOptions: {columns:[':not(.notdown)']}},
+            { footer: true, text: ' ', extend: 'excel',  className: 'btndownload iconexcel',  title:'Laporan Periode transaksi('+$('#filter-tahun').val()+''+$('#filter-bulan').val()+')_date'+datenow(new Date), exportOptions: {columns:[':not(.notdown)']}},
         ],
         columns: [
             {

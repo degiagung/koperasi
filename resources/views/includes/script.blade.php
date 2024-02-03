@@ -56,6 +56,8 @@
 <script src="../assets2/vendor/php-email-form/validate.js"></script>
 <script src="../assets2/vendor/pnotify/components_notifications_pnotify.js"></script>
 <script src="../assets2/vendor/pnotify/pnotify.min.js"></script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.9.0/css/bootstrap-datepicker.min.css" />
+<script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.9.0/js/bootstrap-datepicker.min.js"></script>
 
 <!-- Template Main JS File -->
 <script src="../assets2/js/main.js"></script>

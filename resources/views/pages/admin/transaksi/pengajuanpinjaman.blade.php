@@ -14,38 +14,47 @@
          <div class="row">
             <h2>Pengajuan Pinjaman</h2>
             <br>
-            @if ($role != 'anggota')
             <div class="col-lg-12">
                  <div class="card-filter">
                     <label style="font-size:18px;">Filter</label>
                     <hr>
                         <div class="row">
+                            @if ($role != 'anggota')
+
+                                {{-- <div class="col-sm-3">
+                                    <label>Status Approve</label>
+                                    <select id="filter-approve" name="filter-keanggotaan" class="select2 ">
+                                        <option value="">Semua Status</option>
+                                        <option value="approve">Approved</option>
+                                        <option value="reject">Rejected</option>
+                                    </select>
+                                </div> --}}
+                                <div class="col-sm-3">
+                                    <label>Status Keanggotaan</label>
+                                    <select id="filter-keanggotaan" name="filter-keanggotaan" class="select2 ">
+                                        <option value="">Semua Kondisi</option>
+                                        <option value="<= current_date and us.status != '2'">AKTIF</option>
+                                        <option value="> current_date">PENSIUN</option>
+                                        <option value="pindah">PINDAH</option>
+                                    </select>
+                                </div>
+                            @endif
                             <div class="col-sm-3">
-                                <label>Status Approve</label>
-                                <select id="filter-approve" name="filter-keanggotaan" class="select2 ">
-                                    <option value="">Semua Status</option>
-                                    <option value="approve">Approved</option>
-                                    <option value="reject">Rejected</option>
-                                </select>
+                                <label>Tahun Transaksi</label>
+                                <select  class="select2" id="filter-tahun"></select>
                             </div>
                             <div class="col-sm-3">
-                                <label>Status Keanggotaan</label>
-                                <select id="filter-keanggotaan" name="filter-keanggotaan" class="select2 ">
-                                    <option value="">Semua Kondisi</option>
-                                    <option value="<= current_date and us.status != '2'">AKTIF</option>
-                                    <option value="> current_date">PENSIUN</option>
-                                    <option value="pindah">PINDAH</option>
-                                </select>
+                                <label>Bulan Transaksi</label>
+                                <select  class="select2" id="filter-bulan"></select>
                             </div>
                             <div class="col-sm-2">
                                 <button type="submit" id="filter-btn" class="btn btn-sgn" style="color:#e12a2a;width:100%;height:35px;font-size:14px;margin-top: 27px;"><i class="bi bi-search" style="font-size:12px;" ></i> Cari</button>
                             </div>
                         </div>
                     <hr>
-                    <h5><b style="color:red;">UNTUK PENGAJUAN YANG TELAH DI SETUJUI ,SILAHKAN MENGHUBUNGI PIHAK KOPERASI UNTUK PENANDATANGANAN BERKAS DAN TRANSFER</b></h5>
+                    <h5><b style="color:red;">SETELAH PENGAJUAN ,SILAHKAN MENGHUBUNGI PIHAK KOPERASI UNTUK PENANDATANGANAN BERKAS DAN TRANSFER</b></h5>
                 </div>
             </div>
-            @endif
         </div><br>
         <div class="row">
             <div class="col-lg-12">
@@ -65,10 +74,10 @@
                                 <thead>
                                     <tr>
                                         <th>No</th>
-                                        <th>Status </th>
+                                        {{-- <th>Status </th> --}}
                                         <th>NRP</th>
                                         <th>Nama Anggota</th>
-                                        <th>Tanggal Approve</th>
+                                        <th>Tanggal Transaksi</th>
                                         <th>keanggotaan</th>
                                         <th>Total Limit</th>
                                         <th>Pengajuan Tenor & Pinjaman</th>

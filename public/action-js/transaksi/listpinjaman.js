@@ -20,6 +20,10 @@ $(".select2add").select2({
 });
 
 $("#filter-btn").on('click',function(e){
+    if($("#filter-tahun").val() == '' && $("#filter-bulan").val()){
+        swalwarning('filter tahun harus diisi');
+        return false ;
+    };
     $('#table-list').dataTable().fnClearTable();
     $('#table-list').dataTable().fnDraw();
     $('#table-list').dataTable().fnDestroy();
@@ -28,7 +32,6 @@ $("#filter-btn").on('click',function(e){
 let isObject = {};
 
 function getListData() {
-
     dtpr = $("#table-list").DataTable({
         ajax: {
             url: baseURL + "/getPinjaman",
@@ -36,7 +39,9 @@ function getListData() {
             dataType: "json",
             data    : {
                 'keanggotaan'   :$('#filter-keanggotaan').val(),
-                'statuspinjam'  :$('#filter-status').val()
+                'statuspinjam'  :$('#filter-status').val(),
+                'tahun'         :$('#filter-tahun').val(),
+                'bulan'         :$('#filter-bulan').val(),
             },
             dataSrc: function (response) {
                 if (response.code == 0) {
@@ -69,7 +74,7 @@ function getListData() {
                     $('#table-list').DataTable().ajax.reload();
                 }
             },
-            { text: ' ', extend: 'excel',  className: 'btndownload iconexcel',  title:'List Pinjaman '+datenow(new Date), exportOptions: {columns:[':not(.notdown)']}},
+            { text: ' ', extend: 'excel',  className: 'btndownload iconexcel',  title:'List Pinjaman Periode transaksi('+$('#filter-tahun').val()+''+$('#filter-bulan').val()+')_date'+datenow(new Date), exportOptions: {columns:[':not(.notdown)']}},
         ],
         columns: [
             {
@@ -186,7 +191,9 @@ function getListDataAnggota() {
             dataType: "json",
             data    : {
                 'keanggotaan'   :$('#filter-keanggotaan').val(),
-                'statuspinjam'  :$('#filter-status').val()
+                'statuspinjam'  :$('#filter-status').val(),
+                'tahun'         :$('#filter-tahun').val(),
+                'bulan'         :$('#filter-bulan').val(),
             },
             dataSrc: function (response) {
                 if (response.code == 0) {
@@ -219,7 +226,7 @@ function getListDataAnggota() {
                     $('#table-list-pinjam').DataTable().ajax.reload();
                 }
             },
-            { text: ' ', extend: 'excel',  className: 'btndownload iconexcel',  title:'List Pinjaman '+datenow(new Date), exportOptions: {columns:[':not(.notdown)']}},
+            { text: ' ', extend: 'excel',  className: 'btndownload iconexcel',  title:'List Pinjaman Periode transaksi('+$('#filter-tahun').val()+''+$('#filter-bulan').val()+')_date'+datenow(new Date), exportOptions: {columns:[':not(.notdown)']}},
         ],
         columns: [
             {
@@ -266,11 +273,17 @@ function getListDataAnggota() {
                 .on("click", function () {
                     var tr = $(this).closest("tr");
                     var rowData = dtpr.row(tr).data();
-                    if(role == 'superadmin' || role == 'bendahara koperasi'){
-                        isObject = {};
-                        isObject = rowData ;
-                        $("#modal-payment").modal('show');
+                    
+                    isObject = {};
+                    isObject = rowData ;
+                    if(rowData.status_pinjaman == 'lunas'){
+                        buktilunas();
+                    }else{
+                        if(role == 'anggota'){
+                            $("#modal-payment").modal('show');
+                        }
                     }
+                    
                 });
 
             $(rows)
@@ -289,7 +302,12 @@ function getListDataAnggota() {
                     $(".buktidiv").empty();
                     isObject    = {};
                     isObject    = rowData ;
-                    getlistbukti(rowData)
+
+                    // if(rowData.status_pinjaman == 'lunas'){
+                    //     buktilunas();
+                    // }else{
+                        getlistbukti(rowData)
+                    // }
                     
                 });
         },
@@ -323,7 +341,6 @@ function detail(rowData) {
             sisatenor = rowData.sisatenor+' BLN & ' +formatRupiah(rowData.sisapinjaman);
         }
     }
-    console.log(rowData);
     $("#form-nrp").val(rowData.nrp);
     $("#form-name").val(rowData.name);
     $("#form-keanggotaan").val(rowData.keanggotaan);
@@ -341,23 +358,29 @@ function detail(rowData) {
 
 function approval(){
     let status = $("#form-statuslunas").val();
+    if ($("#form-bukti").val() == ''){
+        swalwarning('Kwitansi tidak boleh kosong');
+        return false;
+    }
+    const formData    = new FormData(document.getElementById("formbukti"));
+    formData.append('id',isObject.idpinjam);
     swal({
-        title: "Yakin untuk update "+status+" pinjaman "+ isObject.name +" ?",
+        title: "Yakin untuk update LUNAS pinjaman ?",
         type: "warning",
         showCancelButton: !0,
         confirmButtonColor: "#DD6B55",
-        confirmButtonText: "Ya, update "+status+" !!",
+        confirmButtonText: "Ya, update ",
         cancelButtonText: "Tidak, Batalkan !!",
         closeOnConfirm: !1,
         closeOnCancel: !1,
     }).then(function (e) {
         if (e.value) {
             $.ajax({
-                url: baseURL + "/approvalpinjaman",
+                url: baseURL + "/lunasipinjaman",
                 type: "POST",
-                data: JSON.stringify({ idpinjam: isObject.idpinjam, status: status,jenis: 'statuslunas' }),
-                dataType: "json",
-                contentType: "application/json",
+                data: formData,
+                contentType: false,
+                processData: false,
                 beforeSend: function () {
                     Swal.fire({
                         title: "Loading",
@@ -511,4 +534,42 @@ function simpanbukti() {
             sweetAlert("Oops...", "ERROR", "ERROR");
         },
     });
+}
+
+async function buktilunas() {
+
+    $(".buktidiv").empty();
+    try {
+        const response = await $.ajax({
+            url: baseURL + "/buktilunas",
+            type: "POST",
+            dataType: "json",
+            data:{
+                id      : isObject.idpinjam ,
+                userid  : isObject.user ,
+            },
+            beforeSend: function () {
+                
+            },
+        });
+        
+        if( response.data.length >=1){
+            file = response.data[0].file ;
+            file = baseURL+file.replaceAll('../public','');
+            content =`<center>
+                            <img src="`+file+`" style="width:300px;" alt="">
+                        <center>
+            `;
+            $(".buktidiv").append(content);
+            $("#modal-bukti").modal('show');
+        }else{
+            if (role == 'bendahara koperasi' || role == 'superadmin') {
+                $("#form-bukti").val('');
+                $("#modal-upload").modal('show');
+            }
+        }
+        
+    } catch (error) {
+        sweetAlert("Oops...", error.responseText, "ERROR");
+    }
 }

@@ -21,12 +21,18 @@ $(".select2add").select2({
 });
 
 $("#filter-btn").on('click',function(e){
+    if($("#filter-tahun").val() == '' && $("#filter-bulan").val()){
+        swalwarning('filter tahun harus diisi');
+        return false ;
+    };
     $('#table-list').dataTable().fnClearTable();
     $('#table-list').dataTable().fnDraw();
     $('#table-list').dataTable().fnDestroy();
     getListData();
     
 });
+
+
 let isObject = {};
 
 function getListData() {
@@ -37,7 +43,9 @@ function getListData() {
             type: "POST",
             dataType: "json",
             data    : {
-                'keanggotaan'   :$('#filter-keanggotaan').val()
+                'keanggotaan'   :$('#filter-keanggotaan').val(),
+                'tahun'         :$('#filter-tahun').val(),
+                'bulan'         :$('#filter-bulan').val(),
             },
             dataSrc: function (response) {
                 if (response.code == 0) {
@@ -70,7 +78,7 @@ function getListData() {
                     $('#table-list').DataTable().ajax.reload();
                 }
             },
-            { text: ' ', extend: 'excel',  className: 'btndownload iconexcel',  title:'List Simpanan '+datenow(new Date), exportOptions: {columns:[':not(.notdown)']}},
+            { text: ' ', extend: 'excel',  className: 'btndownload iconexcel',  title:'List Simpanan Periode transaksi('+$('#filter-tahun').val()+''+$('#filter-bulan').val()+')_date'+datenow(new Date), exportOptions: {columns:[':not(.notdown)']}},
         ],
         columns: [
             {
@@ -350,7 +358,9 @@ function detailsukarela() {
             type: "POST",
             dataType: "json",
             data    : {
-                'id'   :isObject.user
+                'id'   :isObject.user,
+                'tahun'         :$('#filter-tahun').val(),
+                'bulan'         :$('#filter-bulan').val(),
             },
             dataSrc: function (response) {
                 if (response.code == 0) {
@@ -383,7 +393,7 @@ function detailsukarela() {
                     $('#table-detail-sukarela').DataTable().ajax.reload();
                 }
             },
-            { text: ' ', extend: 'excel',  className: 'btndownload iconexcel',  title:'Detail Simpanan '+datenow(new Date), exportOptions: {columns:[':not(.notdown)']}},
+            { text: ' ', extend: 'excel',  className: 'btndownload iconexcel',  title:'Detail Simpanan Periode transaksi('+$('#filter-tahun').val()+''+$('#filter-bulan').val()+')_date'+datenow(new Date), exportOptions: {columns:[':not(.notdown)']}},
         ],
         columns: [
             {

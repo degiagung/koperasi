@@ -64,7 +64,9 @@
                                         <th>Nama Anggota</th>
                                         <th>Pangkat Anggota</th>
                                         <th>NRP Anggota</th>
-                                        <th>Tgl Berdinasi</th>
+                                        <th>Tgl Berdinas</th>
+                                        <th>Limit Pinjaman</th>
+                                        <th>Total Gaji</th>
                                         <th>Handphone</th>
                                         <th>Keanggotaan</th>
                                         <th>Role User</th>

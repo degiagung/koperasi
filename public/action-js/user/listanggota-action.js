@@ -74,7 +74,7 @@ function getListData() {
                     $('#table-list').DataTable().ajax.reload();
                 }
             },
-            { text: ' ', extend: 'excel',  className: 'btndownload iconexcel',  title:'List Anggota '+datenow(new Date), exportOptions: {columns:[':not(.notdown)']}},
+            { text: ' ', extend: 'excel',  className: 'btndownload iconexcel',  title:'List Anggota Periode transaksi('+$('#filter-tahun').val()+''+$('#filter-bulan').val()+')_date'+datenow(new Date), exportOptions: {columns:[':not(.notdown)']}},
         ],
         columns: [
             {
@@ -89,6 +89,12 @@ function getListData() {
             { data: "nrp" },
             { render:function (data,type,row) {
                 return datetostring2('yymmdd',row.tgl_dinas);
+            } },
+            { render:function (data,type,row) {
+                return formatRupiah(row.limit_pinjaman);
+            } },
+            { render:function (data,type,row) {
+                return formatRupiah(row.totalgaji);
             } },
             { data: "handphone" },
             { data: "keanggotaan" },
