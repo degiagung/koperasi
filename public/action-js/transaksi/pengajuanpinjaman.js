@@ -447,6 +447,7 @@ function ajukanpinjaman(){
                     if (response.code == 0) {
                         swal("BERHASIL !", response.message, "success");
                             $("#modal-data").modal("hide");
+                            $("#modal-batal").modal("hide");
 
                     } else {
                         sweetAlert("Oops...", response.message, "ERROR");
@@ -522,10 +523,11 @@ async function buktitf() {
             $(".buktidiv").append(content);
             $("#modal-bukti").modal('show');
         }else{
+            $("#form-bukti").val('');
             if (role == 'bendahara koperasi' || role == 'superadmin') {
-                $("#form-bukti").val('');
                 $("#modal-upload").modal('show');
             }
+            
         }
         
     } catch (error) {

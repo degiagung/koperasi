@@ -3295,7 +3295,7 @@ class JsonDataController extends Controller
                             'status_pinjaman'   => 'belum lunas',
                             'jenis'             => $jenis,
                             'tenor'             => $tenor,
-                            'status'            => 'approve',
+                            // 'status'            => 'approve',
                             'tgl_approve'       => $now,
                             'created_at'        => $now,
                         ];

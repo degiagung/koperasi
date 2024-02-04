@@ -12,7 +12,7 @@
     </style>
     <section class="section dashboard">
          <div class="row">
-            <h2>Pengajuan Pinjaman</h2>
+            <h2>Pengajuan Pinjamanx</h2>
             <br>
             <div class="col-lg-12">
                  <div class="card-filter">
