@@ -88,7 +88,10 @@ function getListData() {
             // } },
             { visibe:false,class:"notanggota",data: "name",render:function (data,type,row) {
                 if(row.jenis == 'manual'){
-                    return 'Transfer';
+                    if(row.created_by)
+                        return 'tunai'
+                    else
+                        return 'Transfer';
                 }else if(row.jenis == 'potong gaji'){
                     return 'Potong dari gaji';
                 }else{
@@ -250,6 +253,7 @@ $("#add-btn-manual").on("click", function (e) {
     isObject = {};
     $("#form-simpananmanual").val("");
     $("#form-formbuktimanual").val("");
+    loadUsers()
     $("#modal-data-manual").modal("show");
 });
 
@@ -279,12 +283,19 @@ $("#ajukan-btn").on("click", function (e) {
         return false;
     }
 
-    ajukanpinjaman();
+    ajukansukarela();
 });
 
 $("#ajukanmanual-btn").on("click", function (e) {
     e.preventDefault();
     jumlah = $("#form-simpananmanual").val();
+    if(role == 'superadmin' || role == 'bendahara koperasi'){
+        
+        if ($("#form-anggota").val() == ''){
+            swalwarning('Anggota tidak boleh kosong');
+            return false;
+        }
+    }
     if (jumlah.replaceAll('.','') < 50000){
         swalwarning('Minimal pengajuan Rp 50000');
         return false;
@@ -294,10 +305,10 @@ $("#ajukanmanual-btn").on("click", function (e) {
         return false;
     }
 
-    ajukanpinjamanmanual();
+    ajukansukarelamanual();
 });
 
-function ajukanpinjaman(){
+function ajukansukarela(){
     jumlah      = $("#form-simpanan").val() ;
     bulan       = $("#form-bulan").val() ;
     durasi      = $("#form-durasi").val() ;
@@ -357,9 +368,10 @@ function ajukanpinjaman(){
     });
 }
 
-function ajukanpinjamanmanual() {
+function ajukansukarelamanual() {
     const formData    = new FormData(document.getElementById("formbuktimanual"));
     formData.append('jumlah',$('#form-simpananmanual').val());
+    formData.append('anggota',$('#form-anggota').val());
 
     $.ajax({
         url: baseURL + "/actionpengajuansukarelamanual",
@@ -390,3 +402,39 @@ function ajukanpinjamanmanual() {
         },
     });
 }
+
+if(role == 'superadmin' || role == 'bendahara koperasi'){
+    $(".divnabung").show();
+}
+async function loadUsers() {
+    try {
+        const response = await $.ajax({
+            url: baseURL + "/getUsersangggota",
+            type: "POST",
+            dataType: "json",
+            
+            beforeSend: function () {
+                // Swal.fire({
+                //     title: "Loading",
+                //     text: "Please wait...",
+                // });
+            },
+        });
+
+        const res = response.data.map(function (item) {
+            return {
+                id: item.id,
+                text: item.name,
+            };
+        });
+
+        $("#form-anggota").select2({
+            data: res,
+            placeholder: "Pilih Anggota",
+            dropdownParent: $("#modal-data-manual"),
+        });
+    } catch (error) {
+        sweetAlert("Oops...", error.responseText, "ERROR");
+    }
+}
+

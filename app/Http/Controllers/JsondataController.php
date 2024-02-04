@@ -210,6 +210,64 @@ class JsonDataController extends Controller
             return $MasterClass->Results($results);
 
         }
+        public function getUsersangggota(Request $request){
+
+            $MasterClass = new Master();
+
+            $checkAuth = $MasterClass->Authenticated($MasterClass->getSession('user_id'));
+            
+            if($checkAuth['code'] == $MasterClass::CODE_SUCCESS){
+                try {
+                    if ($request->isMethod('post')) {
+                        
+                        DB::beginTransaction();
+                
+                        $saved = DB::select("SELECT a.* FROM users a,users_roles b where a.role_id = b.id and b.role_name like '%anggota%'");
+                        $saved = $MasterClass->checkErrorModel($saved);
+                        
+                        $status = $saved;
+    
+                        // if($status['code'] == $MasterClass::CODE_SUCCESS){
+                        //     DB::commit();
+                        // }else{
+                        //     DB::rollBack();
+                        // }
+            
+                        $results = [
+                            'code' => $status['code'],
+                            'info'  => $status['info'],
+                            'data'  =>  $status['data'],
+                        ];
+                            
+            
+            
+                    } else {
+                        $results = [
+                            'code' => '103',
+                            'info'  => "Method Failed",
+                        ];
+                    }
+                } catch (\Exception $e) {
+                    // Roll back the transaction in case of an exception
+                    $results = [
+                        'code' => '102',
+                        'info'  => $e->getMessage(),
+                    ];
+        
+                }
+            }
+            else {
+        
+                $results = [
+                    'code' => '403',
+                    'info'  => "Unauthorized",
+                ];
+                
+            }
+
+            return $MasterClass->Results($results);
+
+        }
         public function getAccessRole(Request $request){
 
             $MasterClass = new Master();
@@ -630,7 +688,7 @@ class JsonDataController extends Controller
                             lp.id as idlimit,
                             cast(lp.amount as decimal(18,0)) as limit_pinjaman,
                             cast(us.gaji as decimal(18,0)) as gaji,
-                            PERIOD_DIFF(DATE_FORMAT(SYSDATE(), '%Y%m'),DATE_FORMAT(us.tgl_dinas, '%Y%m')) * cast(us.gaji as decimal(18,0)) as totalgaji
+                            PERIOD_DIFF(".date('Ym').",DATE_FORMAT(us.tgl_dinas, '%Y%m')) * cast(us.gaji as decimal(18,0)) as totalgaji
                         ";
                         
                         $table = '
@@ -779,21 +837,21 @@ class JsonDataController extends Controller
                                     ELSE 'AKTIF'
                                 END
                             END keanggotaan,
-                            PERIOD_DIFF(DATE_FORMAT(SYSDATE(), '%Y%m'),DATE_FORMAT(us.tgl_dinas, '%Y%m')) as los,
+                            PERIOD_DIFF(".date('Ym').",DATE_FORMAT(us.tgl_dinas, '%Y%m')) as los,
                             
-                            cast(cast(coalesce(( 50000 * COALESCE(PERIOD_DIFF(DATE_FORMAT(SYSDATE(), '%Y%m'),DATE_FORMAT(us.tgl_dinas, '%Y%m')),0) / COALESCE(PERIOD_DIFF(DATE_FORMAT(SYSDATE(), '%Y%m'),DATE_FORMAT(us.tgl_dinas, '%Y%m')),0)),0)as decimal(18,2)) as decimal(18,2)) as simpananpokok,
+                            cast(cast(coalesce(( 50000 * COALESCE(PERIOD_DIFF(".date('Ym').",DATE_FORMAT(us.tgl_dinas, '%Y%m')),0) / COALESCE(PERIOD_DIFF(".date('Ym').",DATE_FORMAT(us.tgl_dinas, '%Y%m')),0)),0)as decimal(18,2)) as decimal(18,2)) as simpananpokok,
                             
-                            cast(COALESCE(PERIOD_DIFF(DATE_FORMAT(SYSDATE(), '%Y%m'),DATE_FORMAT(us.tgl_dinas, '%Y%m')),0) * 50000 as decimal(18,2)) as simpananwajib,
+                            cast(COALESCE(PERIOD_DIFF(".date('Ym').",DATE_FORMAT(us.tgl_dinas, '%Y%m')),0) * 50000 as decimal(18,2)) as simpananwajib,
                             
-                            COALESCE(PERIOD_DIFF(DATE_FORMAT(SYSDATE(), '%Y%m'),DATE_FORMAT(us.tgl_dinas, '%Y%m')),0) jmldinas, 
+                            COALESCE(PERIOD_DIFF(".date('Ym').",DATE_FORMAT(us.tgl_dinas, '%Y%m')),0) jmldinas, 
                             coalesce(sum(su.amount),0.00)+coalesce(sum(ss.amount),0.00) as sukarela,
 
                             (
-                                cast(cast(coalesce(( 50000 * COALESCE(PERIOD_DIFF(DATE_FORMAT(SYSDATE(), '%Y%m'),DATE_FORMAT(us.tgl_dinas, '%Y%m')),0) / COALESCE(PERIOD_DIFF(DATE_FORMAT(SYSDATE(), '%Y%m'),DATE_FORMAT(us.tgl_dinas, '%Y%m')),0)),0)as decimal(18,2)) as decimal(18,2))
+                                cast(cast(coalesce(( 50000 * COALESCE(PERIOD_DIFF(".date('Ym').",DATE_FORMAT(us.tgl_dinas, '%Y%m')),0) / COALESCE(PERIOD_DIFF(".date('Ym').",DATE_FORMAT(us.tgl_dinas, '%Y%m')),0)),0)as decimal(18,2)) as decimal(18,2))
                             )
                             +
                             (
-                                COALESCE(PERIOD_DIFF(DATE_FORMAT(SYSDATE(), '%Y%m'),DATE_FORMAT(us.tgl_dinas, '%Y%m')),0) * 50000
+                                COALESCE(PERIOD_DIFF(".date('Ym').",DATE_FORMAT(us.tgl_dinas, '%Y%m')),0) * 50000
                             )
                             +
                             coalesce(sum(su.amount),0.00)
@@ -802,11 +860,11 @@ class JsonDataController extends Controller
                             as total,
                             coalesce(sum(st.amount),0) penarikan,
                             cast((
-                                cast(coalesce(( 50000 * COALESCE(PERIOD_DIFF(DATE_FORMAT(SYSDATE(), '%Y%m'),DATE_FORMAT(us.tgl_dinas, '%Y%m')),0) / COALESCE(PERIOD_DIFF(DATE_FORMAT(SYSDATE(), '%Y%m'),DATE_FORMAT(us.tgl_dinas, '%Y%m')),0)),0)as decimal(18,2))
+                                cast(coalesce(( 50000 * COALESCE(PERIOD_DIFF(".date('Ym').",DATE_FORMAT(us.tgl_dinas, '%Y%m')),0) / COALESCE(PERIOD_DIFF(".date('Ym').",DATE_FORMAT(us.tgl_dinas, '%Y%m')),0)),0)as decimal(18,2))
                             )
                             +
                             (
-                                COALESCE(PERIOD_DIFF(DATE_FORMAT(SYSDATE(), '%Y%m'),DATE_FORMAT(us.tgl_dinas, '%Y%m')),0) * 50000
+                                COALESCE(PERIOD_DIFF(".date('Ym').",DATE_FORMAT(us.tgl_dinas, '%Y%m')),0) * 50000
                             )
                             +
                             coalesce(sum(su.amount),0.00)
@@ -826,7 +884,7 @@ class JsonDataController extends Controller
                                         user_id,
                                         CASE
                                             WHEN DATE_ADD(tgl_awal, INTERVAL durasi MONTH) >= CURRENT_DATE() THEN 
-                                                amount * COALESCE(PERIOD_DIFF(DATE_FORMAT(SYSDATE(), '%Y%m'),
+                                                amount * COALESCE(PERIOD_DIFF(".date('Ym').",
                                                 DATE_FORMAT(tgl_awal, '%Y%m')),0) 
                                             ELSE 
                                                 amount * durasi
@@ -976,30 +1034,30 @@ class JsonDataController extends Controller
                             lp.amount as limitpinjaman,
                             pj.id as idpinjam,
                             COALESCE(pj.amount,0) as pinjaman,
-                            PERIOD_DIFF(DATE_FORMAT(SYSDATE(), '%Y%m'),DATE_FORMAT(pj.tgl_approve, '%Y%m')) as totaltenor,
+                            PERIOD_DIFF(".date('Ym').",DATE_FORMAT(pj.tgl_approve, '%Y%m')) as totaltenor,
 
                             cast(COALESCE(pj.amount,0) + COALESCE(pj.amount,0)*0.02 as decimal(18,2)) as pinjamanbunga,
                             cast((COALESCE(pj.amount,0) + COALESCE(pj.amount,0)*0.02) / pj.tenor as decimal(18,2)) as totalbayarperbulan1,
-                            cast(((COALESCE(pj.amount,0) + COALESCE(pj.amount,0)*0.02) / pj.tenor) * COALESCE(PERIOD_DIFF(DATE_FORMAT(SYSDATE(), '%Y%m'),DATE_FORMAT(pj.tgl_approve, '%Y%m')),0) as decimal(18,2)) as totalbayar1,
+                            cast(((COALESCE(pj.amount,0) + COALESCE(pj.amount,0)*0.02) / pj.tenor) * COALESCE(PERIOD_DIFF(".date('Ym').",DATE_FORMAT(pj.tgl_approve, '%Y%m')),0) as decimal(18,2)) as totalbayar1,
                             cast(
                                 (COALESCE(pj.amount,0) + COALESCE(pj.amount,0)*0.02)
                                 -
-                                ((COALESCE(pj.amount,0) + COALESCE(pj.amount,0)*0.02) / pj.tenor) * COALESCE(PERIOD_DIFF(DATE_FORMAT(SYSDATE(), '%Y%m'),DATE_FORMAT(pj.tgl_approve, '%Y%m')),0) as decimal(18,2)
+                                ((COALESCE(pj.amount,0) + COALESCE(pj.amount,0)*0.02) / pj.tenor) * COALESCE(PERIOD_DIFF(".date('Ym').",DATE_FORMAT(pj.tgl_approve, '%Y%m')),0) as decimal(18,2)
                             ) sisapinjaman1,
 
                             cast(COALESCE(pj.amount,0) + COALESCE(pj.amount,0)*0.02*pj.tenor as decimal(18,2)) as pinjaman2persen,
                             cast((COALESCE(pj.amount,0) + COALESCE(pj.amount,0)*0.02*pj.tenor) / pj.tenor as decimal(18,2)) totalbayarperbulan,
                             cast((COALESCE(pj.amount,0) + COALESCE(pj.amount,0)*0.02*pj.tenor) / pj.tenor * 
-                            PERIOD_DIFF(DATE_FORMAT(SYSDATE(), '%Y%m'),DATE_FORMAT(pj.tgl_approve, '%Y%m'))
+                            PERIOD_DIFF(".date('Ym').",DATE_FORMAT(pj.tgl_approve, '%Y%m'))
                             as decimal(18,2)) as totalbayar,
-                            COALESCE(pj.amount,0) - cast(COALESCE(pj.amount,0) - COALESCE(pj.amount,0) / pj.tenor  * PERIOD_DIFF(DATE_FORMAT(SYSDATE(), '%Y%m'),DATE_FORMAT(pj.tgl_approve, '%Y%m'))as decimal(18,2)) as sisalimit,
+                            COALESCE(pj.amount,0) - cast(COALESCE(pj.amount,0) - COALESCE(pj.amount,0) / pj.tenor  * PERIOD_DIFF(".date('Ym').",DATE_FORMAT(pj.tgl_approve, '%Y%m'))as decimal(18,2)) as sisalimit,
                             cast(
                                 (COALESCE(pj.amount,0) + COALESCE(pj.amount,0)*0.02*pj.tenor)
                                 -
                                 (COALESCE(pj.amount,0) + COALESCE(pj.amount,0)*0.02*pj.tenor) / pj.tenor * 
-                                PERIOD_DIFF(DATE_FORMAT(SYSDATE(), '%Y%m'),DATE_FORMAT(pj.tgl_approve, '%Y%m'))
+                                PERIOD_DIFF(".date('Ym').",DATE_FORMAT(pj.tgl_approve, '%Y%m'))
                             as decimal(18,2)) as sisapinjaman,
-                            pj.tenor - PERIOD_DIFF(DATE_FORMAT(SYSDATE(), '%Y%m'),DATE_FORMAT(pj.tgl_approve, '%Y%m')) as sisatenor,
+                            pj.tenor - PERIOD_DIFF(".date('Ym').",DATE_FORMAT(pj.tgl_approve, '%Y%m')) as sisatenor,
                             
                             pj.tenor,
                             pj.created_at tglaju,
@@ -1043,11 +1101,11 @@ class JsonDataController extends Controller
                         }
                         if($fstatuspinjam == '1'){
                             $where .= "
-                                 AND (lower(pj.status_pinjaman) = 'lunas' OR COALESCE(pj.tenor,0) = PERIOD_DIFF(DATE_FORMAT(SYSDATE(), '%Y%m'),DATE_FORMAT(us.tgl_dinas, '%Y%m')))
+                                 AND (lower(pj.status_pinjaman) = 'lunas' OR COALESCE(pj.tenor,0) = PERIOD_DIFF(".date('Ym').",DATE_FORMAT(us.tgl_dinas, '%Y%m')))
                             ";
                         }elseif($fstatuspinjam == '2'){
                             $where .= "
-                                 AND pj.status_pinjaman != 'lunas' AND COALESCE(pj.tenor,0) != PERIOD_DIFF(DATE_FORMAT(SYSDATE(), '%Y%m'),DATE_FORMAT(us.tgl_dinas, '%Y%m'))
+                                 AND pj.status_pinjaman != 'lunas' AND COALESCE(pj.tenor,0) != PERIOD_DIFF(".date('Ym').",DATE_FORMAT(us.tgl_dinas, '%Y%m'))
                             ";
                         }
 
@@ -1152,24 +1210,24 @@ class JsonDataController extends Controller
                             lp.amount as limitpinjaman,
                             pj.id as idpinjam,
                             COALESCE(pj.amount,0) as pinjaman,
-                            COALESCE(PERIOD_DIFF(DATE_FORMAT(SYSDATE(), '%Y%m'),DATE_FORMAT(pj.tgl_approve, '%Y%m')),0) as totaltenor,
+                            COALESCE(PERIOD_DIFF(".date('Ym').",DATE_FORMAT(pj.tgl_approve, '%Y%m')),0) as totaltenor,
 
                             cast(COALESCE(pj.amount,0) + COALESCE(pj.amount,0)*0.02 as decimal(18,2)) as pinjamanbunga,
                             cast((COALESCE(pj.amount,0) + COALESCE(pj.amount,0)*0.02) / pj.tenor as decimal(18,2)) as totalbayarperbulan1,
-                            cast(((COALESCE(pj.amount,0) + COALESCE(pj.amount,0)*0.02) / pj.tenor) * COALESCE(PERIOD_DIFF(DATE_FORMAT(SYSDATE(), '%Y%m'),DATE_FORMAT(pj.tgl_approve, '%Y%m')),0) as decimal(18,2)) as totalbayar1,
+                            cast(((COALESCE(pj.amount,0) + COALESCE(pj.amount,0)*0.02) / pj.tenor) * COALESCE(PERIOD_DIFF(".date('Ym').",DATE_FORMAT(pj.tgl_approve, '%Y%m')),0) as decimal(18,2)) as totalbayar1,
 
                             cast(COALESCE(pj.amount,0) + COALESCE(pj.amount,0)*0.02*pj.tenor as decimal(18,2)) as pinjaman2persen,
                             cast((COALESCE(pj.amount,0) + COALESCE(pj.amount,0)*0.02*pj.tenor) / pj.tenor as decimal(18,2)) totalbayarperbulan,
                             cast((COALESCE(pj.amount,0) + COALESCE(pj.amount,0)*0.02*pj.tenor) / pj.tenor * 
-                            COALESCE(PERIOD_DIFF(DATE_FORMAT(SYSDATE(), '%Y%m'),DATE_FORMAT(pj.tgl_approve, '%Y%m')),0)
+                            COALESCE(PERIOD_DIFF(".date('Ym').",DATE_FORMAT(pj.tgl_approve, '%Y%m')),0)
                             as decimal(18,2)) as totalbayar,
-                            cast(COALESCE(lp.amount,0) - COALESCE(pj.amount,0) + (COALESCE(pj.amount,0)/pj.tenor*COALESCE(PERIOD_DIFF(DATE_FORMAT(SYSDATE(), '%Y%m'),DATE_FORMAT(pj.tgl_approve, '%Y%m')),0)) as decimal(18,2)) as sisalimit,
+                            cast(COALESCE(lp.amount,0) - COALESCE(pj.amount,0) + (COALESCE(pj.amount,0)/pj.tenor*COALESCE(PERIOD_DIFF(".date('Ym').",DATE_FORMAT(pj.tgl_approve, '%Y%m')),0)) as decimal(18,2)) as sisalimit,
                             cast(
                                 (COALESCE(pj.amount,0) + COALESCE(pj.amount,0)*0.02 )
                                 -
-                                ((COALESCE(pj.amount,0) + COALESCE(pj.amount,0)*0.02) / pj.tenor) * COALESCE(PERIOD_DIFF(DATE_FORMAT(SYSDATE(), '%Y%m'),DATE_FORMAT(pj.tgl_approve, '%Y%m')),0)
+                                ((COALESCE(pj.amount,0) + COALESCE(pj.amount,0)*0.02) / pj.tenor) * COALESCE(PERIOD_DIFF(".date('Ym').",DATE_FORMAT(pj.tgl_approve, '%Y%m')),0)
                             as decimal(18,2)) as sisapinjaman,
-                            pj.tenor - COALESCE(PERIOD_DIFF(DATE_FORMAT(SYSDATE(), '%Y%m'),DATE_FORMAT(pj.tgl_approve, '%Y%m')),0) as sisatenor,
+                            pj.tenor - COALESCE(PERIOD_DIFF(".date('Ym').",DATE_FORMAT(pj.tgl_approve, '%Y%m')),0) as sisatenor,
                             pj.tenor,
                             pj.status,
                             pj.jenis,
@@ -1339,20 +1397,20 @@ class JsonDataController extends Controller
                                     ELSE 'AKTIF'
                                 END
                             END keanggotaan,
-                            COALESCE(PERIOD_DIFF(DATE_FORMAT(SYSDATE(), '%Y%m'),DATE_FORMAT(us.tgl_dinas, '%Y%m')),0) jmldinas,
-                            cast(coalesce(( 50000 * COALESCE(PERIOD_DIFF(DATE_FORMAT(SYSDATE(), '%Y%m'),DATE_FORMAT(us.tgl_dinas, '%Y%m')),0) / COALESCE(PERIOD_DIFF(DATE_FORMAT(SYSDATE(), '%Y%m'),DATE_FORMAT(us.tgl_dinas, '%Y%m')),0)),0)as decimal(18,2))
+                            COALESCE(PERIOD_DIFF(".date('Ym').",DATE_FORMAT(us.tgl_dinas, '%Y%m')),0) jmldinas,
+                            cast(coalesce(( 50000 * COALESCE(PERIOD_DIFF(".date('Ym').",DATE_FORMAT(us.tgl_dinas, '%Y%m')),0) / COALESCE(PERIOD_DIFF(".date('Ym').",DATE_FORMAT(us.tgl_dinas, '%Y%m')),0)),0)as decimal(18,2))
                             +
-                            (50000 * COALESCE(PERIOD_DIFF(DATE_FORMAT(SYSDATE(), '%Y%m'),DATE_FORMAT(us.tgl_dinas, '%Y%m')),0))
+                            (50000 * COALESCE(PERIOD_DIFF(".date('Ym').",DATE_FORMAT(us.tgl_dinas, '%Y%m')),0))
                             + 
                             coalesce(sum(su.amount),0.00)
                             as sukarela,
 
                             (
-                                cast(cast(coalesce(( 50000 * COALESCE(PERIOD_DIFF(DATE_FORMAT(SYSDATE(), '%Y%m'),DATE_FORMAT(us.tgl_dinas, '%Y%m')),0) / COALESCE(PERIOD_DIFF(DATE_FORMAT(SYSDATE(), '%Y%m'),DATE_FORMAT(us.tgl_dinas, '%Y%m')),0)),0)as decimal(18,2)) as decimal(18,2))
+                                cast(cast(coalesce(( 50000 * COALESCE(PERIOD_DIFF(".date('Ym').",DATE_FORMAT(us.tgl_dinas, '%Y%m')),0) / COALESCE(PERIOD_DIFF(".date('Ym').",DATE_FORMAT(us.tgl_dinas, '%Y%m')),0)),0)as decimal(18,2)) as decimal(18,2))
                             )
                             +
                             (
-                                COALESCE(PERIOD_DIFF(DATE_FORMAT(SYSDATE(), '%Y%m'),DATE_FORMAT(us.tgl_dinas, '%Y%m')),0) * 50000
+                                COALESCE(PERIOD_DIFF(".date('Ym').",DATE_FORMAT(us.tgl_dinas, '%Y%m')),0) * 50000
                             )
                             +
                             coalesce(sum(su.amount),0.00)
@@ -1362,11 +1420,11 @@ class JsonDataController extends Controller
 
                             coalesce(sum(st.amount),0) tariksimpanan,
                             cast((
-                                cast(coalesce(( 50000 * COALESCE(PERIOD_DIFF(DATE_FORMAT(SYSDATE(), '%Y%m'),DATE_FORMAT(us.tgl_dinas, '%Y%m')),0) / COALESCE(PERIOD_DIFF(DATE_FORMAT(SYSDATE(), '%Y%m'),DATE_FORMAT(us.tgl_dinas, '%Y%m')),0)),0)as decimal(18,2))
+                                cast(coalesce(( 50000 * COALESCE(PERIOD_DIFF(".date('Ym').",DATE_FORMAT(us.tgl_dinas, '%Y%m')),0) / COALESCE(PERIOD_DIFF(".date('Ym').",DATE_FORMAT(us.tgl_dinas, '%Y%m')),0)),0)as decimal(18,2))
                             )
                             +
                             (
-                                COALESCE(PERIOD_DIFF(DATE_FORMAT(SYSDATE(), '%Y%m'),DATE_FORMAT(us.tgl_dinas, '%Y%m')),0) * 50000
+                                COALESCE(PERIOD_DIFF(".date('Ym').",DATE_FORMAT(us.tgl_dinas, '%Y%m')),0) * 50000
                             )
                             +
                             coalesce(sum(su.amount),0.00) 
@@ -1376,8 +1434,8 @@ class JsonDataController extends Controller
                             cast(coalesce(sum(st.amount),0) as decimal(18,2))
                             as decimal(18,2) ) as sisasimpanan,
                             pj.amount pinjaman,
-                            cast(((COALESCE(pj1.amount,0) + COALESCE(pj1.amount,0)*0.02) / pj1.tenor) * COALESCE(PERIOD_DIFF(DATE_FORMAT(SYSDATE(), '%Y%m'),DATE_FORMAT(pj1.tgl_approve, '%Y%m')),0) as decimal(18,2)) as totalbayar,
-                            cast(pj1.amount - ((COALESCE(pj1.amount,0) + COALESCE(pj1.amount,0)*0.02) / pj1.tenor) * COALESCE(PERIOD_DIFF(DATE_FORMAT(SYSDATE(), '%Y%m'),DATE_FORMAT(pj1.tgl_approve, '%Y%m')),0) as decimal(18,2)) as sisapinjaman
+                            cast(((COALESCE(pj1.amount,0) + COALESCE(pj1.amount,0)*0.02) / pj1.tenor) * COALESCE(PERIOD_DIFF(".date('Ym').",DATE_FORMAT(pj1.tgl_approve, '%Y%m')),0) as decimal(18,2)) as totalbayar,
+                            cast(pj1.amount - ((COALESCE(pj1.amount,0) + COALESCE(pj1.amount,0)*0.02) / pj1.tenor) * COALESCE(PERIOD_DIFF(".date('Ym').",DATE_FORMAT(pj1.tgl_approve, '%Y%m')),0) as decimal(18,2)) as sisapinjaman
 
                         ";
                         
@@ -1392,13 +1450,13 @@ class JsonDataController extends Controller
                                 where status = 'approve' $wherefdate
                                 group by user_id
                             ) pj ON pj.user_id = us.id 
-                            LEFT JOIN pinjaman pj1 ON pj1.user_id = us.id AND pj1.status = 'approve' and pj1.status_pinjaman != 'lunas' and COALESCE(PERIOD_DIFF(DATE_FORMAT(SYSDATE(), '%Y%m'),DATE_FORMAT(pj1.tgl_approve, '%Y%m')),0) < pj1.tenor $wherefdate1
+                            LEFT JOIN pinjaman pj1 ON pj1.user_id = us.id AND pj1.status = 'approve' and pj1.status_pinjaman != 'lunas' and COALESCE(PERIOD_DIFF(".date('Ym').",DATE_FORMAT(pj1.tgl_approve, '%Y%m')),0) < pj1.tenor $wherefdate1
                             LEFT JOIN (
                                     select 
                                         user_id,
                                         CASE
                                             WHEN DATE_ADD(tgl_awal, INTERVAL durasi MONTH) >= CURRENT_DATE() THEN 
-                                                amount * COALESCE(PERIOD_DIFF(DATE_FORMAT(SYSDATE(), '%Y%m'),
+                                                amount * COALESCE(PERIOD_DIFF(".date('Ym').",
                                                 DATE_FORMAT(tgl_awal, '%Y%m')),0) 
                                             ELSE 
                                                 amount * durasi
@@ -1443,11 +1501,11 @@ class JsonDataController extends Controller
                         }
                         if($fstatuspinjam == '1'){
                             $where .= "
-                                 AND (lower(pj.status_pinjaman) = 'lunas' OR COALESCE(pj.tenor,0) = PERIOD_DIFF(DATE_FORMAT(SYSDATE(), '%Y%m'),DATE_FORMAT(us.tgl_dinas, '%Y%m')))
+                                 AND (lower(pj.status_pinjaman) = 'lunas' OR COALESCE(pj.tenor,0) = PERIOD_DIFF(".date('Ym').",DATE_FORMAT(us.tgl_dinas, '%Y%m')))
                             ";
                         }elseif($fstatuspinjam == '2'){
                             $where .= "
-                                 AND pj.status_pinjaman != 'lunas' AND COALESCE(pj.tenor,0) != PERIOD_DIFF(DATE_FORMAT(SYSDATE(), '%Y%m'),DATE_FORMAT(us.tgl_dinas, '%Y%m'))
+                                 AND pj.status_pinjaman != 'lunas' AND COALESCE(pj.tenor,0) != PERIOD_DIFF(".date('Ym').",DATE_FORMAT(us.tgl_dinas, '%Y%m'))
                             ";
                         }
 
@@ -1627,7 +1685,8 @@ class JsonDataController extends Controller
                             END keanggotaan,
                             su.jenis,
                             su.id idsukarela,su.status,su.amount,su.created_at tgl_pengajuan,su.tgl_approve,DATE_FORMAT(su.tgl_awal, '%Y%m') as tgl_awal,su.durasi,
-                            bt.file
+                            bt.file,
+                            su.created_by
                         ";
                         
                         $table = "
@@ -1724,10 +1783,10 @@ class JsonDataController extends Controller
                         $status = [];
                         $userid= $MasterClass->getSession('user_id') ;
                         
-                        $select = "COALESCE(PERIOD_DIFF(DATE_FORMAT(SYSDATE(), '%Y%m'),DATE_FORMAT(us.tgl_dinas, '%Y%m')),0) jmldinas,
+                        $select = "COALESCE(PERIOD_DIFF(".date('Ym').",DATE_FORMAT(us.tgl_dinas, '%Y%m')),0) jmldinas,
                                 cast(
                                     
-                                    (50000 * COALESCE(PERIOD_DIFF(DATE_FORMAT(SYSDATE(), '%Y%m'),DATE_FORMAT(us.tgl_dinas, '%Y%m')),0))
+                                    (50000 * COALESCE(PERIOD_DIFF(".date('Ym').",DATE_FORMAT(us.tgl_dinas, '%Y%m')),0))
                                     + 
                                     coalesce(sum(su.amount),0.00)
                                     +
@@ -1743,7 +1802,7 @@ class JsonDataController extends Controller
                                         tgl_awal,
                                         CASE
                                             WHEN DATE_ADD(tgl_awal, INTERVAL durasi MONTH) >= CURRENT_DATE() THEN 
-                                                amount * COALESCE(PERIOD_DIFF(DATE_FORMAT(SYSDATE(), '%Y%m'),
+                                                amount * COALESCE(PERIOD_DIFF(".date('Ym').",
                                                 DATE_FORMAT(tgl_awal, '%Y%m')),0) 
                                             ELSE 
                                                 amount * durasi
@@ -1877,9 +1936,9 @@ class JsonDataController extends Controller
                             sm.id as idpenarikan,
                             sm.status,
                             cast(
-                            cast(coalesce(( 50000 * COALESCE(PERIOD_DIFF(DATE_FORMAT(SYSDATE(), '%Y%m'),DATE_FORMAT(us.tgl_dinas, '%Y%m')),0) / COALESCE(PERIOD_DIFF(DATE_FORMAT(SYSDATE(), '%Y%m'),DATE_FORMAT(us.tgl_dinas, '%Y%m')),0)),0)as decimal(18,2))
+                            cast(coalesce(( 50000 * COALESCE(PERIOD_DIFF(".date('Ym').",DATE_FORMAT(us.tgl_dinas, '%Y%m')),0) / COALESCE(PERIOD_DIFF(".date('Ym').",DATE_FORMAT(us.tgl_dinas, '%Y%m')),0)),0)as decimal(18,2))
                             +
-                            (50000 * COALESCE(PERIOD_DIFF(DATE_FORMAT(SYSDATE(), '%Y%m'),DATE_FORMAT(us.tgl_dinas, '%Y%m')),0))
+                            (50000 * COALESCE(PERIOD_DIFF(".date('Ym').",DATE_FORMAT(us.tgl_dinas, '%Y%m')),0))
                             + 
                             coalesce(sum(su.amount),0.00)
                             +
@@ -1900,7 +1959,7 @@ class JsonDataController extends Controller
                                         user_id,
                                         CASE
                                             WHEN DATE_ADD(tgl_awal, INTERVAL durasi MONTH) >= CURRENT_DATE() THEN 
-                                                amount * COALESCE(PERIOD_DIFF(DATE_FORMAT(SYSDATE(), '%Y%m'),
+                                                amount * COALESCE(PERIOD_DIFF(".date('Ym').",
                                                 DATE_FORMAT(tgl_awal, '%Y%m')),0) 
                                             ELSE 
                                                 amount * durasi
@@ -2207,6 +2266,62 @@ class JsonDataController extends Controller
             return $MasterClass->Results($results);
 
         }
+        public function getbuktitfpinjaman(Request $request){
+
+            $MasterClass = new Master();
+
+            $checkAuth = $MasterClass->Authenticated($MasterClass->getSession('user_id'));
+            
+            if($checkAuth['code'] == $MasterClass::CODE_SUCCESS){
+                try {
+                    if ($request->isMethod('post')) {
+                        
+                        DB::beginTransaction();
+                
+                        $status = [];
+                        $idprnt = $request->id ;
+                        $userid = $request->userid ;
+                        
+                        $saved  = DB::select("SELECT a.* FROM bukti_transaksi a where user_id = $userid and keterangan = 'bukti tf pinjaman' and id_parent = $idprnt  ORDER BY created_at desc");
+                        $saved  = $MasterClass->checkErrorModel($saved);
+                        
+                        $status = $saved;
+            
+                        $results = [
+                            'code' => $status['code'],
+                            'info'  => $status['info'],
+                            'data'  =>  $status['data'],
+                        ];
+                            
+            
+            
+                    } else {
+                        $results = [
+                            'code' => '103',
+                            'info'  => "Method Failed",
+                        ];
+                    }
+                } catch (\Exception $e) {
+                    // Roll back the transaction in case of an exception
+                    $results = [
+                        'code' => '102',
+                        'info'  => $e->getMessage(),
+                    ];
+        
+                }
+            }
+            else {
+        
+                $results = [
+                    'code' => '403',
+                    'info'  => "Unauthorized",
+                ];
+                
+            }
+
+            return $MasterClass->Results($results);
+
+        }
         public function buktilunas(Request $request){
 
             $MasterClass = new Master();
@@ -2341,7 +2456,7 @@ class JsonDataController extends Controller
                                 tgl_approve tgl_transaksi,
                                 amount nominal,
                                 'sukarela', 
-                                PERIOD_DIFF(DATE_FORMAT(SYSDATE(), '%Y%m'),DATE_FORMAT(tgl_approve, '%Y%m')) as periode
+                                PERIOD_DIFF(".date('Ym').",DATE_FORMAT(tgl_approve, '%Y%m')) as periode
                             from 
                                 simpanan_sukarela su 
                             where 
@@ -2432,30 +2547,30 @@ class JsonDataController extends Controller
                             lp.amount as limitpinjaman,
                             pj.id as idpinjam,
                             COALESCE(pj.amount,0) as pinjaman,
-                            PERIOD_DIFF(DATE_FORMAT(SYSDATE(), '%Y%m'),DATE_FORMAT(pj.tgl_approve, '%Y%m')) as totaltenor,
+                            PERIOD_DIFF(".date('Ym').",DATE_FORMAT(pj.tgl_approve, '%Y%m')) as totaltenor,
 
                             cast(COALESCE(pj.amount,0) + COALESCE(pj.amount,0)*0.02 as decimal(18,2)) as pinjamanbunga,
                             cast((COALESCE(pj.amount,0) + COALESCE(pj.amount,0)*0.02) / pj.tenor as decimal(18,2)) as totalbayarperbulan1,
-                            cast(((COALESCE(pj.amount,0) + COALESCE(pj.amount,0)*0.02) / pj.tenor) * COALESCE(PERIOD_DIFF(DATE_FORMAT(SYSDATE(), '%Y%m'),DATE_FORMAT(pj.tgl_approve, '%Y%m')),0) as decimal(18,2)) as totalbayar1,
+                            cast(((COALESCE(pj.amount,0) + COALESCE(pj.amount,0)*0.02) / pj.tenor) * COALESCE(PERIOD_DIFF(".date('Ym').",DATE_FORMAT(pj.tgl_approve, '%Y%m')),0) as decimal(18,2)) as totalbayar1,
                             cast(
                                 (COALESCE(pj.amount,0) + COALESCE(pj.amount,0)*0.02)
                                 -
-                                ((COALESCE(pj.amount,0) + COALESCE(pj.amount,0)*0.02) / pj.tenor) * COALESCE(PERIOD_DIFF(DATE_FORMAT(SYSDATE(), '%Y%m'),DATE_FORMAT(pj.tgl_approve, '%Y%m')),0) as decimal(18,2)
+                                ((COALESCE(pj.amount,0) + COALESCE(pj.amount,0)*0.02) / pj.tenor) * COALESCE(PERIOD_DIFF(".date('Ym').",DATE_FORMAT(pj.tgl_approve, '%Y%m')),0) as decimal(18,2)
                             ) sisapinjaman1,
                             
                             cast(COALESCE(pj.amount,0) + COALESCE(pj.amount,0)*0.02*pj.tenor as decimal(18,2)) as pinjaman2persen,
                             cast((COALESCE(pj.amount,0) + COALESCE(pj.amount,0)*0.02*pj.tenor) / pj.tenor as decimal(18,2)) totalbayarperbulan,
                             cast((COALESCE(pj.amount,0) + COALESCE(pj.amount,0)*0.02*pj.tenor) / pj.tenor * 
-                            PERIOD_DIFF(DATE_FORMAT(SYSDATE(), '%Y%m'),DATE_FORMAT(pj.tgl_approve, '%Y%m'))
+                            PERIOD_DIFF(".date('Ym').",DATE_FORMAT(pj.tgl_approve, '%Y%m'))
                             as decimal(18,2)) as totalbayar,
-                            COALESCE(pj.amount,0) - cast(COALESCE(pj.amount,0) - COALESCE(pj.amount,0) / pj.tenor  * PERIOD_DIFF(DATE_FORMAT(SYSDATE(), '%Y%m'),DATE_FORMAT(pj.tgl_approve, '%Y%m'))as decimal(18,2)) as sisalimit,
+                            COALESCE(pj.amount,0) - cast(COALESCE(pj.amount,0) - COALESCE(pj.amount,0) / pj.tenor  * PERIOD_DIFF(".date('Ym').",DATE_FORMAT(pj.tgl_approve, '%Y%m'))as decimal(18,2)) as sisalimit,
                             cast(
                                 (COALESCE(pj.amount,0) + COALESCE(pj.amount,0)*0.02*pj.tenor)
                                 -
                                 (COALESCE(pj.amount,0) + COALESCE(pj.amount,0)*0.02*pj.tenor) / pj.tenor * 
-                                PERIOD_DIFF(DATE_FORMAT(SYSDATE(), '%Y%m'),DATE_FORMAT(pj.tgl_approve, '%Y%m'))
+                                PERIOD_DIFF(".date('Ym').",DATE_FORMAT(pj.tgl_approve, '%Y%m'))
                             as decimal(18,2)) as sisapinjaman,
-                            pj.tenor - PERIOD_DIFF(DATE_FORMAT(SYSDATE(), '%Y%m'),DATE_FORMAT(pj.tgl_approve, '%Y%m')) as sisatenor,
+                            pj.tenor - PERIOD_DIFF(".date('Ym').",DATE_FORMAT(pj.tgl_approve, '%Y%m')) as sisatenor,
                             
                             pj.tenor,
                             pj.created_at tglaju,
@@ -2545,7 +2660,7 @@ class JsonDataController extends Controller
                         $status = [];
                         $id     = $MasterClass->getSession('user_id') ;
                         $userid = $MasterClass->getSession('user_id') ;
-                        $saved  = DB::select("SELECT PERIOD_DIFF(DATE_FORMAT(SYSDATE(), '%Y%m'),DATE_FORMAT(tgl_dinas, '%Y%m')) los,a.* FROM users a where id = $id");
+                        $saved  = DB::select("SELECT PERIOD_DIFF(".date('Ym').",DATE_FORMAT(tgl_dinas, '%Y%m')) los,a.* FROM users a where id = $id");
                         $saved  = $MasterClass->checkErrorModel($saved);
                         
                         $status = $saved;
@@ -2603,7 +2718,7 @@ class JsonDataController extends Controller
                                 *,
                                  CASE
                                     WHEN DATE_ADD(tgl_awal, INTERVAL durasi MONTH) >= CURRENT_DATE() THEN 
-                                        COALESCE(PERIOD_DIFF(DATE_FORMAT(SYSDATE(), '%Y%m'),
+                                        COALESCE(PERIOD_DIFF(".date('Ym').",
                                         DATE_FORMAT(tgl_awal, '%Y%m')),0) 
                                     ELSE 
                                         durasi
@@ -3073,9 +3188,21 @@ class JsonDataController extends Controller
                             $attributes     = [
                                 'status'          => $data->status,
                                 'approve_by'      => $MasterClass->getSession('name'),
-                                'tgl_approve'     => date('Y-m-d H:i:s')
+                                'tgl_approve'     => date('Y-m-d H:i:s'),
+                                'updated_at'      => date('Y-m-d H:i:s')
 
                             ];
+
+                            if($data->status == 'batal'){
+                                $attributes     = [
+                                    'status'          => $data->status,
+                                    'status_pinjaman' => $data->status,
+                                    'updated_at'      => date('Y-m-d H:i:s')
+                                ];
+
+                                DB::select("update limit_pinjaman set amount = amount + $data->pinjaman where user_id = ".$MasterClass->getSession('user_id'));
+
+                            }
                         }
                         $where     = [
                             'id' => $data->idpinjam
@@ -3146,7 +3273,7 @@ class JsonDataController extends Controller
                         $status = [];
 
                         $cekpengajuan = $MasterClass->selectGlobal(
-                            "*,PERIOD_DIFF(DATE_FORMAT(SYSDATE(), '%Y%m'),DATE_FORMAT(tgl_approve, '%Y%m')) los",
+                            "*,PERIOD_DIFF(".date('Ym').",DATE_FORMAT(tgl_approve, '%Y%m')) los",
                             'pinjaman',
                             "user_id = $userid order by created_at desc limit 1");
                         if($cekpengajuan['data']){
@@ -3335,6 +3462,7 @@ class JsonDataController extends Controller
                                     'keterangan'=> 'manual',
                                     'created_at'=> $now,
                                 ];
+
                                 $savefoto      = $MasterClass->saveGlobal('bukti_transaksi', $attrphoto );
                                 
                                 if($savefoto['code'] != $MasterClass::CODE_SUCCESS){
@@ -3347,7 +3475,9 @@ class JsonDataController extends Controller
                                 }
                             }
                             
-
+                            if($request->anggota ){
+                                $userid = $request->anggota ;
+                            }
                             $attributes     = [
                                 'user_id'           => $userid,
                                 'jenis'             => 'manual',
@@ -3356,7 +3486,12 @@ class JsonDataController extends Controller
                                 'tgl_approve'       => $now,
                                 'id_bukti'          => $savefoto['data'],
                                 'created_at'        => $now,
+                                'created_by'        => $userid,
                             ];
+                            
+                            if($request->anggota == 'undefined' || $request->anggota == '' || $request->anggota == null){
+                                unset($attrphoto['created_by']);
+                            }
                             $saved      = $MasterClass->saveGlobal('simpanan_sukarela', $attributes );
                             $status = $saved;
         
@@ -3492,12 +3627,12 @@ class JsonDataController extends Controller
                         $status = [];
 
                         // simpanan pokok
-                        // cast(coalesce(( 50000 * COALESCE(PERIOD_DIFF(DATE_FORMAT(SYSDATE(), '%Y%m'),DATE_FORMAT(us.tgl_dinas, '%Y%m')),0) / COALESCE(PERIOD_DIFF(DATE_FORMAT(SYSDATE(), '%Y%m'),DATE_FORMAT(us.tgl_dinas, '%Y%m')),0)),0)as decimal(18,2))
+                        // cast(coalesce(( 50000 * COALESCE(PERIOD_DIFF(".date('Ym').",DATE_FORMAT(us.tgl_dinas, '%Y%m')),0) / COALESCE(PERIOD_DIFF(".date('Ym').",DATE_FORMAT(us.tgl_dinas, '%Y%m')),0)),0)as decimal(18,2))
                         //
-                        $select = "COALESCE(PERIOD_DIFF(DATE_FORMAT(SYSDATE(), '%Y%m'),DATE_FORMAT(us.tgl_dinas, '%Y%m')),0) jmldinas,
+                        $select = "COALESCE(PERIOD_DIFF(".date('Ym').",DATE_FORMAT(us.tgl_dinas, '%Y%m')),0) jmldinas,
                                 cast(
                                     
-                                    (50000 * COALESCE(PERIOD_DIFF(DATE_FORMAT(SYSDATE(), '%Y%m'),DATE_FORMAT(us.tgl_dinas, '%Y%m')),0))
+                                    (50000 * COALESCE(PERIOD_DIFF(".date('Ym').",DATE_FORMAT(us.tgl_dinas, '%Y%m')),0))
                                     + 
                                     coalesce(sum(su.amount),0.00)
                                     +
@@ -3513,7 +3648,7 @@ class JsonDataController extends Controller
                                         tgl_awal,
                                         CASE
                                             WHEN DATE_ADD(tgl_awal, INTERVAL durasi MONTH) >= CURRENT_DATE() THEN 
-                                                amount * COALESCE(PERIOD_DIFF(DATE_FORMAT(SYSDATE(), '%Y%m'),
+                                                amount * COALESCE(PERIOD_DIFF(".date('Ym').",
                                                 DATE_FORMAT(tgl_awal, '%Y%m')),0) 
                                             ELSE 
                                                 amount * durasi
@@ -3647,162 +3782,6 @@ class JsonDataController extends Controller
                             'info'  => $status['info'],
                         ];
                             
-            
-            
-                    } else {
-                        $results = [
-                            'code' => '103',
-                            'info'  => "Method Failed",
-                        ];
-                    }
-                } catch (\Exception $e) {
-                    // Roll back the transaction in case of an exception
-                    $results = [
-                        'code' => '102',
-                        'info'  => $e->getMessage(),
-                    ];
-        
-                }
-            }
-            else {
-        
-                $results = [
-                    'code' => '403',
-                    'info'  => "Unauthorized",
-                ];
-                
-            }
-
-            return $MasterClass->Results($results);
-
-        }
-        public function saveBukti(Request $request){
-
-            $MasterClass = new Master();
-
-            $checkAuth = $MasterClass->Authenticated($MasterClass->getSession('user_id'));
-            
-            if($checkAuth['code'] == $MasterClass::CODE_SUCCESS){
-                try {
-                    if ($request->isMethod('post')) {
-
-                        DB::beginTransaction();     
-
-                        $idkamar            = $request->idkamar;
-                        $user_id            = $request->user_id;
-                        $name               = $request->name;
-                        $handphone          = $request->handphone;
-                        $no_kamar           = $request->no_kamar;
-                        $tipe_kamar         = $request->tipe_kamar;
-                        $faskos             = $request->faskos;
-                        $faskosp            = $request->faskosp;
-                        $tgl_awal           = $request->tgl_awal;
-                        $jmlbulan           = $request->jmlbulan;
-                        $harga              = $request->harga;
-                        $biayatambah        = $request->biayatambah;
-                        $biaya              = $request->biaya;
-                        $jenispembayaran    = $request->jenispembayaran;
-                        if($jenispembayaran == '1'){
-                            $jmlbulan           = 1 ;
-                            $tgl_akhir          = date("Y-m-d", strtotime("+1 month", strtotime($tgl_awal)));
-                        }else{
-                            $tgl_awal           = date("Y-m-d", strtotime("+".$jmlbulan." month", strtotime($tgl_awal)));
-                            $tgl_akhir          = date("Y-m-d", strtotime("+".$jmlbulan." month", strtotime($tgl_awal)));
-                        }
-
-                         if($user_id == '' || $user_id == null || $user_id == 'undefined'){//ngebaca yg upload apakah admin / penghuni
-                            $user_id = $MasterClass->getSession('user_id') ; 
-                         }
-                        $now                = date('Y-m-d H:i:s');
-                        $docname            = 'bukti';
-
-                        $nama_file          = $_FILES['form-bukti']['name'];
-                        $type		        = $_FILES['form-bukti']['type'];
-                        $ukuran		        = $_FILES['form-bukti']['size'];
-                        $tmp_name		    = $_FILES['form-bukti']['tmp_name'];
-                        $nama_file_upload   = strtolower(str_replace(' ','_',$docname.'-'.$nama_file));
-                        $alamatfile         = '../public/data/bukti/'; // directory file
-                        $uploaddir          = $alamatfile.$nama_file_upload; // directory file
-                        
-                        if (move_uploaded_file($tmp_name,$uploaddir)){
-                            chmod($uploaddir, 0777);
-
-                            $attrphoto     = [
-                                'user_id'   => $user_id,
-                                'tgl_awal'  => $tgl_awal,
-                                'tgl_akhir' => $tgl_akhir,
-                                'file'      => $nama_file_upload,
-                                'alamat'    => $alamatfile,
-                                'size'      => $ukuran,
-                                'tipe'      => $type,
-                                'jenis'     => 'bukti',
-                                'created_at'=> $now,
-                            ];
-                            $savefoto      = $MasterClass->saveGlobal('bukti_transaksi', $attrphoto );
-                            if($savefoto['code'] != $MasterClass::CODE_SUCCESS){
-                                DB::rollBack();
-                                $results = [
-                                    'code' => '1',
-                                    'info'  => "Gagal simpan data",
-                                ];
-                                return $MasterClass->Results($results);
-                            }
-
-                            
-                            $attrtransaksi     = [
-                                'user_id'           => $user_id,
-                                'name'              => $name,
-                                'handphone'         => $handphone,
-                                'no_kamar'          => $no_kamar,
-                                'tipe'              => $tipe_kamar,
-                                'fasilitas'         => $faskos,
-                                'fasilitas_penghuni'=> $faskosp,
-                                'tgl_awal'          => $tgl_awal,
-                                'tgl_akhir'         => $tgl_akhir,
-                                'jml_bulan'         => $jmlbulan,
-                                'biaya_kamar'       => $harga,
-                                'biaya_tambahan'    => $biayatambah,
-                                'total_biaya'       => $biaya,
-                                'created_at'        => $now,
-                            ];
-                            $savetransaksi      = $MasterClass->saveGlobal('history_transaksi', $attrtransaksi );
-                            if($savetransaksi['code'] != $MasterClass::CODE_SUCCESS){
-                                DB::rollBack();
-                                $results = [
-                                    'code' => '1',
-                                    'info'  => "Gagal simpan data",
-                                ];
-                                return $MasterClass->Results($results);
-                            }
-
-                            // update masa kos 1 bulan
-                            $attributes     = [
-                                'tgl_awal'      => $tgl_awal,
-                                'tgl_akhir'     => $tgl_akhir,
-                                'updated_at'    => $now,
-                            ];
-                            $where     = [
-                                'id_kamar' => $idkamar,
-                                'user_id' => $user_id,
-                            ];
-                            $updatemasa      = $MasterClass->updateGlobal('mapping_kamar', $attributes,$where );
-
-                            if($updatemasa['code'] != $MasterClass::CODE_SUCCESS){
-                                DB::rollBack();
-                                $results = [
-                                    'code' => '1',
-                                    'info'  => "Gagal simpan data",
-                                ];
-                                return $MasterClass->Results($results);
-                            }
-
-                        }
-
-                        DB::commit();
-                        $results = [
-                            'code'  => $MasterClass::CODE_SUCCESS,
-                            'info'  => 'ok',
-                        ];
             
             
                     } else {
@@ -4031,6 +4010,87 @@ class JsonDataController extends Controller
                                     'user_id'   => $userid,
                                     'id_parent' => $id,
                                     'keterangan'=> 'tarik',
+                                    'created_at'=> $now,
+                                ];
+                                $savefoto      = $MasterClass->saveGlobal('bukti_transaksi', $attrphoto );
+                                if($savefoto['code'] != $MasterClass::CODE_SUCCESS){
+                                    DB::rollBack();
+                                    $results = [
+                                        'code' => '1',
+                                        'info'  => "Upload Gagal",
+                                    ];
+                                    return $MasterClass->Results($results);
+                                }
+                            }
+
+                            DB::commit();
+                            $results = [
+                                'code'      => $MasterClass::CODE_SUCCESS,
+                                'info'      => 'Upload Berhasil',
+                            ];
+            
+                        }
+                    } else {
+                        $results = [
+                            'code' => '103',
+                            'info'  => "Method Failed",
+                        ];
+                    }
+                } catch (\Exception $e) {
+                    // Roll back the transaction in case of an exception
+                    $results = [
+                        'code' => '102',
+                        'info'  => $e->getMessage(),
+                    ];
+        
+                }
+            }
+            else {
+        
+                $results = [
+                    'code' => '403',
+                    'info'  => "Unauthorized",
+                ];
+                
+            }
+
+            return $MasterClass->Results($results);
+
+        }
+        public function saveBuktitfpinjaman(Request $request){
+
+            $MasterClass = new Master();
+            
+            $checkAuth = $MasterClass->Authenticated($MasterClass->getSession('user_id'));
+            
+            if($checkAuth['code'] == $MasterClass::CODE_SUCCESS){
+                try {
+                    if ($request->isMethod('post')) {
+
+                        DB::beginTransaction();     
+                        $id         = $request->id ;
+                        $userid     = $request->userid ;
+                        $now        = date('Y-m-d H:i:s');
+                        $idlogin    = $MasterClass->getSession('user_id') ;
+                        $status = [];
+
+                        $docname            = 'bukti';
+                        if(!empty($_FILES['bukti']['name'])){//jika file ada maka masukan file 
+                            
+                            $nama_file          = $_FILES['bukti']['name'];
+                            $tmp_name		    = $_FILES['bukti']['tmp_name'];
+                            $nama_file_upload   = strtolower(str_replace(' ','_',$docname.'-'.$nama_file));
+                            $alamatfile         = '../public/data/bukti/'; // directory file
+                            $uploaddir          = $alamatfile.$nama_file_upload; // directory file
+                            
+                            if (move_uploaded_file($tmp_name,$uploaddir)){
+                                chmod($uploaddir, 0777);
+    
+                                $attrphoto     = [
+                                    'file'      => $uploaddir,
+                                    'user_id'   => $userid,
+                                    'id_parent' => $id,
+                                    'keterangan'=> 'bukti tf pinjaman',
                                     'created_at'=> $now,
                                 ];
                                 $savefoto      = $MasterClass->saveGlobal('bukti_transaksi', $attrphoto );

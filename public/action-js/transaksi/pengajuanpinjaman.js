@@ -8,7 +8,10 @@ $(document).ready(function () {
 });
 
 $(".select2").select2();
-$(".select2add").select2({
+$("#form-batal").select2({
+    dropdownParent: $("#modal-batal"),
+});
+$("#form-statusapprove").select2({
     dropdownParent: $("#modal-approval"),
 });
 $(".select2add1").select2({
@@ -84,14 +87,16 @@ function getListData() {
                     return meta.row + meta.settings._iDisplayStart + 1;
                 },
             },
-            // { render:function (data,type,row) {
-            //     if(row.status == 'approve')
-            //         return "<a class='approvalpinjaman' style='color:green;cursor:pointer;font-weight:bold;' >APPROVED</a>";
-            //     else if(row.status == 'reject')
-            //         return "<a class='approvalpinjaman' style='color:red;cursor:pointer;font-weight:bold;'>REJECTED</a>";
-            //     else
-            //         return "<a class='approvalpinjaman' style='color:black;cursor:pointer;font-weight:bold;'>WAITING APPROVED</a>";
-            // } },
+            { render:function (data,type,row) {
+                if(row.status == 'approve')
+                    return "<a class='approvalpinjaman' style='color:green;cursor:pointer;font-weight:bold;' >APPROVED</a>";
+                else if(row.status == 'reject')
+                    return "<a class='approvalpinjaman' style='color:red;cursor:pointer;font-weight:bold;'>REJECTED</a>";
+                else if(row.status == 'batal')
+                    return "<a class='approvalpinjaman' style='color:red;cursor:pointer;font-weight:bold;'>DI BATALKAN</a>";
+                else
+                    return "<a class='approvalpinjaman' style='color:black;cursor:pointer;font-weight:bold;'>WAITING APPROVED</a>";
+            } },
             { visible:false,class:"notanggota",data: "nrp" },
             { visible:false,class:"notanggota",data: "name",render:function (data,type,row) {
                 return row.name;
@@ -134,6 +139,9 @@ function getListData() {
             { visible:false,sClass:"notdown action",render:function (data,type,row) {
                 return "<a style='cursor:pointer' class='perjanjian'>Klik Disini</a>";
             } },
+            { sClass:"notdown",render:function (data,type,row) {
+                return "<a style='cursor:pointer' class='buktitf'>Klik Disini</a>";
+            } },
         ],
         drawCallback: function (settings) {
             var api = this.api();
@@ -145,10 +153,13 @@ function getListData() {
                 .on("click", function () {
                     var tr = $(this).closest("tr");
                     var rowData = dtpr.row(tr).data();
-                    if(role == 'superadmin' || role == 'bendahara koperasi'){
+                    if((role == 'superadmin' || role == 'bendahara koperasi') && rowData.status == null){
                         isObject = {};
                         isObject = rowData ;
                         $("#modal-approval").modal('show');
+                    }
+                    if(role == 'anggota' && rowData.status == null){
+                        $("#modal-batal").modal('show');
                     }
                 });
             $(rows)
@@ -157,6 +168,15 @@ function getListData() {
                     var tr = $(this).closest("tr");
                     var rowData = dtpr.row(tr).data();
                     detailpengajuan(rowData);
+                });
+            $(rows)
+                .find(".buktitf")
+                .on("click", function () {
+                    var tr = $(this).closest("tr");
+                    var rowData = dtpr.row(tr).data();
+                    isObject = {};
+                    isObject = rowData;
+                    buktitf(rowData);
                 });
             $(rows)
                 .find(".perjanjian")
@@ -298,8 +318,14 @@ function printDiv(divId, title){
 
 function approval(){
     let status = $("#form-statusapprove").val();
+    if(role == 'anggota'){
+        title = "Yakin untuk membatalkan pinjaman ?"
+        status = 'batal';
+    }else{
+        title = "Yakin untuk "+status+" pinjaman "+ isObject.name +" ?" ;
+    }
     swal({
-        title: "Yakin untuk "+status+" pinjaman "+ isObject.name +" ?",
+        title: title,
         type: "warning",
         showCancelButton: !0,
         confirmButtonColor: "#DD6B55",
@@ -312,7 +338,7 @@ function approval(){
             $.ajax({
                 url: baseURL + "/approvalpinjaman",
                 type: "POST",
-                data: JSON.stringify({ idpinjam: isObject.idpinjam, status: status,jenis: '' }),
+                data: JSON.stringify({ idpinjam: isObject.idpinjam, status: status,jenis: '',pinjaman:isObject.pinjaman }),
                 dataType: "json",
                 contentType: "application/json",
                 beforeSend: function () {
@@ -467,4 +493,92 @@ async function getdatlimitpinjaman() {
     } catch (error) {
         sweetAlert("Oops...", error.responseText, "ERROR");
     }
+}
+
+async function buktitf() {
+
+    $(".buktidiv").empty();
+    try {
+        const response = await $.ajax({
+            url: baseURL + "/getbuktitfpinjaman",
+            type: "POST",
+            dataType: "json",
+            data:{
+                id      : isObject.idpinjam ,
+                userid  : isObject.user ,
+            },
+            beforeSend: function () {
+                
+            },
+        });
+        
+        if( response.data.length >=1){
+            file = response.data[0].file ;
+            file = baseURL+file.replaceAll('../public','');
+            content =`<center>
+                            <img src="`+file+`" style="width:300px;" alt="">
+                        <center>
+            `;
+            $(".buktidiv").append(content);
+            $("#modal-bukti").modal('show');
+        }else{
+            if (role == 'bendahara koperasi' || role == 'superadmin') {
+                $("#form-bukti").val('');
+                $("#modal-upload").modal('show');
+            }
+        }
+        
+    } catch (error) {
+        sweetAlert("Oops...", error.responseText, "ERROR");
+    }
+}
+
+$("#simpanbukti-btn").on("click", function (e) {
+    e.preventDefault();
+
+    if ($("#form-bukti").val() == ''){
+        swalwarning('Bukti tidak boleh kosong');
+        return false;
+    }
+
+    simpanbukti();
+});
+
+function simpanbukti() {
+    const formData    = new FormData(document.getElementById("formbukti"));
+    formData.append('id',isObject.idpinjam);
+    formData.append('userid',isObject.user);
+
+    $.ajax({
+        url: baseURL + "/saveBuktitfpinjaman",
+        type: "POST",
+        data: formData,
+        contentType: false,
+        processData: false,
+        beforeSend: function () {
+            Swal.fire({
+                title: "Loading",
+                text: "Please wait...",
+            });
+        },
+        complete: function () {
+            $('#table-list').DataTable().ajax.reload();
+        },
+        success: function (response) {
+            // Handle response sukses
+            if (response.code == 0) {
+                swal("BERHASIL !", response.info, "success");
+                $("#modal-upload").modal("hide");
+                $("#modal-bukti").modal("hide");
+                $("#modal-detail").modal("hide");
+                
+                isObject = {};
+            } else {
+                sweetAlert("Oops...", response.info, "ERROR");
+            }
+        },
+        error: function (xhr, status, error) {
+            sweetAlert("Oops...", "ERROR", "ERROR");
+        },
+    });
 }

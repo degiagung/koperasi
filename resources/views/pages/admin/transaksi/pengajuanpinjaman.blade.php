@@ -74,7 +74,7 @@
                                 <thead>
                                     <tr>
                                         <th>No</th>
-                                        {{-- <th>Status </th> --}}
+                                        <th>Status </th>
                                         <th>NRP</th>
                                         <th>Nama Anggota</th>
                                         <th>Tanggal Transaksi</th>
@@ -86,6 +86,7 @@
                                         <th>Sisa Tenor & Pinjaman</th>
                                         <th>Surat Pengajuan</th>
                                         <th>Surat Perjanjian</th>
+                                        <th>Bukti</th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -113,6 +114,37 @@
                                         <select class="select2add" id="form-statusapprove">
                                             <option value="approve">Approved</option>
                                             <option value="reject">Rejected</option>
+                                        </select>
+                                    </div>
+                                </div>
+
+                            </form>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-danger light" data-bs-dismiss="modal">Close</button>
+                        <button type="button" class="btn btn-sgn light" onClick="approval() ">Simpan</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="modal fade" id="modal-batal" style="display: none;" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered" role="document">
+                <div class="modal-content">
+                    <div class="modal-header headermodal">
+                        <h5 class="modal-title">Pembatalan</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal">
+                        </button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="basic-form">
+                            <form>
+                                <div class="mb-3 row">
+                                    <label class="col-sm-5 col-form-label ">Opsi</label>
+                                    <div class="col-sm-7">
+                                        <select id="form-batal">
+                                            <option value="batal">Batalkan Pinjaman</option>
                                         </select>
                                     </div>
                                 </div>
@@ -528,6 +560,57 @@
                     <div class="modal-footer">
                         <button type="button" class="btn btn-danger light" data-bs-dismiss="modal">Close</button>
                         <button type="button" id="ajukan-btn" class="btn btn-primary">Ajukan</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="modal fade" id="modal-bukti" style="display: none;" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered" role="document">
+                <div class="modal-content">
+                    <div class="modal-header headermodal">
+                        <h5 class="modal-title">Bukti Transaksi</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal">
+                        </button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="basic-form buktidiv">
+                            
+                        </div>
+                    </div>
+                    {{-- <div class="modal-footer">
+                        <button type="button" class="btn btn-danger light" data-bs-dismiss="modal">Close</button>
+                        <button type="button" class="btn btn-sgn light" onClick="approval() ">Simpan</button>
+                    </div> --}}
+                </div>
+            </div>
+        </div>
+
+        <div class="modal fade" id="modal-upload" style="display: none;" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered" role="document">
+                <div class="modal-content">
+                    <div class="modal-header headermodal">
+                        <h5 class="modal-title">Upload Bukti</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal">
+                        </button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="basic-form">
+                                
+                            <div class="mb-3 row">
+                                <label class="col-sm-3 col-form-label">Bukti Transaksi</label>
+                                <div class="col-sm-9">
+                                    <form role="form" class="" id="formbukti" method="post" type="post" enctype="multipart/form-data">
+                                        <input class="form-control" name="bukti" id="form-bukti" type="file" value="" multiple style="opacity:1;"/>
+                                    </form>
+                                </div>
+                            </div>
+
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-danger light" data-bs-dismiss="modal">Close</button>
+                        <button type="button" id="simpanbukti-btn" class="btn btn-primary">Simpan</button>
                     </div>
                 </div>
             </div>

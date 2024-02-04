@@ -68,13 +68,15 @@
                 <div class="card">
                     <div class="card-header mt-2 flex-wrap d-flex justify-content-between">
                         <ul class="nav nav-tabs dzm-tabs" id="myTab-4" role="tablist">
-                            @if ($role == 'anggota')
-                            <li class="nav-item" role="presentation">
-                                <button type="button" id="add-btn" class="nav-link active btn-sgn">Pengajuan Potong Dari Gaji</button>
-                            </li>
-                            <li class="nav-item" role="presentation" style="margin-left :15px;">
-                                <button type="button" id="add-btn-manual" class="nav-link active btn-sgn">Pengajuan Transfer</button>
-                            </li>
+                            @if ($role == 'anggota' || $role == 'bendahara koperasi' || $role == 'superadmin')
+                                @if ($role == 'anggota')
+                                    <li class="nav-item" role="presentation">
+                                        <button type="button" id="add-btn" class="nav-link active btn-sgn">Pengajuan Potong Dari Gaji</button>
+                                    </li>
+                                @endif
+                                <li class="nav-item" role="presentation" style="margin-left :15px;">
+                                    <button type="button" id="add-btn-manual" class="nav-link active btn-sgn">Pengajuan Transfer/Tunai</button>
+                                </li>
                             @endif
                         </ul>
                     </div>
@@ -211,6 +213,14 @@
                     <div class="modal-body">
                         <div class="basic-form">
                                 
+                            <div class="mb-3 row divnabung">
+                                <label class="col-sm-3 col-form-label">Anggota </label>
+                                <div class="col-sm-9">
+                                    <select id="form-anggota"class="form-control" >
+                                        <option value="">Pilih Anggota</option>
+                                    </select>
+                                </div>
+                            </div>
                             <div class="mb-3 row">
                                 <label class="col-sm-3 col-form-label">Simpanan Sukarela </label>
                                 <div class="col-sm-9">
