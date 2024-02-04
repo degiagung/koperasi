@@ -688,7 +688,14 @@ class JsonDataController extends Controller
                             lp.id as idlimit,
                             cast(lp.amount as decimal(18,0)) as limit_pinjaman,
                             cast(us.gaji as decimal(18,0)) as gaji,
-                            PERIOD_DIFF(".date('Ym').",DATE_FORMAT(us.tgl_dinas, '%Y%m')) * cast(us.gaji as decimal(18,0)) as totalgaji
+                            PERIOD_DIFF(". DB::select("
+                            select 
+                                case 
+                                    when a.date is null then DATE_FORMAT(sysdate(),'%Y%m')
+                                    else DATE_FORMAT(a.date,'%Y%m')
+                                end as dates
+                            from datenow a
+                        ")[0]->dates.",DATE_FORMAT(us.tgl_dinas, '%Y%m')) * cast(us.gaji as decimal(18,0)) as totalgaji
                         ";
                         
                         $table = '
@@ -837,21 +844,77 @@ class JsonDataController extends Controller
                                     ELSE 'AKTIF'
                                 END
                             END keanggotaan,
-                            PERIOD_DIFF(".date('Ym').",DATE_FORMAT(us.tgl_dinas, '%Y%m')) as los,
+                            PERIOD_DIFF(". DB::select("
+                            select 
+                                case 
+                                    when a.date is null then DATE_FORMAT(sysdate(),'%Y%m')
+                                    else DATE_FORMAT(a.date,'%Y%m')
+                                end as dates
+                            from datenow a
+                        ")[0]->dates.",DATE_FORMAT(us.tgl_dinas, '%Y%m')) as los,
                             
-                            cast(cast(coalesce(( 50000 * COALESCE(PERIOD_DIFF(".date('Ym').",DATE_FORMAT(us.tgl_dinas, '%Y%m')),0) / COALESCE(PERIOD_DIFF(".date('Ym').",DATE_FORMAT(us.tgl_dinas, '%Y%m')),0)),0)as decimal(18,2)) as decimal(18,2)) as simpananpokok,
+                            cast(cast(coalesce(( 50000 * COALESCE(PERIOD_DIFF(". DB::select("
+                            select 
+                                case 
+                                    when a.date is null then DATE_FORMAT(sysdate(),'%Y%m')
+                                    else DATE_FORMAT(a.date,'%Y%m')
+                                end as dates
+                            from datenow a
+                        ")[0]->dates.",DATE_FORMAT(us.tgl_dinas, '%Y%m')),0) / COALESCE(PERIOD_DIFF(". DB::select("
+                            select 
+                                case 
+                                    when a.date is null then DATE_FORMAT(sysdate(),'%Y%m')
+                                    else DATE_FORMAT(a.date,'%Y%m')
+                                end as dates
+                            from datenow a
+                        ")[0]->dates.",DATE_FORMAT(us.tgl_dinas, '%Y%m')),0)),0)as decimal(18,2)) as decimal(18,2)) as simpananpokok,
                             
-                            cast(COALESCE(PERIOD_DIFF(".date('Ym').",DATE_FORMAT(us.tgl_dinas, '%Y%m')),0) * 50000 as decimal(18,2)) as simpananwajib,
+                            cast(COALESCE(PERIOD_DIFF(". DB::select("
+                            select 
+                                case 
+                                    when a.date is null then DATE_FORMAT(sysdate(),'%Y%m')
+                                    else DATE_FORMAT(a.date,'%Y%m')
+                                end as dates
+                            from datenow a
+                        ")[0]->dates.",DATE_FORMAT(us.tgl_dinas, '%Y%m')),0) * 50000 as decimal(18,2)) as simpananwajib,
                             
-                            COALESCE(PERIOD_DIFF(".date('Ym').",DATE_FORMAT(us.tgl_dinas, '%Y%m')),0) jmldinas, 
+                            COALESCE(PERIOD_DIFF(". DB::select("
+                            select 
+                                case 
+                                    when a.date is null then DATE_FORMAT(sysdate(),'%Y%m')
+                                    else DATE_FORMAT(a.date,'%Y%m')
+                                end as dates
+                            from datenow a
+                        ")[0]->dates.",DATE_FORMAT(us.tgl_dinas, '%Y%m')),0) jmldinas, 
                             coalesce(sum(su.amount),0.00)+coalesce(sum(ss.amount),0.00) as sukarela,
 
                             (
-                                cast(cast(coalesce(( 50000 * COALESCE(PERIOD_DIFF(".date('Ym').",DATE_FORMAT(us.tgl_dinas, '%Y%m')),0) / COALESCE(PERIOD_DIFF(".date('Ym').",DATE_FORMAT(us.tgl_dinas, '%Y%m')),0)),0)as decimal(18,2)) as decimal(18,2))
+                                cast(cast(coalesce(( 50000 * COALESCE(PERIOD_DIFF(". DB::select("
+                            select 
+                                case 
+                                    when a.date is null then DATE_FORMAT(sysdate(),'%Y%m')
+                                    else DATE_FORMAT(a.date,'%Y%m')
+                                end as dates
+                            from datenow a
+                        ")[0]->dates.",DATE_FORMAT(us.tgl_dinas, '%Y%m')),0) / COALESCE(PERIOD_DIFF(". DB::select("
+                            select 
+                                case 
+                                    when a.date is null then DATE_FORMAT(sysdate(),'%Y%m')
+                                    else DATE_FORMAT(a.date,'%Y%m')
+                                end as dates
+                            from datenow a
+                        ")[0]->dates.",DATE_FORMAT(us.tgl_dinas, '%Y%m')),0)),0)as decimal(18,2)) as decimal(18,2))
                             )
                             +
                             (
-                                COALESCE(PERIOD_DIFF(".date('Ym').",DATE_FORMAT(us.tgl_dinas, '%Y%m')),0) * 50000
+                                COALESCE(PERIOD_DIFF(". DB::select("
+                            select 
+                                case 
+                                    when a.date is null then DATE_FORMAT(sysdate(),'%Y%m')
+                                    else DATE_FORMAT(a.date,'%Y%m')
+                                end as dates
+                            from datenow a
+                        ")[0]->dates.",DATE_FORMAT(us.tgl_dinas, '%Y%m')),0) * 50000
                             )
                             +
                             coalesce(sum(su.amount),0.00)
@@ -860,11 +923,32 @@ class JsonDataController extends Controller
                             as total,
                             coalesce(sum(st.amount),0) penarikan,
                             cast((
-                                cast(coalesce(( 50000 * COALESCE(PERIOD_DIFF(".date('Ym').",DATE_FORMAT(us.tgl_dinas, '%Y%m')),0) / COALESCE(PERIOD_DIFF(".date('Ym').",DATE_FORMAT(us.tgl_dinas, '%Y%m')),0)),0)as decimal(18,2))
+                                cast(coalesce(( 50000 * COALESCE(PERIOD_DIFF(". DB::select("
+                            select 
+                                case 
+                                    when a.date is null then DATE_FORMAT(sysdate(),'%Y%m')
+                                    else DATE_FORMAT(a.date,'%Y%m')
+                                end as dates
+                            from datenow a
+                        ")[0]->dates.",DATE_FORMAT(us.tgl_dinas, '%Y%m')),0) / COALESCE(PERIOD_DIFF(". DB::select("
+                            select 
+                                case 
+                                    when a.date is null then DATE_FORMAT(sysdate(),'%Y%m')
+                                    else DATE_FORMAT(a.date,'%Y%m')
+                                end as dates
+                            from datenow a
+                        ")[0]->dates.",DATE_FORMAT(us.tgl_dinas, '%Y%m')),0)),0)as decimal(18,2))
                             )
                             +
                             (
-                                COALESCE(PERIOD_DIFF(".date('Ym').",DATE_FORMAT(us.tgl_dinas, '%Y%m')),0) * 50000
+                                COALESCE(PERIOD_DIFF(". DB::select("
+                            select 
+                                case 
+                                    when a.date is null then DATE_FORMAT(sysdate(),'%Y%m')
+                                    else DATE_FORMAT(a.date,'%Y%m')
+                                end as dates
+                            from datenow a
+                        ")[0]->dates.",DATE_FORMAT(us.tgl_dinas, '%Y%m')),0) * 50000
                             )
                             +
                             coalesce(sum(su.amount),0.00)
@@ -884,7 +968,14 @@ class JsonDataController extends Controller
                                         user_id,
                                         CASE
                                             WHEN DATE_ADD(tgl_awal, INTERVAL durasi MONTH) >= CURRENT_DATE() THEN 
-                                                amount * COALESCE(PERIOD_DIFF(".date('Ym').",
+                                                amount * COALESCE(PERIOD_DIFF(". DB::select("
+                            select 
+                                case 
+                                    when a.date is null then DATE_FORMAT(sysdate(),'%Y%m')
+                                    else DATE_FORMAT(a.date,'%Y%m')
+                                end as dates
+                            from datenow a
+                        ")[0]->dates.",
                                                 DATE_FORMAT(tgl_awal, '%Y%m')),0) 
                                             ELSE 
                                                 amount * durasi
@@ -1034,30 +1125,79 @@ class JsonDataController extends Controller
                             lp.amount as limitpinjaman,
                             pj.id as idpinjam,
                             COALESCE(pj.amount,0) as pinjaman,
-                            PERIOD_DIFF(".date('Ym').",DATE_FORMAT(pj.tgl_approve, '%Y%m')) as totaltenor,
+                            PERIOD_DIFF(". DB::select("
+                            select 
+                                case 
+                                    when a.date is null then DATE_FORMAT(sysdate(),'%Y%m')
+                                    else DATE_FORMAT(a.date,'%Y%m')
+                                end as dates
+                            from datenow a
+                        ")[0]->dates.",DATE_FORMAT(pj.tgl_approve, '%Y%m')) as totaltenor,
 
                             cast(COALESCE(pj.amount,0) + COALESCE(pj.amount,0)*0.02 as decimal(18,2)) as pinjamanbunga,
                             cast((COALESCE(pj.amount,0) + COALESCE(pj.amount,0)*0.02) / pj.tenor as decimal(18,2)) as totalbayarperbulan1,
-                            cast(((COALESCE(pj.amount,0) + COALESCE(pj.amount,0)*0.02) / pj.tenor) * COALESCE(PERIOD_DIFF(".date('Ym').",DATE_FORMAT(pj.tgl_approve, '%Y%m')),0) as decimal(18,2)) as totalbayar1,
+                            cast(((COALESCE(pj.amount,0) + COALESCE(pj.amount,0)*0.02) / pj.tenor) * COALESCE(PERIOD_DIFF(". DB::select("
+                            select 
+                                case 
+                                    when a.date is null then DATE_FORMAT(sysdate(),'%Y%m')
+                                    else DATE_FORMAT(a.date,'%Y%m')
+                                end as dates
+                            from datenow a
+                        ")[0]->dates.",DATE_FORMAT(pj.tgl_approve, '%Y%m')),0) as decimal(18,2)) as totalbayar1,
                             cast(
                                 (COALESCE(pj.amount,0) + COALESCE(pj.amount,0)*0.02)
                                 -
-                                ((COALESCE(pj.amount,0) + COALESCE(pj.amount,0)*0.02) / pj.tenor) * COALESCE(PERIOD_DIFF(".date('Ym').",DATE_FORMAT(pj.tgl_approve, '%Y%m')),0) as decimal(18,2)
+                                ((COALESCE(pj.amount,0) + COALESCE(pj.amount,0)*0.02) / pj.tenor) * COALESCE(PERIOD_DIFF(". DB::select("
+                            select 
+                                case 
+                                    when a.date is null then DATE_FORMAT(sysdate(),'%Y%m')
+                                    else DATE_FORMAT(a.date,'%Y%m')
+                                end as dates
+                            from datenow a
+                        ")[0]->dates.",DATE_FORMAT(pj.tgl_approve, '%Y%m')),0) as decimal(18,2)
                             ) sisapinjaman1,
 
                             cast(COALESCE(pj.amount,0) + COALESCE(pj.amount,0)*0.02*pj.tenor as decimal(18,2)) as pinjaman2persen,
                             cast((COALESCE(pj.amount,0) + COALESCE(pj.amount,0)*0.02*pj.tenor) / pj.tenor as decimal(18,2)) totalbayarperbulan,
                             cast((COALESCE(pj.amount,0) + COALESCE(pj.amount,0)*0.02*pj.tenor) / pj.tenor * 
-                            PERIOD_DIFF(".date('Ym').",DATE_FORMAT(pj.tgl_approve, '%Y%m'))
+                            PERIOD_DIFF(". DB::select("
+                            select 
+                                case 
+                                    when a.date is null then DATE_FORMAT(sysdate(),'%Y%m')
+                                    else DATE_FORMAT(a.date,'%Y%m')
+                                end as dates
+                            from datenow a
+                        ")[0]->dates.",DATE_FORMAT(pj.tgl_approve, '%Y%m'))
                             as decimal(18,2)) as totalbayar,
-                            COALESCE(pj.amount,0) - cast(COALESCE(pj.amount,0) - COALESCE(pj.amount,0) / pj.tenor  * PERIOD_DIFF(".date('Ym').",DATE_FORMAT(pj.tgl_approve, '%Y%m'))as decimal(18,2)) as sisalimit,
+                            COALESCE(pj.amount,0) - cast(COALESCE(pj.amount,0) - COALESCE(pj.amount,0) / pj.tenor  * PERIOD_DIFF(". DB::select("
+                            select 
+                                case 
+                                    when a.date is null then DATE_FORMAT(sysdate(),'%Y%m')
+                                    else DATE_FORMAT(a.date,'%Y%m')
+                                end as dates
+                            from datenow a
+                        ")[0]->dates.",DATE_FORMAT(pj.tgl_approve, '%Y%m'))as decimal(18,2)) as sisalimit,
                             cast(
                                 (COALESCE(pj.amount,0) + COALESCE(pj.amount,0)*0.02*pj.tenor)
                                 -
                                 (COALESCE(pj.amount,0) + COALESCE(pj.amount,0)*0.02*pj.tenor) / pj.tenor * 
-                                PERIOD_DIFF(".date('Ym').",DATE_FORMAT(pj.tgl_approve, '%Y%m'))
+                                PERIOD_DIFF(". DB::select("
+                            select 
+                                case 
+                                    when a.date is null then DATE_FORMAT(sysdate(),'%Y%m')
+                                    else DATE_FORMAT(a.date,'%Y%m')
+                                end as dates
+                            from datenow a
+                        ")[0]->dates.",DATE_FORMAT(pj.tgl_approve, '%Y%m'))
                             as decimal(18,2)) as sisapinjaman,
-                            pj.tenor - PERIOD_DIFF(".date('Ym').",DATE_FORMAT(pj.tgl_approve, '%Y%m')) as sisatenor,
+                            pj.tenor - PERIOD_DIFF(". DB::select("
+                            select 
+                                case 
+                                    when a.date is null then DATE_FORMAT(sysdate(),'%Y%m')
+                                    else DATE_FORMAT(a.date,'%Y%m')
+                                end as dates
+                            from datenow a
+                        ")[0]->dates.",DATE_FORMAT(pj.tgl_approve, '%Y%m')) as sisatenor,
                             
                             pj.tenor,
                             pj.created_at tglaju,
@@ -1101,11 +1241,25 @@ class JsonDataController extends Controller
                         }
                         if($fstatuspinjam == '1'){
                             $where .= "
-                                 AND (lower(pj.status_pinjaman) = 'lunas' OR COALESCE(pj.tenor,0) = PERIOD_DIFF(".date('Ym').",DATE_FORMAT(us.tgl_dinas, '%Y%m')))
+                                 AND (lower(pj.status_pinjaman) = 'lunas' OR COALESCE(pj.tenor,0) = PERIOD_DIFF(". DB::select("
+                            select 
+                                case 
+                                    when a.date is null then DATE_FORMAT(sysdate(),'%Y%m')
+                                    else DATE_FORMAT(a.date,'%Y%m')
+                                end as dates
+                            from datenow a
+                        ")[0]->dates.",DATE_FORMAT(us.tgl_dinas, '%Y%m')))
                             ";
                         }elseif($fstatuspinjam == '2'){
                             $where .= "
-                                 AND pj.status_pinjaman != 'lunas' AND COALESCE(pj.tenor,0) != PERIOD_DIFF(".date('Ym').",DATE_FORMAT(us.tgl_dinas, '%Y%m'))
+                                 AND pj.status_pinjaman != 'lunas' AND COALESCE(pj.tenor,0) != PERIOD_DIFF(". DB::select("
+                            select 
+                                case 
+                                    when a.date is null then DATE_FORMAT(sysdate(),'%Y%m')
+                                    else DATE_FORMAT(a.date,'%Y%m')
+                                end as dates
+                            from datenow a
+                        ")[0]->dates.",DATE_FORMAT(us.tgl_dinas, '%Y%m'))
                             ";
                         }
 
@@ -1210,24 +1364,66 @@ class JsonDataController extends Controller
                             lp.amount as limitpinjaman,
                             pj.id as idpinjam,
                             COALESCE(pj.amount,0) as pinjaman,
-                            COALESCE(PERIOD_DIFF(".date('Ym').",DATE_FORMAT(pj.tgl_approve, '%Y%m')),0) as totaltenor,
+                            COALESCE(PERIOD_DIFF(". DB::select("
+                            select 
+                                case 
+                                    when a.date is null then DATE_FORMAT(sysdate(),'%Y%m')
+                                    else DATE_FORMAT(a.date,'%Y%m')
+                                end as dates
+                            from datenow a
+                        ")[0]->dates.",DATE_FORMAT(pj.tgl_approve, '%Y%m')),0) as totaltenor,
 
                             cast(COALESCE(pj.amount,0) + COALESCE(pj.amount,0)*0.02 as decimal(18,2)) as pinjamanbunga,
                             cast((COALESCE(pj.amount,0) + COALESCE(pj.amount,0)*0.02) / pj.tenor as decimal(18,2)) as totalbayarperbulan1,
-                            cast(((COALESCE(pj.amount,0) + COALESCE(pj.amount,0)*0.02) / pj.tenor) * COALESCE(PERIOD_DIFF(".date('Ym').",DATE_FORMAT(pj.tgl_approve, '%Y%m')),0) as decimal(18,2)) as totalbayar1,
+                            cast(((COALESCE(pj.amount,0) + COALESCE(pj.amount,0)*0.02) / pj.tenor) * COALESCE(PERIOD_DIFF(". DB::select("
+                            select 
+                                case 
+                                    when a.date is null then DATE_FORMAT(sysdate(),'%Y%m')
+                                    else DATE_FORMAT(a.date,'%Y%m')
+                                end as dates
+                            from datenow a
+                        ")[0]->dates.",DATE_FORMAT(pj.tgl_approve, '%Y%m')),0) as decimal(18,2)) as totalbayar1,
 
                             cast(COALESCE(pj.amount,0) + COALESCE(pj.amount,0)*0.02*pj.tenor as decimal(18,2)) as pinjaman2persen,
                             cast((COALESCE(pj.amount,0) + COALESCE(pj.amount,0)*0.02*pj.tenor) / pj.tenor as decimal(18,2)) totalbayarperbulan,
                             cast((COALESCE(pj.amount,0) + COALESCE(pj.amount,0)*0.02*pj.tenor) / pj.tenor * 
-                            COALESCE(PERIOD_DIFF(".date('Ym').",DATE_FORMAT(pj.tgl_approve, '%Y%m')),0)
+                            COALESCE(PERIOD_DIFF(". DB::select("
+                            select 
+                                case 
+                                    when a.date is null then DATE_FORMAT(sysdate(),'%Y%m')
+                                    else DATE_FORMAT(a.date,'%Y%m')
+                                end as dates
+                            from datenow a
+                        ")[0]->dates.",DATE_FORMAT(pj.tgl_approve, '%Y%m')),0)
                             as decimal(18,2)) as totalbayar,
-                            cast(COALESCE(lp.amount,0) - COALESCE(pj.amount,0) + (COALESCE(pj.amount,0)/pj.tenor*COALESCE(PERIOD_DIFF(".date('Ym').",DATE_FORMAT(pj.tgl_approve, '%Y%m')),0)) as decimal(18,2)) as sisalimit,
+                            cast(COALESCE(lp.amount,0) - COALESCE(pj.amount,0) + (COALESCE(pj.amount,0)/pj.tenor*COALESCE(PERIOD_DIFF(". DB::select("
+                            select 
+                                case 
+                                    when a.date is null then DATE_FORMAT(sysdate(),'%Y%m')
+                                    else DATE_FORMAT(a.date,'%Y%m')
+                                end as dates
+                            from datenow a
+                        ")[0]->dates.",DATE_FORMAT(pj.tgl_approve, '%Y%m')),0)) as decimal(18,2)) as sisalimit,
                             cast(
                                 (COALESCE(pj.amount,0) + COALESCE(pj.amount,0)*0.02 )
                                 -
-                                ((COALESCE(pj.amount,0) + COALESCE(pj.amount,0)*0.02) / pj.tenor) * COALESCE(PERIOD_DIFF(".date('Ym').",DATE_FORMAT(pj.tgl_approve, '%Y%m')),0)
+                                ((COALESCE(pj.amount,0) + COALESCE(pj.amount,0)*0.02) / pj.tenor) * COALESCE(PERIOD_DIFF(". DB::select("
+                            select 
+                                case 
+                                    when a.date is null then DATE_FORMAT(sysdate(),'%Y%m')
+                                    else DATE_FORMAT(a.date,'%Y%m')
+                                end as dates
+                            from datenow a
+                        ")[0]->dates.",DATE_FORMAT(pj.tgl_approve, '%Y%m')),0)
                             as decimal(18,2)) as sisapinjaman,
-                            pj.tenor - COALESCE(PERIOD_DIFF(".date('Ym').",DATE_FORMAT(pj.tgl_approve, '%Y%m')),0) as sisatenor,
+                            pj.tenor - COALESCE(PERIOD_DIFF(". DB::select("
+                            select 
+                                case 
+                                    when a.date is null then DATE_FORMAT(sysdate(),'%Y%m')
+                                    else DATE_FORMAT(a.date,'%Y%m')
+                                end as dates
+                            from datenow a
+                        ")[0]->dates.",DATE_FORMAT(pj.tgl_approve, '%Y%m')),0) as sisatenor,
                             pj.tenor,
                             pj.status,
                             pj.jenis,
@@ -1397,20 +1593,69 @@ class JsonDataController extends Controller
                                     ELSE 'AKTIF'
                                 END
                             END keanggotaan,
-                            COALESCE(PERIOD_DIFF(".date('Ym').",DATE_FORMAT(us.tgl_dinas, '%Y%m')),0) jmldinas,
-                            cast(coalesce(( 50000 * COALESCE(PERIOD_DIFF(".date('Ym').",DATE_FORMAT(us.tgl_dinas, '%Y%m')),0) / COALESCE(PERIOD_DIFF(".date('Ym').",DATE_FORMAT(us.tgl_dinas, '%Y%m')),0)),0)as decimal(18,2))
+                            COALESCE(PERIOD_DIFF(". DB::select("
+                            select 
+                                case 
+                                    when a.date is null then DATE_FORMAT(sysdate(),'%Y%m')
+                                    else DATE_FORMAT(a.date,'%Y%m')
+                                end as dates
+                            from datenow a
+                        ")[0]->dates.",DATE_FORMAT(us.tgl_dinas, '%Y%m')),0) jmldinas,
+                            cast(coalesce(( 50000 * COALESCE(PERIOD_DIFF(". DB::select("
+                            select 
+                                case 
+                                    when a.date is null then DATE_FORMAT(sysdate(),'%Y%m')
+                                    else DATE_FORMAT(a.date,'%Y%m')
+                                end as dates
+                            from datenow a
+                        ")[0]->dates.",DATE_FORMAT(us.tgl_dinas, '%Y%m')),0) / COALESCE(PERIOD_DIFF(". DB::select("
+                            select 
+                                case 
+                                    when a.date is null then DATE_FORMAT(sysdate(),'%Y%m')
+                                    else DATE_FORMAT(a.date,'%Y%m')
+                                end as dates
+                            from datenow a
+                        ")[0]->dates.",DATE_FORMAT(us.tgl_dinas, '%Y%m')),0)),0)as decimal(18,2))
                             +
-                            (50000 * COALESCE(PERIOD_DIFF(".date('Ym').",DATE_FORMAT(us.tgl_dinas, '%Y%m')),0))
+                            (50000 * COALESCE(PERIOD_DIFF(". DB::select("
+                            select 
+                                case 
+                                    when a.date is null then DATE_FORMAT(sysdate(),'%Y%m')
+                                    else DATE_FORMAT(a.date,'%Y%m')
+                                end as dates
+                            from datenow a
+                        ")[0]->dates.",DATE_FORMAT(us.tgl_dinas, '%Y%m')),0))
                             + 
                             coalesce(sum(su.amount),0.00)
                             as sukarela,
 
                             (
-                                cast(cast(coalesce(( 50000 * COALESCE(PERIOD_DIFF(".date('Ym').",DATE_FORMAT(us.tgl_dinas, '%Y%m')),0) / COALESCE(PERIOD_DIFF(".date('Ym').",DATE_FORMAT(us.tgl_dinas, '%Y%m')),0)),0)as decimal(18,2)) as decimal(18,2))
+                                cast(cast(coalesce(( 50000 * COALESCE(PERIOD_DIFF(". DB::select("
+                            select 
+                                case 
+                                    when a.date is null then DATE_FORMAT(sysdate(),'%Y%m')
+                                    else DATE_FORMAT(a.date,'%Y%m')
+                                end as dates
+                            from datenow a
+                        ")[0]->dates.",DATE_FORMAT(us.tgl_dinas, '%Y%m')),0) / COALESCE(PERIOD_DIFF(". DB::select("
+                            select 
+                                case 
+                                    when a.date is null then DATE_FORMAT(sysdate(),'%Y%m')
+                                    else DATE_FORMAT(a.date,'%Y%m')
+                                end as dates
+                            from datenow a
+                        ")[0]->dates.",DATE_FORMAT(us.tgl_dinas, '%Y%m')),0)),0)as decimal(18,2)) as decimal(18,2))
                             )
                             +
                             (
-                                COALESCE(PERIOD_DIFF(".date('Ym').",DATE_FORMAT(us.tgl_dinas, '%Y%m')),0) * 50000
+                                COALESCE(PERIOD_DIFF(". DB::select("
+                            select 
+                                case 
+                                    when a.date is null then DATE_FORMAT(sysdate(),'%Y%m')
+                                    else DATE_FORMAT(a.date,'%Y%m')
+                                end as dates
+                            from datenow a
+                        ")[0]->dates.",DATE_FORMAT(us.tgl_dinas, '%Y%m')),0) * 50000
                             )
                             +
                             coalesce(sum(su.amount),0.00)
@@ -1420,11 +1665,32 @@ class JsonDataController extends Controller
 
                             coalesce(sum(st.amount),0) tariksimpanan,
                             cast((
-                                cast(coalesce(( 50000 * COALESCE(PERIOD_DIFF(".date('Ym').",DATE_FORMAT(us.tgl_dinas, '%Y%m')),0) / COALESCE(PERIOD_DIFF(".date('Ym').",DATE_FORMAT(us.tgl_dinas, '%Y%m')),0)),0)as decimal(18,2))
+                                cast(coalesce(( 50000 * COALESCE(PERIOD_DIFF(". DB::select("
+                            select 
+                                case 
+                                    when a.date is null then DATE_FORMAT(sysdate(),'%Y%m')
+                                    else DATE_FORMAT(a.date,'%Y%m')
+                                end as dates
+                            from datenow a
+                        ")[0]->dates.",DATE_FORMAT(us.tgl_dinas, '%Y%m')),0) / COALESCE(PERIOD_DIFF(". DB::select("
+                            select 
+                                case 
+                                    when a.date is null then DATE_FORMAT(sysdate(),'%Y%m')
+                                    else DATE_FORMAT(a.date,'%Y%m')
+                                end as dates
+                            from datenow a
+                        ")[0]->dates.",DATE_FORMAT(us.tgl_dinas, '%Y%m')),0)),0)as decimal(18,2))
                             )
                             +
                             (
-                                COALESCE(PERIOD_DIFF(".date('Ym').",DATE_FORMAT(us.tgl_dinas, '%Y%m')),0) * 50000
+                                COALESCE(PERIOD_DIFF(". DB::select("
+                            select 
+                                case 
+                                    when a.date is null then DATE_FORMAT(sysdate(),'%Y%m')
+                                    else DATE_FORMAT(a.date,'%Y%m')
+                                end as dates
+                            from datenow a
+                        ")[0]->dates.",DATE_FORMAT(us.tgl_dinas, '%Y%m')),0) * 50000
                             )
                             +
                             coalesce(sum(su.amount),0.00) 
@@ -1434,8 +1700,22 @@ class JsonDataController extends Controller
                             cast(coalesce(sum(st.amount),0) as decimal(18,2))
                             as decimal(18,2) ) as sisasimpanan,
                             pj.amount pinjaman,
-                            cast(((COALESCE(pj1.amount,0) + COALESCE(pj1.amount,0)*0.02) / pj1.tenor) * COALESCE(PERIOD_DIFF(".date('Ym').",DATE_FORMAT(pj1.tgl_approve, '%Y%m')),0) as decimal(18,2)) as totalbayar,
-                            cast(pj1.amount - ((COALESCE(pj1.amount,0) + COALESCE(pj1.amount,0)*0.02) / pj1.tenor) * COALESCE(PERIOD_DIFF(".date('Ym').",DATE_FORMAT(pj1.tgl_approve, '%Y%m')),0) as decimal(18,2)) as sisapinjaman
+                            cast(((COALESCE(pj1.amount,0) + COALESCE(pj1.amount,0)*0.02) / pj1.tenor) * COALESCE(PERIOD_DIFF(". DB::select("
+                            select 
+                                case 
+                                    when a.date is null then DATE_FORMAT(sysdate(),'%Y%m')
+                                    else DATE_FORMAT(a.date,'%Y%m')
+                                end as dates
+                            from datenow a
+                        ")[0]->dates.",DATE_FORMAT(pj1.tgl_approve, '%Y%m')),0) as decimal(18,2)) as totalbayar,
+                            cast(pj1.amount - ((COALESCE(pj1.amount,0) + COALESCE(pj1.amount,0)*0.02) / pj1.tenor) * COALESCE(PERIOD_DIFF(". DB::select("
+                            select 
+                                case 
+                                    when a.date is null then DATE_FORMAT(sysdate(),'%Y%m')
+                                    else DATE_FORMAT(a.date,'%Y%m')
+                                end as dates
+                            from datenow a
+                        ")[0]->dates.",DATE_FORMAT(pj1.tgl_approve, '%Y%m')),0) as decimal(18,2)) as sisapinjaman
 
                         ";
                         
@@ -1450,13 +1730,27 @@ class JsonDataController extends Controller
                                 where status = 'approve' $wherefdate
                                 group by user_id
                             ) pj ON pj.user_id = us.id 
-                            LEFT JOIN pinjaman pj1 ON pj1.user_id = us.id AND pj1.status = 'approve' and pj1.status_pinjaman != 'lunas' and COALESCE(PERIOD_DIFF(".date('Ym').",DATE_FORMAT(pj1.tgl_approve, '%Y%m')),0) < pj1.tenor $wherefdate1
+                            LEFT JOIN pinjaman pj1 ON pj1.user_id = us.id AND pj1.status = 'approve' and pj1.status_pinjaman != 'lunas' and COALESCE(PERIOD_DIFF(". DB::select("
+                            select 
+                                case 
+                                    when a.date is null then DATE_FORMAT(sysdate(),'%Y%m')
+                                    else DATE_FORMAT(a.date,'%Y%m')
+                                end as dates
+                            from datenow a
+                        ")[0]->dates.",DATE_FORMAT(pj1.tgl_approve, '%Y%m')),0) < pj1.tenor $wherefdate1
                             LEFT JOIN (
                                     select 
                                         user_id,
                                         CASE
                                             WHEN DATE_ADD(tgl_awal, INTERVAL durasi MONTH) >= CURRENT_DATE() THEN 
-                                                amount * COALESCE(PERIOD_DIFF(".date('Ym').",
+                                                amount * COALESCE(PERIOD_DIFF(". DB::select("
+                            select 
+                                case 
+                                    when a.date is null then DATE_FORMAT(sysdate(),'%Y%m')
+                                    else DATE_FORMAT(a.date,'%Y%m')
+                                end as dates
+                            from datenow a
+                        ")[0]->dates.",
                                                 DATE_FORMAT(tgl_awal, '%Y%m')),0) 
                                             ELSE 
                                                 amount * durasi
@@ -1501,11 +1795,25 @@ class JsonDataController extends Controller
                         }
                         if($fstatuspinjam == '1'){
                             $where .= "
-                                 AND (lower(pj.status_pinjaman) = 'lunas' OR COALESCE(pj.tenor,0) = PERIOD_DIFF(".date('Ym').",DATE_FORMAT(us.tgl_dinas, '%Y%m')))
+                                 AND (lower(pj.status_pinjaman) = 'lunas' OR COALESCE(pj.tenor,0) = PERIOD_DIFF(". DB::select("
+                            select 
+                                case 
+                                    when a.date is null then DATE_FORMAT(sysdate(),'%Y%m')
+                                    else DATE_FORMAT(a.date,'%Y%m')
+                                end as dates
+                            from datenow a
+                        ")[0]->dates.",DATE_FORMAT(us.tgl_dinas, '%Y%m')))
                             ";
                         }elseif($fstatuspinjam == '2'){
                             $where .= "
-                                 AND pj.status_pinjaman != 'lunas' AND COALESCE(pj.tenor,0) != PERIOD_DIFF(".date('Ym').",DATE_FORMAT(us.tgl_dinas, '%Y%m'))
+                                 AND pj.status_pinjaman != 'lunas' AND COALESCE(pj.tenor,0) != PERIOD_DIFF(". DB::select("
+                            select 
+                                case 
+                                    when a.date is null then DATE_FORMAT(sysdate(),'%Y%m')
+                                    else DATE_FORMAT(a.date,'%Y%m')
+                                end as dates
+                            from datenow a
+                        ")[0]->dates.",DATE_FORMAT(us.tgl_dinas, '%Y%m'))
                             ";
                         }
 
@@ -1783,10 +2091,24 @@ class JsonDataController extends Controller
                         $status = [];
                         $userid= $MasterClass->getSession('user_id') ;
                         
-                        $select = "COALESCE(PERIOD_DIFF(".date('Ym').",DATE_FORMAT(us.tgl_dinas, '%Y%m')),0) jmldinas,
+                        $select = "COALESCE(PERIOD_DIFF(". DB::select("
+                            select 
+                                case 
+                                    when a.date is null then DATE_FORMAT(sysdate(),'%Y%m')
+                                    else DATE_FORMAT(a.date,'%Y%m')
+                                end as dates
+                            from datenow a
+                        ")[0]->dates.",DATE_FORMAT(us.tgl_dinas, '%Y%m')),0) jmldinas,
                                 cast(
                                     
-                                    (50000 * COALESCE(PERIOD_DIFF(".date('Ym').",DATE_FORMAT(us.tgl_dinas, '%Y%m')),0))
+                                    (50000 * COALESCE(PERIOD_DIFF(". DB::select("
+                            select 
+                                case 
+                                    when a.date is null then DATE_FORMAT(sysdate(),'%Y%m')
+                                    else DATE_FORMAT(a.date,'%Y%m')
+                                end as dates
+                            from datenow a
+                        ")[0]->dates.",DATE_FORMAT(us.tgl_dinas, '%Y%m')),0))
                                     + 
                                     coalesce(sum(su.amount),0.00)
                                     +
@@ -1802,7 +2124,14 @@ class JsonDataController extends Controller
                                         tgl_awal,
                                         CASE
                                             WHEN DATE_ADD(tgl_awal, INTERVAL durasi MONTH) >= CURRENT_DATE() THEN 
-                                                amount * COALESCE(PERIOD_DIFF(".date('Ym').",
+                                                amount * COALESCE(PERIOD_DIFF(". DB::select("
+                            select 
+                                case 
+                                    when a.date is null then DATE_FORMAT(sysdate(),'%Y%m')
+                                    else DATE_FORMAT(a.date,'%Y%m')
+                                end as dates
+                            from datenow a
+                        ")[0]->dates.",
                                                 DATE_FORMAT(tgl_awal, '%Y%m')),0) 
                                             ELSE 
                                                 amount * durasi
@@ -1936,9 +2265,30 @@ class JsonDataController extends Controller
                             sm.id as idpenarikan,
                             sm.status,
                             cast(
-                            cast(coalesce(( 50000 * COALESCE(PERIOD_DIFF(".date('Ym').",DATE_FORMAT(us.tgl_dinas, '%Y%m')),0) / COALESCE(PERIOD_DIFF(".date('Ym').",DATE_FORMAT(us.tgl_dinas, '%Y%m')),0)),0)as decimal(18,2))
+                            cast(coalesce(( 50000 * COALESCE(PERIOD_DIFF(". DB::select("
+                            select 
+                                case 
+                                    when a.date is null then DATE_FORMAT(sysdate(),'%Y%m')
+                                    else DATE_FORMAT(a.date,'%Y%m')
+                                end as dates
+                            from datenow a
+                        ")[0]->dates.",DATE_FORMAT(us.tgl_dinas, '%Y%m')),0) / COALESCE(PERIOD_DIFF(". DB::select("
+                            select 
+                                case 
+                                    when a.date is null then DATE_FORMAT(sysdate(),'%Y%m')
+                                    else DATE_FORMAT(a.date,'%Y%m')
+                                end as dates
+                            from datenow a
+                        ")[0]->dates.",DATE_FORMAT(us.tgl_dinas, '%Y%m')),0)),0)as decimal(18,2))
                             +
-                            (50000 * COALESCE(PERIOD_DIFF(".date('Ym').",DATE_FORMAT(us.tgl_dinas, '%Y%m')),0))
+                            (50000 * COALESCE(PERIOD_DIFF(". DB::select("
+                            select 
+                                case 
+                                    when a.date is null then DATE_FORMAT(sysdate(),'%Y%m')
+                                    else DATE_FORMAT(a.date,'%Y%m')
+                                end as dates
+                            from datenow a
+                        ")[0]->dates.",DATE_FORMAT(us.tgl_dinas, '%Y%m')),0))
                             + 
                             coalesce(sum(su.amount),0.00)
                             +
@@ -1959,7 +2309,14 @@ class JsonDataController extends Controller
                                         user_id,
                                         CASE
                                             WHEN DATE_ADD(tgl_awal, INTERVAL durasi MONTH) >= CURRENT_DATE() THEN 
-                                                amount * COALESCE(PERIOD_DIFF(".date('Ym').",
+                                                amount * COALESCE(PERIOD_DIFF(". DB::select("
+                            select 
+                                case 
+                                    when a.date is null then DATE_FORMAT(sysdate(),'%Y%m')
+                                    else DATE_FORMAT(a.date,'%Y%m')
+                                end as dates
+                            from datenow a
+                        ")[0]->dates.",
                                                 DATE_FORMAT(tgl_awal, '%Y%m')),0) 
                                             ELSE 
                                                 amount * durasi
@@ -2456,7 +2813,14 @@ class JsonDataController extends Controller
                                 tgl_approve tgl_transaksi,
                                 amount nominal,
                                 'sukarela', 
-                                PERIOD_DIFF(".date('Ym').",DATE_FORMAT(tgl_approve, '%Y%m')) as periode
+                                PERIOD_DIFF(". DB::select("
+                            select 
+                                case 
+                                    when a.date is null then DATE_FORMAT(sysdate(),'%Y%m')
+                                    else DATE_FORMAT(a.date,'%Y%m')
+                                end as dates
+                            from datenow a
+                        ")[0]->dates.",DATE_FORMAT(tgl_approve, '%Y%m')) as periode
                             from 
                                 simpanan_sukarela su 
                             where 
@@ -2547,30 +2911,79 @@ class JsonDataController extends Controller
                             lp.amount as limitpinjaman,
                             pj.id as idpinjam,
                             COALESCE(pj.amount,0) as pinjaman,
-                            PERIOD_DIFF(".date('Ym').",DATE_FORMAT(pj.tgl_approve, '%Y%m')) as totaltenor,
+                            PERIOD_DIFF(". DB::select("
+                            select 
+                                case 
+                                    when a.date is null then DATE_FORMAT(sysdate(),'%Y%m')
+                                    else DATE_FORMAT(a.date,'%Y%m')
+                                end as dates
+                            from datenow a
+                        ")[0]->dates.",DATE_FORMAT(pj.tgl_approve, '%Y%m')) as totaltenor,
 
                             cast(COALESCE(pj.amount,0) + COALESCE(pj.amount,0)*0.02 as decimal(18,2)) as pinjamanbunga,
                             cast((COALESCE(pj.amount,0) + COALESCE(pj.amount,0)*0.02) / pj.tenor as decimal(18,2)) as totalbayarperbulan1,
-                            cast(((COALESCE(pj.amount,0) + COALESCE(pj.amount,0)*0.02) / pj.tenor) * COALESCE(PERIOD_DIFF(".date('Ym').",DATE_FORMAT(pj.tgl_approve, '%Y%m')),0) as decimal(18,2)) as totalbayar1,
+                            cast(((COALESCE(pj.amount,0) + COALESCE(pj.amount,0)*0.02) / pj.tenor) * COALESCE(PERIOD_DIFF(". DB::select("
+                            select 
+                                case 
+                                    when a.date is null then DATE_FORMAT(sysdate(),'%Y%m')
+                                    else DATE_FORMAT(a.date,'%Y%m')
+                                end as dates
+                            from datenow a
+                        ")[0]->dates.",DATE_FORMAT(pj.tgl_approve, '%Y%m')),0) as decimal(18,2)) as totalbayar1,
                             cast(
                                 (COALESCE(pj.amount,0) + COALESCE(pj.amount,0)*0.02)
                                 -
-                                ((COALESCE(pj.amount,0) + COALESCE(pj.amount,0)*0.02) / pj.tenor) * COALESCE(PERIOD_DIFF(".date('Ym').",DATE_FORMAT(pj.tgl_approve, '%Y%m')),0) as decimal(18,2)
+                                ((COALESCE(pj.amount,0) + COALESCE(pj.amount,0)*0.02) / pj.tenor) * COALESCE(PERIOD_DIFF(". DB::select("
+                            select 
+                                case 
+                                    when a.date is null then DATE_FORMAT(sysdate(),'%Y%m')
+                                    else DATE_FORMAT(a.date,'%Y%m')
+                                end as dates
+                            from datenow a
+                        ")[0]->dates.",DATE_FORMAT(pj.tgl_approve, '%Y%m')),0) as decimal(18,2)
                             ) sisapinjaman1,
                             
                             cast(COALESCE(pj.amount,0) + COALESCE(pj.amount,0)*0.02*pj.tenor as decimal(18,2)) as pinjaman2persen,
                             cast((COALESCE(pj.amount,0) + COALESCE(pj.amount,0)*0.02*pj.tenor) / pj.tenor as decimal(18,2)) totalbayarperbulan,
                             cast((COALESCE(pj.amount,0) + COALESCE(pj.amount,0)*0.02*pj.tenor) / pj.tenor * 
-                            PERIOD_DIFF(".date('Ym').",DATE_FORMAT(pj.tgl_approve, '%Y%m'))
+                            PERIOD_DIFF(". DB::select("
+                            select 
+                                case 
+                                    when a.date is null then DATE_FORMAT(sysdate(),'%Y%m')
+                                    else DATE_FORMAT(a.date,'%Y%m')
+                                end as dates
+                            from datenow a
+                        ")[0]->dates.",DATE_FORMAT(pj.tgl_approve, '%Y%m'))
                             as decimal(18,2)) as totalbayar,
-                            COALESCE(pj.amount,0) - cast(COALESCE(pj.amount,0) - COALESCE(pj.amount,0) / pj.tenor  * PERIOD_DIFF(".date('Ym').",DATE_FORMAT(pj.tgl_approve, '%Y%m'))as decimal(18,2)) as sisalimit,
+                            COALESCE(pj.amount,0) - cast(COALESCE(pj.amount,0) - COALESCE(pj.amount,0) / pj.tenor  * PERIOD_DIFF(". DB::select("
+                            select 
+                                case 
+                                    when a.date is null then DATE_FORMAT(sysdate(),'%Y%m')
+                                    else DATE_FORMAT(a.date,'%Y%m')
+                                end as dates
+                            from datenow a
+                        ")[0]->dates.",DATE_FORMAT(pj.tgl_approve, '%Y%m'))as decimal(18,2)) as sisalimit,
                             cast(
                                 (COALESCE(pj.amount,0) + COALESCE(pj.amount,0)*0.02*pj.tenor)
                                 -
                                 (COALESCE(pj.amount,0) + COALESCE(pj.amount,0)*0.02*pj.tenor) / pj.tenor * 
-                                PERIOD_DIFF(".date('Ym').",DATE_FORMAT(pj.tgl_approve, '%Y%m'))
+                                PERIOD_DIFF(". DB::select("
+                            select 
+                                case 
+                                    when a.date is null then DATE_FORMAT(sysdate(),'%Y%m')
+                                    else DATE_FORMAT(a.date,'%Y%m')
+                                end as dates
+                            from datenow a
+                        ")[0]->dates.",DATE_FORMAT(pj.tgl_approve, '%Y%m'))
                             as decimal(18,2)) as sisapinjaman,
-                            pj.tenor - PERIOD_DIFF(".date('Ym').",DATE_FORMAT(pj.tgl_approve, '%Y%m')) as sisatenor,
+                            pj.tenor - PERIOD_DIFF(". DB::select("
+                            select 
+                                case 
+                                    when a.date is null then DATE_FORMAT(sysdate(),'%Y%m')
+                                    else DATE_FORMAT(a.date,'%Y%m')
+                                end as dates
+                            from datenow a
+                        ")[0]->dates.",DATE_FORMAT(pj.tgl_approve, '%Y%m')) as sisatenor,
                             
                             pj.tenor,
                             pj.created_at tglaju,
@@ -2660,7 +3073,14 @@ class JsonDataController extends Controller
                         $status = [];
                         $id     = $MasterClass->getSession('user_id') ;
                         $userid = $MasterClass->getSession('user_id') ;
-                        $saved  = DB::select("SELECT PERIOD_DIFF(".date('Ym').",DATE_FORMAT(tgl_dinas, '%Y%m')) los,a.* FROM users a where id = $id");
+                        $saved  = DB::select("SELECT PERIOD_DIFF(". DB::select("
+                            select 
+                                case 
+                                    when a.date is null then DATE_FORMAT(sysdate(),'%Y%m')
+                                    else DATE_FORMAT(a.date,'%Y%m')
+                                end as dates
+                            from datenow a
+                        ")[0]->dates.",DATE_FORMAT(tgl_dinas, '%Y%m')) los,a.* FROM users a where id = $id");
                         $saved  = $MasterClass->checkErrorModel($saved);
                         
                         $status = $saved;
@@ -2718,7 +3138,14 @@ class JsonDataController extends Controller
                                 *,
                                  CASE
                                     WHEN DATE_ADD(tgl_awal, INTERVAL durasi MONTH) >= CURRENT_DATE() THEN 
-                                        COALESCE(PERIOD_DIFF(".date('Ym').",
+                                        COALESCE(PERIOD_DIFF(". DB::select("
+                            select 
+                                case 
+                                    when a.date is null then DATE_FORMAT(sysdate(),'%Y%m')
+                                    else DATE_FORMAT(a.date,'%Y%m')
+                                end as dates
+                            from datenow a
+                        ")[0]->dates.",
                                         DATE_FORMAT(tgl_awal, '%Y%m')),0) 
                                     ELSE 
                                         durasi
@@ -3273,7 +3700,14 @@ class JsonDataController extends Controller
                         $status = [];
 
                         $cekpengajuan = $MasterClass->selectGlobal(
-                            "*,PERIOD_DIFF(".date('Ym').",DATE_FORMAT(tgl_approve, '%Y%m')) los",
+                            "*,PERIOD_DIFF(". DB::select("
+                            select 
+                                case 
+                                    when a.date is null then DATE_FORMAT(sysdate(),'%Y%m')
+                                    else DATE_FORMAT(a.date,'%Y%m')
+                                end as dates
+                            from datenow a
+                        ")[0]->dates.",DATE_FORMAT(tgl_approve, '%Y%m')) los",
                             'pinjaman',
                             "user_id = $userid order by created_at desc limit 1");
                         if($cekpengajuan['data']){
@@ -3626,13 +4060,24 @@ class JsonDataController extends Controller
                         $now        = date('Y-m-d H:i:s') ;
                         $status = [];
 
-                        // simpanan pokok
-                        // cast(coalesce(( 50000 * COALESCE(PERIOD_DIFF(".date('Ym').",DATE_FORMAT(us.tgl_dinas, '%Y%m')),0) / COALESCE(PERIOD_DIFF(".date('Ym').",DATE_FORMAT(us.tgl_dinas, '%Y%m')),0)),0)as decimal(18,2))
-                        //
-                        $select = "COALESCE(PERIOD_DIFF(".date('Ym').",DATE_FORMAT(us.tgl_dinas, '%Y%m')),0) jmldinas,
+                        $select = "COALESCE(PERIOD_DIFF(". DB::select("
+                            select 
+                                case 
+                                    when a.date is null then DATE_FORMAT(sysdate(),'%Y%m')
+                                    else DATE_FORMAT(a.date,'%Y%m')
+                                end as dates
+                            from datenow a
+                        ")[0]->dates.",DATE_FORMAT(us.tgl_dinas, '%Y%m')),0) jmldinas,
                                 cast(
                                     
-                                    (50000 * COALESCE(PERIOD_DIFF(".date('Ym').",DATE_FORMAT(us.tgl_dinas, '%Y%m')),0))
+                                    (50000 * COALESCE(PERIOD_DIFF(". DB::select("
+                            select 
+                                case 
+                                    when a.date is null then DATE_FORMAT(sysdate(),'%Y%m')
+                                    else DATE_FORMAT(a.date,'%Y%m')
+                                end as dates
+                            from datenow a
+                        ")[0]->dates.",DATE_FORMAT(us.tgl_dinas, '%Y%m')),0))
                                     + 
                                     coalesce(sum(su.amount),0.00)
                                     +
@@ -3648,7 +4093,14 @@ class JsonDataController extends Controller
                                         tgl_awal,
                                         CASE
                                             WHEN DATE_ADD(tgl_awal, INTERVAL durasi MONTH) >= CURRENT_DATE() THEN 
-                                                amount * COALESCE(PERIOD_DIFF(".date('Ym').",
+                                                amount * COALESCE(PERIOD_DIFF(". DB::select("
+                            select 
+                                case 
+                                    when a.date is null then DATE_FORMAT(sysdate(),'%Y%m')
+                                    else DATE_FORMAT(a.date,'%Y%m')
+                                end as dates
+                            from datenow a
+                        ")[0]->dates.",
                                                 DATE_FORMAT(tgl_awal, '%Y%m')),0) 
                                             ELSE 
                                                 amount * durasi
