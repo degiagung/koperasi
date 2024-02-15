@@ -352,11 +352,14 @@ async function buktitarik() {
                         <center>
             `;
             $(".buktidiv").append(content);
-            $("#modal-bukti").modal('show');
         }else{
             if (role == 'bendahara koperasi' || role == 'superadmin') {
                 $("#form-bukti").val('');
                 $("#modal-upload").modal('show');
+            }
+
+            if (role == 'anggota') {
+                $("#modal-bukti").modal('show');
             }
         }
         

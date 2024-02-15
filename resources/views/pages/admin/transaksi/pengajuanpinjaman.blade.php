@@ -52,7 +52,7 @@
                             </div>
                         </div>
                     <hr>
-                    <h5><b style="color:red;">SETELAH PENGAJUAN ,SILAHKAN MENGHUBUNGI PIHAK KOPERASI UNTUK PENANDATANGANAN BERKAS DAN TRANSFER</b></h5>
+                    {{-- <h5><b style="color:red;">SETELAH PENGAJUAN ,SILAHKAN MENGHUBUNGI PIHAK KOPERASI UNTUK PENANDATANGANAN BERKAS DAN TRANSFER</b></h5> --}}
                 </div>
             </div>
         </div><br>
