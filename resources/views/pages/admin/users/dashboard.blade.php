@@ -16,36 +16,36 @@
             <br>
             <div class="col-lg-12">
                  <div class="card-filter">
-                    <label style="font-size:18px;">ANGGOTA</label>
+                    <label style="font-size:18px;"><b>ANGGOTA</b></label>
                     <hr>
                         <div class="row">
 
                             <div class="col-sm-4">
-                                <label>Nama</label>
-                                <input readonly id="name" type="text" class="form-control" >
+                                <label><b>Nama</b></label>
+                                <input readonly id="name" type="text" class="form-control" style="font-weight:bold;" >
 
                             </div>
                             <div class="col-sm-3">
-                                <label>NRP</label>
-                                <input readonly id="nrp" type="text" class="form-control" >
+                                <label><b>NRP</b></label>
+                                <input readonly id="nrp" type="text" class="form-control" style="font-weight:bold;" >
 
                             </div>
                             <div class="col-sm-3">
-                                <label>Pangkat</label>
-                                <input readonly id="pangkat" type="text" class="form-control" >
+                                <label><b>Pangkat</b></label>
+                                <input readonly id="pangkat" type="text" class="form-control" style="font-weight:bold;" >
 
                             </div>
                         </div>
                         <div class="row">
 
                             <div class="col-sm-4">
-                                <label>Tanggal Dinas</label>
-                                <input readonly id="tangggal" type="text" class="form-control" >
+                                <label><b>Tanggal Dinas</b></label>
+                                <input readonly id="tangggal" type="text" class="form-control" style="font-weight:bold;" >
 
                             </div>
                             <div class="col-sm-3">
-                                <label>Lama Berdinasi (Bulan)</label>
-                                <input readonly id="los" type="text" class="form-control" >
+                                <label><b>Lama Berdinasi (Bulan)</b></label>
+                                <input readonly id="los" type="text" class="form-control" style="font-weight:bold;" >
 
                             </div>
                         </div>
