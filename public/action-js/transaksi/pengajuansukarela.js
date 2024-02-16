@@ -426,7 +426,7 @@ async function loadUsers() {
         const res = response.data.map(function (item) {
             return {
                 id: item.id,
-                text: item.name,
+                text: item.anggota,
             };
         });
 

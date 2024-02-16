@@ -222,7 +222,7 @@ class JsonDataController extends Controller
                         
                         DB::beginTransaction();
                 
-                        $saved = DB::select("SELECT a.* FROM users a,users_roles b where a.role_id = b.id and b.role_name like '%anggota%'");
+                        $saved = DB::select("SELECT a.*,concat('NRP.',a.nrp ,' (',a.name,')') anggota FROM users a,users_roles b where a.role_id = b.id and b.role_name like '%anggota%'");
                         $saved = $MasterClass->checkErrorModel($saved);
                         
                         $status = $saved;
