@@ -405,7 +405,18 @@ function detailsukarela() {
                     return meta.row + meta.settings._iDisplayStart + 1;
                 },
             },
-            { data: "jenis" },
+            { visibe:false,class:"notanggota",data: "name",render:function (data,type,row) {
+                if(row.jenis == 'manual'){
+                    if(row.created_by)
+                        return 'tunai'
+                    else
+                        return 'Transfer';
+                }else if(row.jenis == 'potong gaji'){
+                    return 'Potong dari gaji';
+                }else{
+                    return ''
+                }
+            } },
             { render:function (data,type,row) {
                 return "<a class='detail' style='cursor:pointer;'>Rp."+formatRupiah(row.amount)+"</a>";
             } },
