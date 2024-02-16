@@ -886,7 +886,7 @@ class JsonDataController extends Controller
                                 end as dates
                             from datenow a
                         ")[0]->dates.",DATE_FORMAT(us.tgl_dinas, '%Y%m')),0) jmldinas, 
-                            coalesce(sum(su.amount),0.00)+coalesce(sum(ss.amount),0.00) as sukarela,
+                            coalesce(sum(su.amount),0.00)+coalesce(ss.amount,0.00) as sukarela,
 
                             (
                                 cast(cast(coalesce(( 50000 * COALESCE(PERIOD_DIFF(". DB::select("
@@ -919,7 +919,7 @@ class JsonDataController extends Controller
                             +
                             coalesce(sum(su.amount),0.00)
                             +
-                            coalesce(sum(ss.amount),0.00)
+                            coalesce(ss.amount,0.00)
                             as total,
                             coalesce(sum(st.amount),0) penarikan,
                             cast((
@@ -953,11 +953,10 @@ class JsonDataController extends Controller
                             +
                             coalesce(sum(su.amount),0.00)
                             +
-                            coalesce(sum(ss.amount),0.00)
+                            coalesce(ss.amount,0.00)
                             -
                             cast(coalesce(sum(st.amount),0) as decimal(18,2))
-                            as decimal(18,2) ) as saldo,
-                            st.created_at tgl_penarikan
+                            as decimal(18,2) ) as saldo
                         ";
                         
                         $table = "
@@ -1024,7 +1023,7 @@ class JsonDataController extends Controller
                         $where.="
                             GROUP BY 
                                 us.name,us.id,us.nrp,us.tgl_dinas,us.is_active,us.status,
-                                ur.role_name,st.created_at
+                                ur.role_name
                         ";
                         $result = $MasterClass->selectGlobal($select,$table,$where);
                         
@@ -1660,7 +1659,7 @@ class JsonDataController extends Controller
                             +
                             coalesce(sum(su.amount),0.00)
                             +
-                            coalesce(sum(ss.amount),0.00)
+                            coalesce(ss.amount,0.00)
                             as simpanan,
 
                             coalesce(sum(st.amount),0) tariksimpanan,
@@ -1695,7 +1694,7 @@ class JsonDataController extends Controller
                             +
                             coalesce(sum(su.amount),0.00) 
                             +
-                            coalesce(sum(ss.amount),0.00)
+                            coalesce(ss.amount,0.00)
                             -
                             cast(coalesce(sum(st.amount),0) as decimal(18,2))
                             as decimal(18,2) ) as sisasimpanan,
@@ -2112,7 +2111,7 @@ class JsonDataController extends Controller
                                     + 
                                     coalesce(sum(su.amount),0.00)
                                     +
-                                    coalesce(sum(ss.amount),0.00)
+                                    coalesce(ss.amount,0.00)
                                     -
                                     coalesce(sum(st.amount),0) as decimal(18,2)
                                 ) as amount";
@@ -2265,22 +2264,7 @@ class JsonDataController extends Controller
                             sm.id as idpenarikan,
                             sm.status,
                             cast(
-                            cast(coalesce(( 50000 * COALESCE(PERIOD_DIFF(". DB::select("
-                            select 
-                                case 
-                                    when a.date is null then DATE_FORMAT(sysdate(),'%Y%m')
-                                    else DATE_FORMAT(a.date,'%Y%m')
-                                end as dates
-                            from datenow a
-                        ")[0]->dates.",DATE_FORMAT(us.tgl_dinas, '%Y%m')),0) / COALESCE(PERIOD_DIFF(". DB::select("
-                            select 
-                                case 
-                                    when a.date is null then DATE_FORMAT(sysdate(),'%Y%m')
-                                    else DATE_FORMAT(a.date,'%Y%m')
-                                end as dates
-                            from datenow a
-                        ")[0]->dates.",DATE_FORMAT(us.tgl_dinas, '%Y%m')),0)),0)as decimal(18,2))
-                            +
+                            
                             (50000 * COALESCE(PERIOD_DIFF(". DB::select("
                             select 
                                 case 
@@ -2292,7 +2276,7 @@ class JsonDataController extends Controller
                             + 
                             coalesce(sum(su.amount),0.00)
                             +
-                            coalesce(sum(ss.amount),0.00)
+                            coalesce(ss.amount,0.00)
                             as decimal(18,2))
                             as simpanan
                             
@@ -4081,7 +4065,7 @@ class JsonDataController extends Controller
                                     + 
                                     coalesce(sum(su.amount),0.00)
                                     +
-                                    coalesce(sum(ss.amount),0.00)
+                                    coalesce(ss.amount,0.00)
                                     -
                                     coalesce(sum(st.amount),0) as decimal(18,2)
                                 ) as amount";

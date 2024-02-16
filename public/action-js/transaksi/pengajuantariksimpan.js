@@ -104,9 +104,9 @@ function getListData() {
             { render:function (data,type,row) {
                 return formatRupiah(row.jml_pengajuan);
             } },
-            { render:function (data,type,row) {
-                return formatRupiah(row.simpanan - row.jml_pengajuan);
-            } },
+            // { render:function (data,type,row) {
+            //     return formatRupiah(row.simpanan - row.jml_pengajuan);
+            // } },
             { render:function (data,type,row) {
                 return `<a class="bukti" style="cursor:pointer;">Klik Disini</a>`;
             } },

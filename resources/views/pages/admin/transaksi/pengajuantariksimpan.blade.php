@@ -81,7 +81,7 @@
                                         <th>Tanggal Transaksi</th>
                                         {{-- <th>Jumlah Simpanan</th> --}}
                                         <th>Jumlah Pengajuan</th>
-                                        <th>Sisa Simpanan</th>
+                                        {{-- <th>Sisa Simpanan</th> --}}
                                         <th>Bukti</th>
                                     </tr>
                                 </thead>
