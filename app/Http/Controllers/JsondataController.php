@@ -3610,7 +3610,7 @@ class JsonDataController extends Controller
                                     'status_pinjaman' => $data->status,
                                     'updated_at'      => date('Y-m-d H:i:s')
                                 ];
-
+                                dd($data);die;
                                 DB::select("update limit_pinjaman set amount = amount + $data->pinjaman where user_id = ".$MasterClass->getSession('user_id'));
 
                             }

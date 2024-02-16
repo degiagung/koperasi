@@ -153,9 +153,9 @@ function getListData() {
                 .on("click", function () {
                     var tr = $(this).closest("tr");
                     var rowData = dtpr.row(tr).data();
+                    isObject = {};
+                    isObject = rowData ;
                     if((role == 'superadmin' || role == 'bendahara koperasi') && rowData.status == null){
-                        isObject = {};
-                        isObject = rowData ;
                         $("#modal-approval").modal('show');
                     }
                     if(role == 'anggota' && rowData.status == null){
@@ -355,6 +355,7 @@ function approval(){
                     if (response.code == 0) {
                         swal("BERHASIL !", response.message, "success");
                         $("#modal-approval").modal('hide');
+                        $("#modal-batal").modal('hide');
                     } else {
                         sweetAlert("Oops...", response.message, "ERROR");
                     }
@@ -526,6 +527,8 @@ async function buktitf() {
             $("#form-bukti").val('');
             if (role == 'bendahara koperasi' || role == 'superadmin') {
                 $("#modal-upload").modal('show');
+            }else{
+                $("#modal-bukti").modal('show');
             }
             
         }

@@ -37882,3 +37882,8 @@ thead{
 .table>thead>tr>th{
   /* color:#fff; */
 }
+
+th,td,input,label,select,span,h1,h2,h3,h4,h5,h6,button{
+  font-weight: bold !important  ;
+  color: black !important  ;
+}
