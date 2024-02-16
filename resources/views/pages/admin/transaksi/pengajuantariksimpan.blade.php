@@ -79,7 +79,7 @@
                                         <th>keanggotaan</th>
                                         {{-- <th>Tanggal Pengajuan</th> --}}
                                         <th>Tanggal Transaksi</th>
-                                        <th>Jumlah Simpanan</th>
+                                        {{-- <th>Jumlah Simpanan</th> --}}
                                         <th>Jumlah Pengajuan</th>
                                         <th>Sisa Simpanan</th>
                                         <th>Bukti</th>

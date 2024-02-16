@@ -99,7 +99,7 @@ function getListData() {
                 return datetostring2('yymmdd',row.tgl_approve);
             } },
             { render:function (data,type,row) {
-                return formatRupiah(row.simpanan);
+                // return formatRupiah(row.simpanan);
             } },
             { render:function (data,type,row) {
                 return formatRupiah(row.jml_pengajuan);
