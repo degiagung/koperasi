@@ -212,6 +212,10 @@ async function buktipokok(id) {
                 $("#modal-upload").modal('show');
                 isObject['jenis'] = 'pokok';
             }
+
+            if (role == 'anggota'){
+                $("#modal-bukti").modal('show');
+            }
         }
         
     } catch (error) {
