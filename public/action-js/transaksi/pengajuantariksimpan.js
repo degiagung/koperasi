@@ -98,9 +98,9 @@ function getListData() {
             { render:function (data,type,row) {
                 return datetostring2('yymmdd',row.tgl_approve);
             } },
-            { render:function (data,type,row) {
-                // return formatRupiah(row.simpanan);
-            } },
+            // { render:function (data,type,row) {
+            //     return formatRupiah(row.simpanan);
+            // } },
             { render:function (data,type,row) {
                 return formatRupiah(row.jml_pengajuan);
             } },
