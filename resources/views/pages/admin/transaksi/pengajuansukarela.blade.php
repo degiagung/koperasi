@@ -213,7 +213,7 @@
                     <div class="modal-body">
                         <div class="basic-form">
                                 
-                            <div class="mb-3 row divnabung">
+                            <div class="mb-3 row divnabung" style="display:none;">
                                 <label class="col-sm-3 col-form-label">Anggota </label>
                                 <div class="col-sm-9">
                                     <select id="form-anggota"class="form-control" >

@@ -405,6 +405,8 @@ function ajukansukarelamanual() {
 
 if(role == 'superadmin' || role == 'bendahara koperasi'){
     $(".divnabung").show();
+}else{
+    $(".divnabung").hide();
 }
 async function loadUsers() {
     try {
