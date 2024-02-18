@@ -3415,7 +3415,8 @@ class JsonDataController extends Controller
                         $data = json_decode($request->getContent());
                         // dd($data);
                         $now        = date('Y-m-d H:i:s');
-                        $noanggota  = $data->kesatuan.$MasterClass->getIncrement('users')['data'].date('m').date('Y');
+                        $incr       = $MasterClass->getIncrement('users')['data']+1 ;
+                        $noanggota  = $data->kesatuan.$incr.date('m').date('Y');
                         $limit      = str_replace('.','',$data->limit_pinjaman);
                         $gaji       = str_replace('.','',$data->gaji);
                         $status = [];

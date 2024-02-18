@@ -97,6 +97,8 @@ function getListData() {
                 return formatRupiah(row.totalgaji);
             } },
             { data: "handphone" },
+            { data: "norek" },
+            { data: "pemilik_rekening" },
             { data: "keanggotaan" },
             { data: "role_name" },
             { data: "status_name" },
@@ -144,6 +146,8 @@ function editdata(rowData) {
     $("#form-nrp").val(rowData.nrp);
     $("#form-alamat").val(rowData.alamat);
     $("#form-handphone").val(rowData.handphone);
+    $("#form-handphone").val(rowData.norek);
+    $("#form-handphone").val(rowData.pemilik_rekening);
     $("#form-tgldinas").val(rowData.tgl_dinas);
     $("#form-status").val(rowData.status).trigger("change");
     $("#form-role").val(rowData.role_id).trigger("change");
@@ -374,13 +378,13 @@ function saveData() {
         },
         complete: function () {
             $('#table-list').DataTable().ajax.reload();
-            $("#modal-data").modal("hide");
 
         },
         success: function (response) {
             // Handle response sukses
             if (response.code == 0) {
                 swal("Saved !", response.message, "success");
+                $("#modal-data").modal("hide");
                 // Reset form
             } else {
                 sweetAlert("Oops...", response.message, "ERROR");

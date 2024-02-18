@@ -56,7 +56,7 @@
                     </div>
                     <div class="card-body">
                         <div class="table-responsive">
-                            <table id="table-list" class="table table-borderes table-hover datatables">
+                            <table id="table-list" class="table table-bordered table-striped table-hover datatables">
                                 <thead>
                                     <tr>
                                         <th>No</th>
@@ -68,6 +68,8 @@
                                         <th>Limit Pinjaman</th>
                                         <th>Total Gaji</th>
                                         <th>Handphone</th>
+                                        <th>No Rekening</th>
+                                        <th>Nama Pemilik Rekening</th>
                                         <th>Keanggotaan</th>
                                         <th>Role User</th>
                                         <th>Status Login</th>

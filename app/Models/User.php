@@ -29,6 +29,8 @@ class User extends Authenticatable
         'nrp',
         'alamat',
         'handphone',
+        'norek',
+        'pemilik_rekening',
         'tgl_dinas',
         'gaji',
         'kesatuan',
