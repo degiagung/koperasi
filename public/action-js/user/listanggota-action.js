@@ -253,6 +253,20 @@ function checkValidation() {
             return false;
         if (
             validationSwalFailed(
+                (isObject["norek"] = $("#form-norek").val()),
+                "No rekening tidak boleh kosong"
+            )
+        )
+            return false;
+        if (
+            validationSwalFailed(
+                (isObject["pemilik"] = $("#form-pemilik").val()),
+                "Nama Pemilik Rekening tidak boleh kosong"
+            )
+        )
+            return false;
+        if (
+            validationSwalFailed(
                 (isObject["status"] = $("#form-status").val()),
                 "Status Anggota tidak boleh kosong"
             )
@@ -275,6 +289,8 @@ function checkValidation() {
         isObject["handphone"] = $("#form-handphone").val();
         isObject["tgldinas"] = $("#form-tgldinas").val();
         isObject["gaji"] = $("#form-gaji").val();
+        isObject["norek"] = $("#form-norek").val();
+        isObject["pemilik"] = $("#form-pemilik").val();
         isObject["status"] = $("#form-status").val();
         isObject["role_id"] = $("#form-role").val();
     }

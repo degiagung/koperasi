@@ -154,6 +154,18 @@
                                         </div>
                                     </div>
                                     <div class="mb-3 row">
+                                        <label class="col-sm-3 col-form-label">No Rekening</label>
+                                        <div class="col-sm-9">
+                                            <input type="number" id="form-norek" class="form-control">
+                                        </div>
+                                    </div>
+                                    <div class="mb-3 row">
+                                        <label class="col-sm-3 col-form-label">Nama Pemilik</label>
+                                        <div class="col-sm-9">
+                                            <input type="text" id="form-pemilik" class="form-control">
+                                        </div>
+                                    </div>
+                                    <div class="mb-3 row">
                                         <label class="col-sm-3 col-form-label">Keanggotaan</label>
                                         <div class="col-sm-9">
                                             <select id="form-status" name="form-status" class="select2add">

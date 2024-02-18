@@ -3429,6 +3429,8 @@ class JsonDataController extends Controller
                                     'handphone'=> $data->handphone,
                                     'tgl_dinas'=> $data->tgldinas,
                                     'gaji' => $gaji,
+                                    'norek' => $data->$norek,
+                                    'pemilik_rekening' => $data->$pemilik,
                                     'kesatuan' => $data->kesatuan,
                                     'status'=> $data->status,
                                     'role_id' => $data->role_id,
@@ -4586,6 +4588,7 @@ class JsonDataController extends Controller
 
                         DB::beginTransaction();     
                         $id         = $request->id ;
+                        $userid     = $request->userid ;
                         $now        = date('Y-m-d H:i:s');
                         $idlogin    = $MasterClass->getSession('user_id') ;
                         $status = [];
@@ -4604,7 +4607,7 @@ class JsonDataController extends Controller
     
                                 $attrphoto     = [
                                     'file'      => $uploaddir,
-                                    'user_id'   => $idlogin,
+                                    'user_id'   => $userid,
                                     'keterangan'=> 'bukti lunas pinjaman',
                                     'created_at'=> $now,
                                 ];
@@ -4613,7 +4616,7 @@ class JsonDataController extends Controller
                                 $attributes     = [
                                     'status_pinjaman' => 'lunas',
                                     'updated_at'      => $now,
-                                    'bukti'        => $savefoto['data']
+                                    'bukti'           => $savefoto['data']
                                 ];
                                 $where     = [
                                     'id' => $id

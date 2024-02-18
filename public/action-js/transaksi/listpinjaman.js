@@ -223,7 +223,7 @@ function getListDataAnggota() {
                 className: 'btnreload',
                 text: '<i class="bi bi-arrow-clockwise" ></li>',
                 action: function ( e, dt, node, config ) {     
-                    $('#table-list-pinjam').DataTable().ajax.reload();
+                    $('#table-list').DataTable().ajax.reload();
                 }
             },
             { text: ' ', extend: 'excel',  className: 'btndownload iconexcel',  title:'List Pinjaman Periode transaksi('+$('#filter-tahun').val()+''+$('#filter-bulan').val()+')_date'+datenow(new Date), exportOptions: {columns:[':not(.notdown)']}},
@@ -279,7 +279,7 @@ function getListDataAnggota() {
                     if(rowData.status_pinjaman == 'lunas'){
                         buktilunas();
                     }else{
-                        if(role == 'anggota'){
+                        if (role == 'bendahara koperasi' || role == 'superadmin') {
                             $("#modal-payment").modal('show');
                         }
                     }
@@ -364,6 +364,7 @@ function approval(){
     }
     const formData    = new FormData(document.getElementById("formbukti"));
     formData.append('id',isObject.idpinjam);
+    formData.append('userid',isObject.user);
     swal({
         title: "Yakin untuk update LUNAS pinjaman ?",
         type: "warning",
