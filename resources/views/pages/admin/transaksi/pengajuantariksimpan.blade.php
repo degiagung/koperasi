@@ -62,7 +62,7 @@
                         <ul class="nav nav-tabs dzm-tabs" id="myTab-4" role="tablist">
                             @if ($role == 'anggota')
                             <li class="nav-item" role="presentation">
-                                <button type="button" id="add-btn" class="nav-link active btn-sgn">Ajukan</button>
+                                <button type="button" id="add-btn" class="nav-link active btn-sgn">Pengajuan</button>
                             </li>
                             @endif
                         </ul>
@@ -207,7 +207,7 @@
                     </div>
                     <div class="modal-footer">
                         <button type="button" class="btn btn-danger light" data-bs-dismiss="modal">Close</button>
-                        <button type="button" id="ajukan-btn" class="btn btn-primary">Ajukan</button>
+                        <button type="button" id="ajukan-btn" class="btn btn-primary">Pengajuan</button>
                     </div>
                 </div>
             </div>

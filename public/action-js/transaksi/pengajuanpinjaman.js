@@ -113,7 +113,17 @@ function getListData() {
             } },
             { render:function (data,type,row) {
                 // return row.tenor +' BLN & Rp.'+formatRupiah(row.pinjaman)+ '<b>X2%/BLN</b> = Rp.' +formatRupiah(row.pinjaman2persen);
-                return row.tenor +' BLN & Rp.'+formatRupiah(row.pinjaman)+ '<b>X2%</b> = Rp.' +formatRupiah(row.pinjamanbunga);
+                return row.tenor +' BLN';
+    
+            } },
+            { render:function (data,type,row) {
+                // return row.tenor +' BLN & Rp.'+formatRupiah(row.pinjaman)+ '<b>X2%/BLN</b> = Rp.' +formatRupiah(row.pinjaman2persen);
+                return 'Rp.'+formatRupiah(row.pinjaman);
+    
+            } },
+            { render:function (data,type,row) {
+                // return row.tenor +' BLN & Rp.'+formatRupiah(row.pinjaman)+ '<b>X2%/BLN</b> = Rp.' +formatRupiah(row.pinjaman2persen);
+                return 'Rp.' +formatRupiah(row.pinjamanbunga);
     
             } },
             { render:function (data,type,row) {

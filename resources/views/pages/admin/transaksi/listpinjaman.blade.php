@@ -72,7 +72,9 @@
                                             <th>Tanggal Transaksi</th>
                                             <th>keanggotaan</th>
                                             <th>Total Limit</th>
-                                            <th>Pengajuan Tenor & Pinjaman</th>
+                                            <th>Tenor</th>
+                                            <th>Jumlah Pengajuan</th>
+                                            <th>Jumlah Pengajuan X Bunga 2%</th>
                                             <th>Total Pembayaran</th>
                                             <th>Sisa Limit</th>
                                             <th>Sisa Tenor & Pinjaman</th>

@@ -22,7 +22,7 @@
                         <p class="text-danger text-xs mt-2">{{ $message }}</p>
                       @enderror --}}
                     </div>
-                    <label>Password</label>
+                    <label>Kata Sandi</label>
                     <div class="mb-3">
                       <input type="password" class="form-control" name="password" id="password" placeholder="Password" aria-label="Password" aria-describedby="password-addon">
                       {{-- @error('password')
@@ -35,7 +35,7 @@
                       </div>
                     @endif
                     <div class="text-center">
-                      <button type="submit" class="btn bg-gradient-info w-100 mt-4 mb-0">Sign in</button>
+                      <button type="submit" class="btn bg-gradient-info w-100 mt-4 mb-0">Masuk</button>
                     </div>
                   </form>
                 </div>

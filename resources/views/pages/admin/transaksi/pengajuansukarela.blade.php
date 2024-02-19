@@ -196,7 +196,7 @@
                     </div>
                     <div class="modal-footer">
                         <button type="button" class="btn btn-danger light" data-bs-dismiss="modal">Close</button>
-                        <button type="button" id="ajukan-btn" class="btn btn-primary">Ajukan</button>
+                        <button type="button" id="ajukan-btn" class="btn btn-primary">Pengajuan</button>
                     </div>
                 </div>
             </div>
@@ -240,7 +240,7 @@
                     </div>
                     <div class="modal-footer">
                         <button type="button" class="btn btn-danger light" data-bs-dismiss="modal">Close</button>
-                        <button type="button" id="ajukanmanual-btn" class="btn btn-primary">Ajukan</button>
+                        <button type="button" id="ajukanmanual-btn" class="btn btn-primary">Pengajuan</button>
                     </div>
                 </div>
             </div>

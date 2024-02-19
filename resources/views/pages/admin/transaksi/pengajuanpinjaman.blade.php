@@ -63,7 +63,7 @@
                         <ul class="nav nav-tabs dzm-tabs" id="myTab-4" role="tablist">
                             @if ($role == 'anggota') 
                             <li class="nav-item" role="presentation">
-                                <button type="button" id="add-btn" class="nav-link active btn-sgn">Ajukan</button>
+                                <button type="button" id="add-btn" class="nav-link active btn-sgn">Pengajuan</button>
                             </li>
                             @endif
                         </ul>
@@ -80,7 +80,9 @@
                                         <th>Tanggal Transaksi</th>
                                         <th>keanggotaan</th>
                                         <th>Total Limit</th>
-                                        <th>Pengajuan Tenor & Pinjaman</th>
+                                        <th>Tenor</th>
+                                        <th>Jumlah Pengajuan</th>
+                                        <th>Jumlah Pengajuan X Bunga 2%</th>
                                         <th>Total Pembayaran</th>
                                         <th>Sisa Limit</th>
                                         <th>Sisa Tenor & Pinjaman</th>
@@ -559,7 +561,7 @@
                     </div>
                     <div class="modal-footer">
                         <button type="button" class="btn btn-danger light" data-bs-dismiss="modal">Close</button>
-                        <button type="button" id="ajukan-btn" class="btn btn-primary">Ajukan</button>
+                        <button type="button" id="ajukan-btn" class="btn btn-primary">Pengajuan</button>
                     </div>
                 </div>
             </div>

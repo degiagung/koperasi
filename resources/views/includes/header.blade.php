@@ -62,7 +62,7 @@
                         <li>
                             <button type="submit" class="dropdown-item d-flex align-items-center">
                                 <i class="bi bi-box-arrow-right"></i>
-                                <span class="ms-2">Logout </span>
+                                <span class="ms-2">Keluar </span>
                             </button>
                         </li>
                     </form>

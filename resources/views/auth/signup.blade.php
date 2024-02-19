@@ -62,7 +62,7 @@
                         <div class="text-center">
                             <button type="submit" id="save-btn" class="btn bg-gradient-dark w-100 my-4 mb-2">Simpan</button>
                         </div>
-                        <p class="text-sm mt-3 mb-0">Sudah Punya Akun? <a href="{{ route('login') }}" class="text-dark font-weight-bolder">Sign in</a></p>
+                        <p class="text-sm mt-3 mb-0">Sudah Punya Akun? <a href="{{ route('login') }}" class="text-dark font-weight-bolder">Masuk</a></p>
                         {{-- </form> --}}
                     </div>
                 </div>
