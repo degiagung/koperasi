@@ -144,7 +144,7 @@ function getListData() {
                     else
                     return row.sisatenor+' BLN & Rp.0';
             } },
-            { render:function (data,type,row) {
+            { sClass:"notdown",render:function (data,type,row) {
                 return `<a class="bukti" style="cursor:pointer;">Klik Disini</a>`;
             } },
         ],
