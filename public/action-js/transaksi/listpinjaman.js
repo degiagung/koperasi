@@ -161,6 +161,7 @@ function getListData() {
                     if(role == 'superadmin' || role == 'bendahara koperasi'){
                         isObject = {};
                         isObject = rowData ;
+                        $("#sisatagihan").val(formatRupiah(rowData.sisapinjaman1));
                         $("#modal-payment").modal('show');
                     }
                 });
@@ -290,6 +291,7 @@ function getListDataAnggota() {
                         buktilunas();
                     }else{
                         if (role == 'bendahara koperasi' || role == 'superadmin') {
+                            $("#sisatagihan").val('Rp.'+formatRupiah(rowData.sisapinjaman1));
                             $("#modal-payment").modal('show');
                         }
                     }

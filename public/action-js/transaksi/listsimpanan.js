@@ -214,6 +214,11 @@ async function buktipokok(id) {
             }
 
             if (role == 'anggota'){
+                content =`<center>
+                            Bukti Belum diupload
+                        <center>
+            `;
+                $(".buktidiv").append(content);
                 $("#modal-bukti").modal('show');
             }
         }
@@ -260,8 +265,13 @@ async function getlistbukti(rowData) {
                     jenis= 'Lihat Bukti';
                 }
             }
+            var threeMonthsAgo = moment(rowData.tgl_dinas, "YYYY-MM-DD").add(no, 'months');
+            var mm2     = threeMonthsAgo.format('MM');
+            var yyyy2   = threeMonthsAgo.format('YYYY');
+            tgl = yyyy2+''+mm2+'01' ;
             content += `
                 <td style="text-align:center;"><a onclick="bukti('`+file+`',`+no+`)" style="cursor:pointer;color:red;">`+jenis+`</a></td>
+                <td style="text-align:center;"><a onclick="showbill('`+no+`','`+rowData.name+`','`+rowData.nrp+`','`+tgl+`  ','50000','SIMPANAN WAJIB','SM')" style="cursor:pointer;color:red;">Nota</a></td>
             `;
             content += `</tr>`;   
         }
@@ -274,6 +284,105 @@ async function getlistbukti(rowData) {
         sweetAlert("Oops...", error.responseText, "ERROR");
     }
 }
+
+function showbill(id,name,nrp,tgl,rp,jenis,kode) {
+    if(id == 'pokok'){
+        jenis   = 'SIMPANAN POKOK';
+        name    = isObject.name;
+        nrp     = isObject.nrp;
+        var threeMonthsAgo = moment(isObject.tgl_dinas, "YYYY-MM-DD").add(1, 'months');
+        var mm2     = threeMonthsAgo.format('MM');
+        var yyyy2   = threeMonthsAgo.format('YYYY');
+        tgl         = yyyy2+''+mm2+'01' ;
+        rp          = 50000;
+        kode        = 'SM';
+        id          = '01' ;
+    }
+    $(".btndownloadsert").removeAttr("onclick");
+    $(".btndownloadsert").attr("onclick","generatePDF('"+jenis+" "+name+"','"+tgl+"')");
+
+    $("#divbill").empty();
+
+    p2   		= tgl.toString().replaceAll('-','');
+    yyyy 		= p2.substring(0,4);
+    mm 			= p2.substring(4,6);
+    dd 			= p2.substring(6,8);
+    date        = yyyy+''+mm+''+dd;
+
+    $("#divbill").append(`
+        <center>
+            <table class="bill" id="tablebill" style="width:500px;">
+                <tr style="border-bottom: 3px solid black;text-align: center;">
+                    <th>
+                        <h3>`+jenis+`</h3>
+                        <h6>`+kode+id+""+date+`</h6>
+                    </th>
+                </tr>
+                <tr>
+                    <th>
+                        <div class="row">
+                            <div class="col-sm-6">
+                                NRP
+                            </div>
+                            <div class="col-sm-6">
+                                : `+nrp+`<br>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-sm-6">
+                                NAMA
+                            </div>
+                            <div class="col-sm-6">
+                                : `+name+`<br>
+                            </div>
+                        </div>
+                        
+                        <div class="row">
+                            <div class="col-sm-6">
+                                JUMLAH
+                            </div>
+                            <div class="col-sm-6">
+                                : `+formatRupiah(rp)+`<br>
+                            </div>
+                        </div>
+                    </th>
+                    
+                </tr>
+                <tr style="border-bottom: 3px solid black;text-align: end;">
+                    <th>
+                    <br>
+                    <br>
+                        Bandung, `+datetostring2('yymmdd',tgl)+`<br>
+                        &ensp;&ensp;&ensp;<img src="`+baseURL+`/template/admin/images/ttd.jpg" style="width:100px" alt="">
+
+                    </th>
+                </tr>
+            </table>
+        </center>
+    `);
+    $("#modal-bill").modal('show');
+}
+
+function generatePDF(p1,p2){   
+    
+    // var testDivElement = document.getElementById('sertifikat');
+    var imgData;
+    html2canvas($("#tablebill"), {
+        useCORS: true,
+        onrendered: function (canvas) {
+            imgData = canvas.toDataURL('image/png');
+            // var doc = new jsPDF();
+            var doc = new jsPDF('landscape', 'mm', 'a4');
+            doc.addImage(imgData, 'PNG', 15, 40, 150, 60);
+            // doc.addImage(imgData, 'PNG', 15, 40, 180, 160);
+            doc.save(p1+'_'+p2.replaceAll(' ','')+'.pdf');
+            // window.open(imgData);
+        }
+    });
+
+    // $("#myModal").modal('hide');
+    
+};
 
 function bukti(file,no) {
     
@@ -439,6 +548,9 @@ function detailsukarela() {
                 else
                     return '';
             } },
+             { sClass:"notdown",render:function (data,type,row) {
+                return `<a class="nota" style="cursor:pointer;">Nota</a>`;
+            } },
 
         ],
         drawCallback: function (settings) {
@@ -462,6 +574,13 @@ function detailsukarela() {
                         isObject['jenis'] = 'potong gaji';
 
                     }
+                });
+            $(rows)
+                .find(".nota")
+                .on("click", function () {
+                    var tr = $(this).closest("tr");
+                    var rowData = tblskrl.row(tr).data();
+                    showbill(rowData.id,rowData.name,rowData.nrp,rowData.tgl_approve,rowData.amount,'SIMPANAN SUKARELA','SMS');
                 });
         },
     });

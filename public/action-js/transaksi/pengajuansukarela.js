@@ -127,8 +127,11 @@ function getListData() {
                     return '';
                 }
             } },
-            { render:function (data,type,row) {
+            { sClass:"notdown",render:function (data,type,row) {
                 return `<a class="bukti" style="cursor:pointer;">Klik Disini</a>`;
+            } },
+            { sClass:"notdown",render:function (data,type,row) {
+                return `<a class="nota" style="cursor:pointer;">Klik Disini</a>`;
             } },
         ],
         drawCallback: function (settings) {
@@ -184,6 +187,13 @@ function getListData() {
                     }
                     detailperjanjian(rowData);
                 });
+            $(rows)
+                .find(".nota")
+                .on("click", function () {
+                    var tr = $(this).closest("tr");
+                    var rowData = dtpr.row(tr).data();
+                    showbill(rowData);
+                });
         },
     });
     var action    = dtpr.columns(".action");
@@ -196,6 +206,94 @@ function getListData() {
     }
     
 }
+
+
+function showbill(params) {
+    
+    $(".btndownloadsert").removeAttr("onclick");
+    $(".btndownloadsert").attr("onclick","generatePDF('Sukarela "+params.name+"','"+datetostring2('yymmdd',params.tgl_approve)+"')");
+
+    $("#divbill").empty();
+
+    p2   		= params.tgl_approve.toString().replaceAll('-','');
+    yyyy 		= p2.substring(0,4);
+    mm 			= p2.substring(4,6);
+    dd 			= p2.substring(6,8);
+    date        = yyyy+''+mm+''+dd;
+    $("#divbill").append(`
+        <center>
+            <table class="bill" id="tablebill" style="width:500px;">
+                <tr style="border-bottom: 3px solid black;text-align: center;">
+                    <th>
+                        <h3>SIMPANAN SUKARELA</h3>
+                        <h6>SMS`+params.idsukarela+date+`</h6>
+                    </th>
+                </tr>
+                <tr>
+                    <th>
+                        <div class="row">
+                            <div class="col-sm-6">
+                                NRP
+                            </div>
+                            <div class="col-sm-6">
+                                : `+params.nrp+`<br>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-sm-6">
+                                NAMA
+                            </div>
+                            <div class="col-sm-6">
+                                : `+params.name+`<br>
+                            </div>
+                        </div>
+                        
+                        <div class="row">
+                            <div class="col-sm-6">
+                                JUMLAH
+                            </div>
+                            <div class="col-sm-6">
+                                : `+formatRupiah(params.amount)+`<br>
+                            </div>
+                        </div>
+                    </th>
+                    
+                </tr>
+                <tr style="border-bottom: 3px solid black;text-align: end;">
+                    <th>
+                    <br>
+                    <br>
+                        Bandung, `+datetostring2('yymmdd',params.tgl_approve)+`<br>
+                        &ensp;&ensp;&ensp;<img src="`+baseURL+`/template/admin/images/ttd.jpg" style="width:100px" alt="">
+
+                    </th>
+                </tr>
+            </table>
+        </center>
+    `);
+    $("#modal-bill").modal('show');
+}
+
+function generatePDF(p1,p2){   
+    
+    // var testDivElement = document.getElementById('sertifikat');
+    var imgData;
+    html2canvas($("#tablebill"), {
+        useCORS: true,
+        onrendered: function (canvas) {
+            imgData = canvas.toDataURL('image/png');
+            // var doc = new jsPDF();
+            var doc = new jsPDF('landscape', 'mm', 'a4');
+            doc.addImage(imgData, 'PNG', 15, 40, 150, 60);
+            // doc.addImage(imgData, 'PNG', 15, 40, 180, 160);
+            doc.save(p1+'_'+p2.replaceAll(' ','')+'.pdf');
+            // window.open(imgData);
+        }
+    });
+
+    // $("#myModal").modal('hide');
+    
+};
 
 function approval(){
     let status = $("#form-statusapprove").val();

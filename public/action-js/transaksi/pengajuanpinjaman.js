@@ -152,6 +152,13 @@ function getListData() {
             { sClass:"notdown",render:function (data,type,row) {
                 return "<a style='cursor:pointer' class='buktitf'>Klik Disini</a>";
             } },
+            { sClass:"notdown",render:function (data,type,row) {
+                if(row.status == 'approve'){
+                    return "<a style='cursor:pointer' class='nota'>Klik Disini</a>";
+                }else{
+                    return '';
+                }
+            } },
         ],
         drawCallback: function (settings) {
             var api = this.api();
@@ -199,6 +206,14 @@ function getListData() {
                     }
                     detailperjanjian(rowData);
                 });
+            $(rows)
+                .find(".nota")
+                .on("click", function () {
+                    var tr = $(this).closest("tr");
+                    var rowData = dtpr.row(tr).data();
+                    
+                    showbill(rowData);
+                });
         },
     });
     var action    = dtpr.columns(".action");
@@ -210,6 +225,111 @@ function getListData() {
         notanggota.visible(true);
     }
 }
+
+
+function showbill(params) {
+    
+    $(".btndownloadsert").removeAttr("onclick");
+    $(".btndownloadsert").attr("onclick","generatePDF('Pengajuan Pinjaman "+params.name+"','"+datetostring2('yymmdd',params.tgl_approve)+"')");
+
+    $("#divbill").empty();
+
+    p2   		= params.tgl_approve.toString().replaceAll('-','');
+    yyyy 		= p2.substring(0,4);
+    mm 			= p2.substring(4,6);
+    dd 			= p2.substring(6,8);
+    date        = yyyy+''+mm+''+dd;
+    $("#divbill").append(`
+        <center>
+            <table class="bill" id="tablebill" style="width:500px;">
+                <tr style="border-bottom: 3px solid black;text-align: center;">
+                    <th>
+                        <h3>PINJAMAN</h3>
+                        <h6>PJ`+params.idpinjam+date+`</h6>
+                    </th>
+                </tr>
+                <tr>
+                    <th>
+                        <div class="row">
+                            <div class="col-sm-6">
+                                NRP
+                            </div>
+                            <div class="col-sm-6">
+                                : `+params.nrp+`<br>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-sm-6">
+                                NAMA
+                            </div>
+                            <div class="col-sm-6">
+                                : `+params.name+`<br>
+                            </div>
+                        </div>
+                        
+                        <div class="row">
+                            <div class="col-sm-6">
+                                Pinjaman
+                            </div>
+                            <div class="col-sm-6">
+                                : `+formatRupiah(params.pinjaman)+`<br>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-sm-6">
+                                Tenor
+                            </div>
+                            <div class="col-sm-6">
+                                : `+params.tenor+`<br>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-sm-6">
+                                Pinjaman X Bunga 2%
+                            </div>
+                            <div class="col-sm-6">
+                                : `+formatRupiah(params.pinjamanbunga)+`<br>
+                            </div>
+                        </div>
+                    </th>
+                    
+                </tr>
+                <tr style="border-bottom: 3px solid black;text-align: end;">
+                    <th>
+                    <br>
+                    <br>
+                        Bandung, `+datetostring2('yymmdd',params.tgl_approve)+`<br>
+                        &ensp;&ensp;&ensp;<img src="`+baseURL+`/template/admin/images/ttd.jpg" style="width:100px" alt="">
+
+                    </th>
+                </tr>
+            </table>
+        </center>
+    `);
+    $("#modal-bill").modal('show');
+}
+
+function generatePDF(p1,p2){   
+    
+    // var testDivElement = document.getElementById('sertifikat');
+    var imgData;
+    html2canvas($("#tablebill"), {
+        useCORS: true,
+        onrendered: function (canvas) {
+            imgData = canvas.toDataURL('image/png');
+            // var doc = new jsPDF();
+            var doc = new jsPDF('landscape', 'mm', 'a4');
+            doc.addImage(imgData, 'PNG', 15, 40, 150, 60);
+            // doc.addImage(imgData, 'PNG', 15, 40, 180, 160);
+            doc.save(p1+'_'+p2.replaceAll(' ','')+'.pdf');
+            // window.open(imgData);
+        }
+    });
+
+    // $("#myModal").modal('hide');
+    
+};
+
 
 function detail(rowData) {
     isObject = rowData;

@@ -210,6 +210,13 @@
                                 </div>
                             </div>
                             <div class="mb-3 row">
+                                <label class="col-sm-5 col-form-label ">Sisa Tagihan</label>
+                                <div class="col-sm-7">
+                                   <input type="text" class="form-control" id="sisatagihan" readonly>
+
+                                </div>
+                            </div>
+                            <div class="mb-3 row">
                                 <label class="col-sm-5 col-form-label">Kwitansi</label>
                                 <div class="col-sm-7">
                                     <form role="form" class="" id="formbukti" method="post" type="post" enctype="multipart/form-data">

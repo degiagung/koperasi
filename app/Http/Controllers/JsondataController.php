@@ -3119,9 +3119,9 @@ class JsonDataController extends Controller
                         
                         $result = DB::select("
                             SELECT 
-                                *,
+                                sm.*,u.name,u.nrp,
                                  CASE
-                                    WHEN DATE_ADD(tgl_awal, INTERVAL durasi MONTH) >= CURRENT_DATE() THEN 
+                                    WHEN DATE_ADD(sm.tgl_awal, INTERVAL durasi MONTH) >= CURRENT_DATE() THEN 
                                         COALESCE(PERIOD_DIFF(". DB::select("
                             select 
                                 case 
@@ -3134,14 +3134,15 @@ class JsonDataController extends Controller
                                     ELSE 
                                         durasi
                                 END durasi2,
-                                DATE_ADD(tgl_awal, INTERVAL durasi MONTH) tgl_akhir,
-                                DATE_ADD(tgl_awal, INTERVAL 1 MONTH) as tgl_awal1
+                                DATE_ADD(sm.tgl_awal, INTERVAL durasi MONTH) tgl_akhir,
+                                DATE_ADD(sm.tgl_awal, INTERVAL 1 MONTH) as tgl_awal1
                             FROM
-                                simpanan_sukarela
+                                simpanan_sukarela sm
+                                LEFT JOIN users u ON u.id = sm.user_id  
                             WHERE
-                                status = 'approve'
-                                AND user_id = $id
-                            ORDER BY id desc
+                                sm.status = 'approve'
+                                AND sm.user_id = $id
+                            ORDER BY sm.id desc
                         ");
                         $result = $MasterClass->checkErrorModel($result);
                         $results = [

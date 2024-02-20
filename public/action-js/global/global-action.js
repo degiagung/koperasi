@@ -401,9 +401,9 @@ function datenow(date) {
 
 function datesimpanan(p,p1){
   if(p){
-    var threeMonthsAgo = moment(p, "YYYY-MM-DD").subtract(p1, 'months');
-    var mm2     = threeMonthsAgo.format('MM');
-    var yyyy2   = threeMonthsAgo.format('YYYY');
+    var date = moment(p, "YYYY-MM-DD").add(p1, 'months');
+    var mm2     = date.format('MM');
+    var yyyy2   = date.format('YYYY');
     var perisel = window.datetostring2('yymmdd',yyyy2+""+mm2+"01");
     
     return perisel;

@@ -89,6 +89,7 @@
                                         <th>Surat Pengajuan</th>
                                         <th>Surat Perjanjian</th>
                                         <th>Bukti</th>
+                                        <th>NOTA</th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -614,6 +615,26 @@
                         <button type="button" class="btn btn-danger light" data-bs-dismiss="modal">Close</button>
                         <button type="button" id="simpanbukti-btn" class="btn btn-primary">Simpan</button>
                     </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="modal fade" id="modal-bill">
+            <div class="modal-dialog modal-lg">
+                <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="staticBackdropLabel">NOTA</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div id="divbill">
+                        
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    <button type="button" class="btn btn-primary btndownloadsert">Download PDF</button>
+                </div>
                 </div>
             </div>
         </div>

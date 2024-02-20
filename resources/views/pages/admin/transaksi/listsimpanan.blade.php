@@ -172,6 +172,7 @@
                                     <th>tgl Transaksi</th>
                                     <th>tgl awal potong gaji</th>
                                     <th>durasi potong gaji</th>
+                                    <th>Nota</th>
                                 </tr>
                             </thead>
                             {{-- <tfoot>
@@ -199,7 +200,8 @@
                                     <th>Tgl Transaksi</th>
                                     <th>Simpanan Ke</th>
                                     <th>Nominal</th>
-                                    <th></th>
+                                    <th>Bukti</th>
+                                    <th>Nota</th>
                                 </tr>
                             </thead>
                             <tbody id="detailbukti">
@@ -228,6 +230,9 @@
                         </button>
                     </div>
                     <div class="modal-body">
+                        <center>
+                            <button type="submit" onclick="showbill('pokok')">Lihat Nota</button>
+                        </center><br>
                         <div class="basic-form buktidiv">
                             
                         </div>
@@ -265,6 +270,25 @@
                         <button type="button" class="btn btn-danger light" data-bs-dismiss="modal">Close</button>
                         <button type="button" id="simpanbukti-btn" class="btn btn-primary">Simpan</button>
                     </div>
+                </div>
+            </div>
+        </div>
+        <div class="modal fade" id="modal-bill">
+            <div class="modal-dialog modal-lg">
+                <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="staticBackdropLabel">NOTA</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div id="divbill">
+                        
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    <button type="button" class="btn btn-primary btndownloadsert">Download PDF</button>
+                </div>
                 </div>
             </div>
         </div>
