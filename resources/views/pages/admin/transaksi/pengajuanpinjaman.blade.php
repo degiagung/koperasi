@@ -86,8 +86,8 @@
                                         <th>Total Pembayaran</th>
                                         <th>Sisa Limit</th>
                                         <th>Sisa Tenor & Pinjaman</th>
-                                        <th>Surat Pengajuan</th>
-                                        <th>Surat Perjanjian</th>
+                                        {{-- <th>Surat Pengajuan</th>
+                                        <th>Surat Perjanjian</th> --}}
                                         <th>Bukti</th>
                                         <th>NOTA</th>
                                     </tr>

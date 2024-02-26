@@ -143,12 +143,12 @@ function getListData() {
                 else
                 return row.sisatenor+' BLN & Rp.0';
             } },
-            { visible:false,sClass:"notdown action",render:function (data,type,row) {
-                return "<a style='cursor:pointer' class='pengajuan'>Klik Disini</a>";
-            } },
-            { visible:false,sClass:"notdown action",render:function (data,type,row) {
-                return "<a style='cursor:pointer' class='perjanjian'>Klik Disini</a>";
-            } },
+            // { visible:false,sClass:"notdown action",render:function (data,type,row) {
+            //     return "<a style='cursor:pointer' class='pengajuan'>Klik Disini</a>";
+            // } },
+            // { visible:false,sClass:"notdown action",render:function (data,type,row) {
+            //     return "<a style='cursor:pointer' class='perjanjian'>Klik Disini</a>";
+            // } },
             { sClass:"notdown",render:function (data,type,row) {
                 return "<a style='cursor:pointer' class='buktitf'>Klik Disini</a>";
             } },
