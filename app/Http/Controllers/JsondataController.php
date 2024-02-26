@@ -1202,6 +1202,7 @@ class JsonDataController extends Controller
                             pj.created_at tglaju,
                             pj.updated_at tgllunas,
                             pj.tgl_approve tglapprove,
+                            pj.bukti idbukti,
                             case
                                 when lower(pj.status_pinjaman) = 'lunas' then 'lunas'
                                 else 'belum lunas'
@@ -1266,7 +1267,7 @@ class JsonDataController extends Controller
                             GROUP BY 
                                 us.name,us.id,us.nrp,us.tgl_dinas,us.is_active,us.status,
                                 ur.role_name,lp.amount,pj.amount,pj.tenor,pj.created_at,pj.status_pinjaman,
-                                pj.id,pj.created_at,pj.updated_at,pj.tgl_approve
+                                pj.id,pj.created_at,pj.updated_at,pj.tgl_approve,pj.bukti
                                 ORDER BY pj.created_at desc
                         ";
                         $result = $MasterClass->selectGlobal($select,$table,$where);
@@ -2400,8 +2401,18 @@ class JsonDataController extends Controller
                 
                         $status = [];
                         $id     = $request->id ;
+                        $bukti  = $request->bukti ;
                         $userid = $MasterClass->getSession('user_id') ;
-                        $saved  = DB::select("SELECT a.* FROM bukti_transaksi a where id_parent = $id  ORDER BY created_at desc");
+                        if($bukti){
+                            $saved  = DB::select("
+                                (SELECT a.*,null as lunas FROM bukti_transaksi a where id_parent = $id  ORDER BY created_at desc)
+                                union all
+                                (SELECT b.*,'lunas' as lunas FROM bukti_transaksi b where b.id = $bukti)
+    
+                            ");
+                        }else{
+                            $saved  = DB::select("SELECT a.*,null as lunas FROM bukti_transaksi a where id_parent = $id  ORDER BY created_at desc");
+                        }
                         $saved  = $MasterClass->checkErrorModel($saved);
                         
                         $status = $saved;

@@ -97,7 +97,7 @@ function getListData() {
                 return datetostring2('yymmdd',row.tgl_dinas);
             } },
             { render:function (data,type,row) {
-                return datetostring2('yymmdd',row.tglaju);
+                return datetostring2('yymmdd',row.tglapprove);
             } },
             { data: "keanggotaan" },
             { render:function (data,type,row) {
@@ -426,60 +426,88 @@ function approval(){
     });
 }
 
-async function getlistbukti(rowData) {
-    jumlah = formatRupiah(rowData.totalbayarperbulan1);
-    tenor  = rowData.tenor;
-     $("#detailbukti").empty();
-    try {
-        const response = await $.ajax({
-            url: baseURL + "/getbuktipinjaman",
-            type: "POST",
-            dataType: "json",
-            data:{
-                id : rowData.idpinjam
-            },
-            beforeSend: function () {
-                
-            },
-        });
-
-        content = '';
-        for (let i = 0; i < rowData.totaltenor; i++) {
-            no = i+1 ;
-            file = '';
-            if (role == 'anggota') {
-                jenis= 'Upload Bukti';
-            }else{
-                jenis= 'Belum Upload';
-            }
-            content += `
-                <tr>
-                    <td>`+tenor+`</td>
-                    <td>`+jumlah+`</td>
-                    <td>`+no+`</td>
-            `;
-            for (let j = 0; j < response.data.length; j++) {
-                if(no == response.data[j]['tenor']){
-                    file = response.data[j]['file'];
-                    jenis= 'Lihat Bukti';
+function getlistbukti(rowData){
+    jumlah          = formatRupiah(rowData.totalbayarperbulan1);
+    sisapinjaman1   = formatRupiah(rowData.sisapinjaman1);
+    tenor           = rowData.tenor;
+    $("#detailbukti").empty();
+   $.ajax({
+        url: baseURL + "/getbuktipinjaman",
+        type: "POST",
+        dataType: "json",
+        data:{
+            id      : rowData.idpinjam,
+            bukti   : rowData.idbukti
+        },
+        beforeSend: function () {
+            // Swal.fire({
+            //     title: "Loading",
+            //     text: "Please wait...",
+            // });
+        },
+        complete: function () {
+        },
+        success: function (response) {
+            // Handle response sukses
+            if (response.code == 0) {
+                content = '';
+                for (let i = 0; i < rowData.totaltenor; i++) {
+                    no = i+1 ;
+                    file = '';
+                    if (role == 'anggota') {
+                        jenis= 'Upload Bukti';
+                    }else{
+                        jenis= 'Belum Upload';
+                    }
+                    content += `
+                        <tr>
+                            <td>`+jumlah+`</td>
+                            <td>`+no+`</td>
+                    `;
+                    for (let j = 0; j < response.data.length; j++) {
+                        if(no == response.data[j]['tenor'] && response.data[j]['lunas'] == ''){
+                            file = response.data[j]['file'];
+                            jenis= 'Lihat Bukti';
+                        }
+                    }
+                    content += `
+                        <td style="text-align:center;"><a onclick="bukti('`+file+`',`+no+`)" style="cursor:pointer;color:red;">`+jenis+`</a></td>
+                    `;
+                    content += `</tr>`;   
                 }
+
+                file = '';
+                if (rowData.status_pinjaman == 'lunas'){
+                    content += `
+                        <tr>
+                            <td>`+sisapinjaman1+`</td>
+                            <td>PELUNASAN</td>
+                    `;
+                    for (let k = 0; k < response.data.length; k++) {
+                        if(response.data[k]['lunas'] == 'lunas'){
+                            file = response.data[k]['file'];
+                        }
+                    }
+                    console.log(response.data)
+                    content += `
+                        <td style="text-align:center;"><a onclick="bukti('`+file+`',`+no+`)" style="cursor:pointer;color:red;">Lihat Bukti</a></td>
+                    `;
+                    content += `</tr>`;
+                }
+                
+                $("#detailbukti").append(content);
+                $("#modal-detail").modal('show');
+            } else {
+                sweetAlert("Oops...", response.info, "ERROR");
             }
-            content += `
-                <td style="text-align:center;"><a onclick="bukti('`+file+`',`+no+`)" style="cursor:pointer;color:red;">`+jenis+`</a></td>
-            `;
-            content += `</tr>`;   
-        }
-        
-        $("#detailbukti").append(content);
-        $("#modal-detail").modal('show');
-        
-    } catch (error) {
-        sweetAlert("Oops...", error.responseText, "ERROR");
-    }
+        },
+        error: function (xhr, status, error) {
+            sweetAlert("Oops...", "ERROR", "ERROR");
+        },
+    });
 }
 
 function bukti(file,no) {
-    
     if(file){
         $(".buktidiv").empty();
         file = file ;

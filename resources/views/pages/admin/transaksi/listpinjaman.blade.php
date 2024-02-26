@@ -247,7 +247,7 @@
                         <table id="table-list" class="table table-bordered table-striped table-lgdatatables">
                             <thead>
                                 <tr>
-                                    <th>Tenor</th>
+                                    {{-- <th>Tenor</th> --}}
                                     <th>Nominal</th>
                                     <th>Cicilan Ke</th>
                                     <th>Bukti Cicilan</th>
@@ -257,27 +257,6 @@
 
                             </tbody>
                         </table>
-                    </div>
-                    {{-- <div class="modal-footer">
-                        <button type="button" class="btn btn-danger light" data-bs-dismiss="modal">Close</button>
-                        <button type="button" class="btn btn-sgn light" onClick="approval() ">Simpan</button>
-                    </div> --}}
-                </div>
-            </div>
-        </div>
-
-        <div class="modal fade" id="modal-bukti" style="display: none;" aria-hidden="true">
-            <div class="modal-dialog modal-dialog-centered" role="document">
-                <div class="modal-content">
-                    <div class="modal-header headermodal">
-                        <h5 class="modal-title">Bukti Transaksi</h5>
-                        <button type="button" class="btn-close" data-bs-dismiss="modal">
-                        </button>
-                    </div>
-                    <div class="modal-body">
-                        <div class="basic-form buktidiv">
-                            
-                        </div>
                     </div>
                     {{-- <div class="modal-footer">
                         <button type="button" class="btn btn-danger light" data-bs-dismiss="modal">Close</button>
@@ -313,6 +292,27 @@
                         <button type="button" class="btn btn-danger light" data-bs-dismiss="modal">Close</button>
                         <button type="button" id="simpanbukti-btn" class="btn btn-primary">Simpan</button>
                     </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="modal fade" id="modal-bukti" style="display: none;" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered" role="document">
+                <div class="modal-content">
+                    <div class="modal-header headermodal">
+                        <h5 class="modal-title">Bukti Transaksi</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal">
+                        </button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="basic-form buktidiv">
+                            
+                        </div>
+                    </div>
+                    {{-- <div class="modal-footer">
+                        <button type="button" class="btn btn-danger light" data-bs-dismiss="modal">Close</button>
+                        <button type="button" class="btn btn-sgn light" onClick="approval() ">Simpan</button>
+                    </div> --}}
                 </div>
             </div>
         </div>
