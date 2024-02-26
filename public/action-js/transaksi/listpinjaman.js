@@ -488,9 +488,8 @@ function getlistbukti(rowData){
                             file = response.data[k]['file'];
                         }
                     }
-                    console.log(response.data)
                     content += `
-                        <td style="text-align:center;"><a onclick="bukti('`+file+`',`+no+`)" style="cursor:pointer;color:red;">Lihat Bukti</a></td>
+                        <td style="text-align:center;"><a onclick="bukti('`+file+`','')" style="cursor:pointer;color:red;">Lihat Bukti</a></td>
                     `;
                     content += `</tr>`;
                 }
