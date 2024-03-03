@@ -184,6 +184,7 @@ function detail(rowData) {
 }
 async function buktipokok(id) {
     $(".buktidiv").empty();
+    $(".notapokok").show();
     try {
         const response = await $.ajax({
             url: baseURL + "/getbuktipokok",
@@ -229,6 +230,7 @@ async function buktipokok(id) {
 }
 
 async function getlistbukti(rowData) {
+    $(".notapokok").hide();
     los  = rowData.los;
      $("#detailbukti").empty();
     try {
@@ -354,7 +356,7 @@ function showbill(id,name,nrp,tgl,rp,jenis,kode) {
                     <br>
                         Bandung, `+datetostring2('yymmdd',tgl)+`<br>
                         &ensp;&ensp;&ensp;<img src="`+baseURL+`/template/admin/images/ttd.jpg" style="width:100px" alt="">
-
+                        BENDAHARA PRIMKOPAU
                     </th>
                 </tr>
             </table>

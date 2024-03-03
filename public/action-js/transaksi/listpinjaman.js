@@ -4,6 +4,12 @@ let dtpr;
 
 $(document).ready(function () {
     calllistdata();
+
+    if(role == 'superadmin' || role == 'bendahara koperasi'){
+        $(".btnkirimnota").show();
+    }else{
+        $(".btnkirimnota").hide();
+    }
 });
 
 function calllistdata(){
@@ -370,11 +376,11 @@ function detail(rowData) {
 
 function approval(){
     let status = $("#form-statuslunas").val();
-    if ($("#form-bukti").val() == ''){
+    if ($("#form-bukti-kwitansi").val() == ''){
         swalwarning('Kwitansi tidak boleh kosong');
         return false;
     }
-    const formData    = new FormData(document.getElementById("formbukti"));
+    const formData    = new FormData(document.getElementById("formbuktikwitansi"));
     formData.append('id',isObject.idpinjam);
     formData.append('userid',isObject.user);
     swal({
@@ -464,16 +470,46 @@ function getlistbukti(rowData){
                             <td>`+jumlah+`</td>
                             <td>`+no+`</td>
                     `;
+                    idtrans = '';
+                    ketbil  = '';
+                    terkirim= '';
+                    varnota = '';
+                    var threeMonthsAgo = moment(rowData.tglapprove, "YYYY-MM-DD").add(no, 'months');
+                    var mm2     = threeMonthsAgo.format('MM');
+                    var yyyy2   = threeMonthsAgo.format('YYYY');
+                    tgl = yyyy2+''+mm2+'01' ;
                     for (let j = 0; j < response.data.length; j++) {
-                        if(no == response.data[j]['tenor'] && response.data[j]['lunas'] == ''){
+                        if(no == response.data[j]['tenor'] && response.data[j]['lunas'] == null){
                             file = response.data[j]['file'];
                             jenis= 'Lihat Bukti';
+                            idtrans = response.data[j]['id'];
+                            if(response.data[j]['nota'] == 'terkirim'){
+                                varnota = `
+                                    <td style="text-align:center;"><a onclick="showbill('`+no+`','`+rowData.name+`','`+rowData.nrp+`','`+tgl+`  ','50000','PINJAMAN','PJ','`+idtrans+`')" style="cursor:pointer;color:red;">Nota</a></td>
+                                `;
+                                terkirim = `
+                                    
+                                    <td style="text-align:center;"><a style="color:green;">TERKIRIM</a></td>
+                                
+                                `;
+                            }
                         }
                     }
-                    content += `
-                        <td style="text-align:center;"><a onclick="bukti('`+file+`',`+no+`)" style="cursor:pointer;color:red;">`+jenis+`</a></td>
-                    `;
-                    content += `</tr>`;   
+                    
+                    
+                    if(role == 'anggota'){
+                        content += `
+                            <td style="text-align:center;"><a onclick="bukti('`+file+`',`+no+`)" style="cursor:pointer;color:red;">`+jenis+`</a></td>
+    
+                        `+varnota;
+                    }else{
+                        content += `
+                            <td style="text-align:center;"><a onclick="bukti('`+file+`',`+no+`)" style="cursor:pointer;color:red;">`+jenis+`</a></td>
+                            <td style="text-align:center;"><a onclick="showbill('`+no+`','`+rowData.name+`','`+rowData.nrp+`','`+tgl+`  ','50000','PINJAMAN','PJ','`+idtrans+`')" style="cursor:pointer;color:red;">Nota</a></td>
+                        `+terkirim;
+                    }
+                    
+                    content += `</tr>`;  
                 }
 
                 file = '';
@@ -612,4 +648,268 @@ async function buktilunas() {
     } catch (error) {
         sweetAlert("Oops...", error.responseText, "ERROR");
     }
+}
+
+var idtransjakarta = '';
+function showbill(id,name,nrp,tgl,rp,jenis,kode,idtrans) {
+    idtransjakarta = idtrans ;
+    if(id == 'pokok'){
+        jenis   = 'SIMPANAN POKOK';
+        name    = isObject.name;
+        nrp     = isObject.nrp;
+        var threeMonthsAgo = moment(isObject.tgl_dinas, "YYYY-MM-DD").add(1, 'months');
+        var mm2     = threeMonthsAgo.format('MM');
+        var yyyy2   = threeMonthsAgo.format('YYYY');
+        tgl         = yyyy2+''+mm2+'01' ;
+        rp          = 50000;
+        kode        = 'SM';
+        id          = '01' ;
+    }
+    $(".btndownloadsert").removeAttr("onclick");
+    $(".btndownloadsert").attr("onclick","generatePDF('"+jenis+" "+name+"','"+tgl+"')");
+
+    $("#divbill").empty();
+
+    p2   		= tgl.toString().replaceAll('-','');
+    yyyy 		= p2.substring(0,4);
+    mm 			= p2.substring(4,6);
+    dd 			= p2.substring(6,8);
+    date        = yyyy+''+mm+''+dd;
+
+    $("#divbill").append(`
+        <center>
+            <table class="bill" id="tablebill" style="width:500px;">
+                <tr style="border-bottom: 3px solid black;text-align: center;">
+                    <th>
+                        <h3>`+jenis+`</h3>
+                        <h6>`+kode+id+""+date+`</h6>
+                    </th>
+                </tr>
+                <tr>
+                    <th>
+                        <div class="row">
+                            <div class="col-sm-6">
+                                NRP
+                            </div>
+                            <div class="col-sm-6">
+                                : `+nrp+`<br>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-sm-6">
+                                NAMA
+                            </div>
+                            <div class="col-sm-6">
+                                : `+name+`<br>
+                            </div>
+                        </div>
+                        
+                        <div class="row">
+                            <div class="col-sm-6">
+                                JUMLAH
+                            </div>
+                            <div class="col-sm-6">
+                                : `+formatRupiah(rp)+`<br>
+                            </div>
+                        </div>
+                    </th>
+                    
+                </tr>
+                <tr style="border-bottom: 3px solid black;text-align: end;">
+                    <th>
+                    <br>
+                    <br>
+                        Bandung, `+datetostring2('yymmdd',tgl)+`<br>
+                        &ensp;&ensp;&ensp;<img src="`+baseURL+`/template/admin/images/ttd.jpg" style="width:100px" alt=""><br>
+                        BENDAHARA PRIMKOPAU
+
+                    </th>
+                </tr>
+            </table>
+        </center>
+    `);
+    $("#modal-bill").modal('show');
+}
+function generatePDF(p1,p2){   
+    
+    // var testDivElement = document.getElementById('sertifikat');
+    var imgData;
+    html2canvas($("#tablebill"), {
+        useCORS: true,
+        onrendered: function (canvas) {
+            imgData = canvas.toDataURL('image/png');
+            // var doc = new jsPDF();
+            var doc = new jsPDF('landscape', 'mm', 'a4');
+            doc.addImage(imgData, 'PNG', 15, 40, 150, 60);
+            // doc.addImage(imgData, 'PNG', 15, 40, 180, 160);
+            doc.save(p1+'_'+p2.replaceAll(' ','')+'.pdf');
+            // window.open(imgData);
+        }
+    });
+
+    // $("#myModal").modal('hide');
+    
+};
+
+function kirimnota(){
+   
+    const formData    = new FormData(document.getElementById("formbuktikwitansi"));
+    formData.append('id',isObject.idtransjakarta);
+    swal({
+        title: "Yakin untuk kirim nota ke anggota ?",
+        type: "warning",
+        showCancelButton: !0,
+        confirmButtonColor: "#DD6B55",
+        confirmButtonText: "Ya, Kirim ",
+        cancelButtonText: "Tidak, Batalkan !!",
+        closeOnConfirm: !1,
+        closeOnCancel: !1,
+    }).then(function (e) {
+        if (e.value) {
+            $.ajax({
+                url: baseURL + "/kirimnota",
+                type: "POST",
+                dataType: "json",
+                data:{
+                    id      : idtransjakarta,
+                },
+                beforeSend: function () {
+                    Swal.fire({
+                        title: "Loading",
+                        text: "Please wait...",
+                    });
+                },
+                complete: function () {
+                },
+                success: function (response) {
+                    // Handle response sukses
+                    if (response.code == 0) {
+                        swal("BERHASIL !", response.message, "success");
+                        $("#modal-bill").modal('hide');
+                    } else {
+                        sweetAlert("Oops...", response.message, "ERROR");
+                    }
+                },
+                error: function (xhr, status, error) {
+                    // Handle error response
+                    // console.log("ERROR");
+                    sweetAlert("Oops...", "ERROR", "ERROR");
+                },
+            });
+        } else {
+            swal(
+                "BATAL !!",
+            );
+        }
+    });
+}
+
+function getlistbukti(rowData){
+    jumlah          = formatRupiah(rowData.totalbayarperbulan1);
+    sisapinjaman1   = formatRupiah(rowData.sisapinjaman1);
+    tenor           = rowData.tenor;
+    $("#detailbukti").empty();
+   $.ajax({
+        url: baseURL + "/getbuktipinjaman",
+        type: "POST",
+        dataType: "json",
+        data:{
+            id      : rowData.idpinjam,
+            bukti   : rowData.idbukti
+        },
+        beforeSend: function () {
+            // Swal.fire({
+            //     title: "Loading",
+            //     text: "Please wait...",
+            // });
+        },
+        complete: function () {
+        },
+        success: function (response) {
+            // Handle response sukses
+            if (response.code == 0) {
+                content = '';
+                for (let i = 0; i < rowData.totaltenor; i++) {
+                    no = i+1 ;
+                    file = '';
+                    if (role == 'anggota') {
+                        jenis= 'Upload Bukti';
+                    }else{
+                        jenis= 'Belum Upload';
+                    }
+                    content += `
+                        <tr>
+                            <td>`+jumlah+`</td>
+                            <td>`+no+`</td>
+                    `;
+                    idtrans = '';
+                    ketbil  = '';
+                    terkirim= '';
+                    varnota = '';
+                    var threeMonthsAgo = moment(rowData.tglapprove, "YYYY-MM-DD").add(no, 'months');
+                    var mm2     = threeMonthsAgo.format('MM');
+                    var yyyy2   = threeMonthsAgo.format('YYYY');
+                    tgl = yyyy2+''+mm2+'01' ;
+                    for (let j = 0; j < response.data.length; j++) {
+                        if(no == response.data[j]['tenor'] && response.data[j]['lunas'] == null){
+                            file = response.data[j]['file'];
+                            jenis= 'Lihat Bukti';
+                            idtrans = response.data[j]['id'];
+                            if(response.data[j]['nota'] == 'terkirim'){
+                                varnota = `
+                                    <td style="text-align:center;"><a onclick="showbill('`+no+`','`+rowData.name+`','`+rowData.nrp+`','`+tgl+`  ','50000','PINJAMAN','PJ','`+idtrans+`')" style="cursor:pointer;color:red;">Nota</a></td>
+                                `;
+                                terkirim = `
+                                    
+                                    <td style="text-align:center;"><a style="color:green;">TERKIRIM</a></td>
+                                
+                                `;
+                            }
+                        }
+                    }
+                    
+                    
+                    if(role == 'anggota'){
+                        content += `
+                            <td style="text-align:center;"><a onclick="bukti('`+file+`',`+no+`)" style="cursor:pointer;color:red;">`+jenis+`</a></td>
+    
+                        `+varnota;
+                    }else{
+                        content += `
+                            <td style="text-align:center;"><a onclick="bukti('`+file+`',`+no+`)" style="cursor:pointer;color:red;">`+jenis+`</a></td>
+                            <td style="text-align:center;"><a onclick="showbill('`+no+`','`+rowData.name+`','`+rowData.nrp+`','`+tgl+`  ','50000','PINJAMAN','PJ','`+idtrans+`')" style="cursor:pointer;color:red;">Nota</a></td>
+                        `+terkirim;
+                    }
+                    
+                    content += `</tr>`;   
+                }
+
+                file = '';
+                if (rowData.status_pinjaman == 'lunas'){
+                    content += `
+                        <tr>
+                            <td>`+sisapinjaman1+`</td>
+                            <td>PELUNASAN</td>
+                    `;
+                    for (let k = 0; k < response.data.length; k++) {
+                        if(response.data[k]['lunas'] == 'lunas'){
+                            file = response.data[k]['file'];
+                        }
+                    }
+                    content += `
+                        <td style="text-align:center;"><a onclick="bukti('`+file+`','')" style="cursor:pointer;color:red;">Lihat Bukti</a></td>
+                    `;
+                    content += `</tr>`;
+                }
+                
+                $("#detailbukti").append(content);
+                $("#modal-detail").modal('show');
+            } else {
+                sweetAlert("Oops...", response.info, "ERROR");
+            }
+        },
+        error: function (xhr, status, error) {
+            sweetAlert("Oops...", "ERROR", "ERROR");
+        },
+    });
 }

@@ -230,7 +230,7 @@
                         </button>
                     </div>
                     <div class="modal-body">
-                        <center>
+                        <center class="notapokok">
                             <button type="submit" onclick="showbill('pokok')">Lihat Nota</button>
                         </center><br>
                         <div class="basic-form buktidiv">

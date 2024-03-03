@@ -4607,10 +4607,10 @@ class JsonDataController extends Controller
                         $status = [];
                         
                         $docname            = 'bukti';
-                        if(!empty($_FILES['bukti']['name'])){//jika file ada maka masukan file 
+                        if(!empty($_FILES['buktikwitansi']['name'])){//jika file ada maka masukan file 
                             
-                            $nama_file          = $_FILES['bukti']['name'];
-                            $tmp_name		    = $_FILES['bukti']['tmp_name'];
+                            $nama_file          = $_FILES['buktikwitansi']['name'];
+                            $tmp_name		    = $_FILES['buktikwitansi']['tmp_name'];
                             $nama_file_upload   = strtolower(str_replace(' ','_',$docname.'-'.$nama_file));
                             $alamatfile         = '../public/data/bukti/'; // directory file
                             $uploaddir          = $alamatfile.$nama_file_upload; // directory file
@@ -4653,6 +4653,71 @@ class JsonDataController extends Controller
                             ];
             
                         }
+                    } else {
+                        $results = [
+                            'code' => '103',
+                            'info'  => "Method Failed",
+                        ];
+                    }
+                } catch (\Exception $e) {
+                    // Roll back the transaction in case of an exception
+                    $results = [
+                        'code' => '102',
+                        'info'  => $e->getMessage(),
+                    ];
+        
+                }
+            }
+            else {
+        
+                $results = [
+                    'code' => '403',
+                    'info'  => "Unauthorized",
+                ];
+                
+            }
+
+            return $MasterClass->Results($results);
+
+        }
+        public function kirimnota(Request $request){
+
+            $MasterClass = new Master();
+
+            $checkAuth = $MasterClass->Authenticated($MasterClass->getSession('user_id'));
+            
+            if($checkAuth['code'] == $MasterClass::CODE_SUCCESS){
+                try {
+                    if ($request->isMethod('post')) {
+
+                        DB::beginTransaction();     
+
+                        
+                        $status = [];
+
+                        $attributes     = [
+                            'nota' => 'terkirim'
+                        ];
+                        $where     = [
+                            'id' => $request->id
+                        ];
+
+                        $saved      = $MasterClass->updateGlobal('bukti_transaksi', $attributes,$where );
+                        $status = $saved;
+    
+                        if($status['code'] == $MasterClass::CODE_SUCCESS){
+                            DB::commit();
+                        }else{
+                            DB::rollBack();
+                        }
+            
+                        $results = [
+                            'code' => $status['code'],
+                            'info'  => $status['info'],
+                        ];
+                            
+            
+            
                     } else {
                         $results = [
                             'code' => '103',

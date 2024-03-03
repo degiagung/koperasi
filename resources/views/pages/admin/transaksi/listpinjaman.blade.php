@@ -219,8 +219,8 @@
                             <div class="mb-3 row">
                                 <label class="col-sm-5 col-form-label">Kwitansi</label>
                                 <div class="col-sm-7">
-                                    <form role="form" class="" id="formbukti" method="post" type="post" enctype="multipart/form-data">
-                                        <input class="form-control" name="bukti" id="form-bukti" type="file" value="" multiple style="opacity:1;"/>
+                                    <form role="form" class="" id="formbuktikwitansi" method="post" type="post" enctype="multipart/form-data">
+                                        <input class="form-control" name="buktikwitansi" id="form-buktikwitansi" type="file" value="" multiple style="opacity:1;"/>
                                     </form>
                                 </div>
                             </div>
@@ -251,6 +251,7 @@
                                     <th>Nominal</th>
                                     <th>Cicilan Ke</th>
                                     <th>Bukti Cicilan</th>
+                                    <th>Nota</th>
                                 </tr>
                             </thead>
                             <tbody id="detailbukti">
@@ -313,6 +314,27 @@
                         <button type="button" class="btn btn-danger light" data-bs-dismiss="modal">Close</button>
                         <button type="button" class="btn btn-sgn light" onClick="approval() ">Simpan</button>
                     </div> --}}
+                </div>
+            </div>
+        </div>
+
+        <div class="modal fade" id="modal-bill">
+            <div class="modal-dialog modal-lg">
+                <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="staticBackdropLabel">NOTA</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div id="divbill">
+                        
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    <button type="button" class="btn btn-primary btnkirimnota" onClick="kirimnota()">Kirim Ke Anggota</button>
+                    <button type="button" class="btn btn-primary btndownloadsert">Download PDF</button>
+                </div>
                 </div>
             </div>
         </div>
