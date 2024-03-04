@@ -4759,14 +4759,8 @@ class JsonDataController extends Controller
                         DB::beginTransaction();     
                         $userid         = $MasterClass->getSession('user_id') ;
                         $role           = $MasterClass->getSession('role_name') ;
-                        $fstatus        = $request->status ;
-                        $fkeanggotaan   = $request->keanggotaan ;
-                        $fstatuspinjam  = $request->statuspinjam ;
-                        $ftahun         = $request->tahun ;
-                        $fbulan         = $request->bulan ;
-                        if($fbulan >= 1 && $fbulan <= 9){
-                            $fbulan = "0".$fbulan ;
-                        }
+                        $fperiode       = str_replace('-','',$request->periode) ;
+                        
                         $status = [];
                         
                         $wherefdate  = "";
@@ -4774,26 +4768,9 @@ class JsonDataController extends Controller
                         $wherefdate2 = "";
                         $wherefdate3 = "";
                         $wherefdate4 = "";
-                        if($ftahun){
-                            
-                            $wherefdate .= "
-                                and DATE_FORMAT(tgl_approve, '%Y') = '$ftahun' 
-                            ";
-                            $wherefdate1 .= "
-                                AND DATE_FORMAT(pj1.tgl_approve, '%Y') = '$ftahun' 
-                            ";
-                            $wherefdate2 .= "
-                                AND DATE_FORMAT(st.tgl_approve, '%Y') = '$ftahun' 
-                            ";
-                            $wherefdate3 .= "
-                                AND DATE_FORMAT(ss.tgl_approve, '%Y') = '$ftahun' 
-                            ";
-                            $wherefdate4 .= "
-                                AND DATE_FORMAT(su.tgl_approve, '%Y') = '$ftahun' 
-                            ";
-                        }
-                        if($fbulan){
-                            $fbulan = $ftahun.$fbulan ;
+                        
+                        if($fperiode){
+                            $fbulan = $fperiode ;
                             $wherefdate .= "
                                 and DATE_FORMAT(tgl_approve, '%Y%m') = '$fbulan'
                             ";
@@ -4824,11 +4801,11 @@ class JsonDataController extends Controller
                             cast((COALESCE(pj.amount,0) + COALESCE(pj.amount,0)*0.02) / pj.tenor as decimal(18,2)) as pinjaman,
                             50000.00 as wajib,
                             cast( (COALESCE(su.amount,0) / durasi) as decimal(18,2)) as sukarela,
-                            (cast((COALESCE(pj.amount,0) + COALESCE(pj.amount,0)*0.02) / pj.tenor as decimal(18,2)))
+                            COALESCE(cast((COALESCE(pj.amount,0) + COALESCE(pj.amount,0)*0.02) / pj.tenor as decimal(18,2)),0)
                             +
                             50000.00
                             +
-                            (cast( (COALESCE(su.amount,0) / durasi) as decimal(18,2)))
+                            COALESCE(cast( (COALESCE(su.amount,0) / durasi) as decimal(18,2)),0)
                              as total
                         ";
                         
@@ -4894,41 +4871,6 @@ class JsonDataController extends Controller
                         if($role == 'anggota'){
                             $where .= "
                                  AND us.id = $userid  
-                            ";
-                        }
-
-                        if($fkeanggotaan){
-                            if($fkeanggotaan == 'pindah'){
-                                $where .= "
-                                     AND lower(us.status) = '2'
-                                ";
-                            }else{
-                                $where .= "
-                                     AND lower(us.tgl_dinas) $fkeanggotaan
-                                ";
-                            }
-                        }
-                        if($fstatuspinjam == '1'){
-                            $where .= "
-                                 AND (lower(pj.status_pinjaman) = 'lunas' OR COALESCE(pj.tenor,0) = PERIOD_DIFF(". DB::select("
-                            select 
-                                case 
-                                    when a.date is null then DATE_FORMAT(sysdate(),'%Y%m')
-                                    else DATE_FORMAT(a.date,'%Y%m')
-                                end as dates
-                            from datenow a
-                        ")[0]->dates.",DATE_FORMAT(us.tgl_dinas, '%Y%m')))
-                            ";
-                        }elseif($fstatuspinjam == '2'){
-                            $where .= "
-                                 AND pj.status_pinjaman != 'lunas' AND COALESCE(pj.tenor,0) != PERIOD_DIFF(". DB::select("
-                            select 
-                                case 
-                                    when a.date is null then DATE_FORMAT(sysdate(),'%Y%m')
-                                    else DATE_FORMAT(a.date,'%Y%m')
-                                end as dates
-                            from datenow a
-                        ")[0]->dates.",DATE_FORMAT(us.tgl_dinas, '%Y%m'))
                             ";
                         }
 

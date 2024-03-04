@@ -1,3 +1,11 @@
+$("#filter-btn").on('click',function(e){
+    $('#table-list').dataTable().fnClearTable();
+    $('#table-list').dataTable().fnDraw();
+    $('#table-list').dataTable().fnDestroy();
+    getListData();
+    
+});
+
 getListData();
 function getListData() {
     $(".total").empty();
@@ -7,22 +15,19 @@ function getListData() {
             type: "POST",
             dataType: "json",
             data    : {
-                'keanggotaan'   :$('#filter-keanggotaan').val(),
-                'statuspinjam'  :$('#filter-status').val(),
-                'tahun'         :$('#filter-tahun').val(),
-                'bulan'         :$('#filter-bulan').val(),
+                'periode'   :$('#periode').val(),
             },
             dataSrc: function (response) {
                 if (response.code == 0) {
                     console.log(response.data.sum[0])
                     es = response.data.data;
                     sum = response.data.sum[0];
-                    $(".totalsimpanan").html(formatRupiah(sum.simpanan));
-                    $(".totaltariksimpanan").html(formatRupiah(sum.tariksimpanan));
-                    $(".totalsisasimpanan").html(formatRupiah(sum.sisasimpanan));
-                    $(".totalpinjamawal").html(formatRupiah(sum.pinjaman));
-                    $(".totalbayar").html(formatRupiah(sum.totalbayar));
-                    $(".totalsisapinjam").html(formatRupiah(sum.sisapinjaman));
+                    // $(".totalsimpanan").html(formatRupiah(sum.simpanan));
+                    // $(".totaltariksimpanan").html(formatRupiah(sum.tariksimpanan));
+                    // $(".totalsisasimpanan").html(formatRupiah(sum.sisasimpanan));
+                    // $(".totalpinjamawal").html(formatRupiah(sum.pinjaman));
+                    // $(".totalbayar").html(formatRupiah(sum.totalbayar));
+                    // $(".totalsisapinjam").html(formatRupiah(sum.sisapinjaman));
                     // console.log(es);
                     return es;
                 } else {

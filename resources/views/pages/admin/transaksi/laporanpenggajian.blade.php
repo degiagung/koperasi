@@ -16,8 +16,8 @@
     <section class="section dashboard">
          <div class="row">
             <h2>Laporan Potongan Gaji</h2>
-            {{-- <br> --}}
-                {{-- <div class="col-lg-12">
+            <br>
+                <div class="col-lg-12">
                     <div class="card-filter">
                         <label style="font-size:18px;">Filter</label>
                         <hr>
@@ -32,7 +32,7 @@
                             </div>
                         </div>
                     </div>
-                </div> --}}
+                </div>
         </div><br>
         <div class="row">
             <div class="col-lg-12">
