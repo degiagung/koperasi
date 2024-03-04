@@ -3810,6 +3810,7 @@ class JsonDataController extends Controller
                         }
                         $attributes     = [
                             'user_id'           => $userid,
+                            'jenis'             => 'potong gaji',
                             'amount'            => $jumlah,
                             'tgl_awal'          => $bulan,
                             'durasi'            => $durasi,
@@ -4714,6 +4715,252 @@ class JsonDataController extends Controller
                         $results = [
                             'code' => $status['code'],
                             'info'  => $status['info'],
+                        ];
+                            
+            
+            
+                    } else {
+                        $results = [
+                            'code' => '103',
+                            'info'  => "Method Failed",
+                        ];
+                    }
+                } catch (\Exception $e) {
+                    // Roll back the transaction in case of an exception
+                    $results = [
+                        'code' => '102',
+                        'info'  => $e->getMessage(),
+                    ];
+        
+                }
+            }
+            else {
+        
+                $results = [
+                    'code' => '403',
+                    'info'  => "Unauthorized",
+                ];
+                
+            }
+
+            return $MasterClass->Results($results);
+
+        }
+        public function getlaporanpotongan(Request $request){
+
+            $MasterClass = new Master();
+
+            $checkAuth = $MasterClass->Authenticated($MasterClass->getSession('user_id'));
+            
+            if($checkAuth['code'] == $MasterClass::CODE_SUCCESS){
+                try {
+                    if ($request->isMethod('post')) {
+
+                        DB::beginTransaction();     
+                        $userid         = $MasterClass->getSession('user_id') ;
+                        $role           = $MasterClass->getSession('role_name') ;
+                        $fstatus        = $request->status ;
+                        $fkeanggotaan   = $request->keanggotaan ;
+                        $fstatuspinjam  = $request->statuspinjam ;
+                        $ftahun         = $request->tahun ;
+                        $fbulan         = $request->bulan ;
+                        if($fbulan >= 1 && $fbulan <= 9){
+                            $fbulan = "0".$fbulan ;
+                        }
+                        $status = [];
+                        
+                        $wherefdate  = "";
+                        $wherefdate1 = "";
+                        $wherefdate2 = "";
+                        $wherefdate3 = "";
+                        $wherefdate4 = "";
+                        if($ftahun){
+                            
+                            $wherefdate .= "
+                                and DATE_FORMAT(tgl_approve, '%Y') = '$ftahun' 
+                            ";
+                            $wherefdate1 .= "
+                                AND DATE_FORMAT(pj1.tgl_approve, '%Y') = '$ftahun' 
+                            ";
+                            $wherefdate2 .= "
+                                AND DATE_FORMAT(st.tgl_approve, '%Y') = '$ftahun' 
+                            ";
+                            $wherefdate3 .= "
+                                AND DATE_FORMAT(ss.tgl_approve, '%Y') = '$ftahun' 
+                            ";
+                            $wherefdate4 .= "
+                                AND DATE_FORMAT(su.tgl_approve, '%Y') = '$ftahun' 
+                            ";
+                        }
+                        if($fbulan){
+                            $fbulan = $ftahun.$fbulan ;
+                            $wherefdate .= "
+                                and DATE_FORMAT(tgl_approve, '%Y%m') = '$fbulan'
+                            ";
+                            $wherefdate1 .= "
+                                AND DATE_FORMAT(pj1.tgl_approve, '%Y%m') = '$fbulan'
+                            ";
+                            $wherefdate2 .= "
+                                AND DATE_FORMAT(st.tgl_approve, '%Y%m') = '$fbulan'
+                            ";
+                            $wherefdate3 .= "
+                                AND DATE_FORMAT(ss.tgl_approve, '%Y%m') = '$fbulan'
+                            ";
+                            $wherefdate4 .= "
+                                AND DATE_FORMAT(su.tgl_approve, '%Y%m') = '$fbulan'
+                            ";
+                        }
+
+                        // dd($wherefdate);
+
+                        $select = "
+                            us.name,us.id as user,us.nrp,us.tgl_dinas,
+                            case 
+                                when us.is_active = '1' then 'ACTIVE' 
+                                when us.is_active = '2' then 'INACTIVE' 
+                                when us.is_active = '3' then 'DELETE' 
+                            end status_name,
+                            ur.role_name,
+                            cast((COALESCE(pj.amount,0) + COALESCE(pj.amount,0)*0.02) / pj.tenor as decimal(18,2)) as pinjaman,
+                            50000.00 as wajib,
+                            cast( (COALESCE(su.amount,0) / durasi) as decimal(18,2)) as sukarela,
+                            (cast((COALESCE(pj.amount,0) + COALESCE(pj.amount,0)*0.02) / pj.tenor as decimal(18,2)))
+                            +
+                            50000.00
+                            +
+                            (cast( (COALESCE(su.amount,0) / durasi) as decimal(18,2)))
+                             as total
+                        ";
+                        
+                        $table = "
+                            users us
+                            LEFT JOIN users_roles ur ON us.role_id = ur.id
+                            LEFT JOIN (
+                                select 
+                                    sum(amount) amount,
+                                    tenor,
+                                    user_id
+                                from pinjaman
+                                where status = 'approve' $wherefdate
+                                group by user_id
+                            ) pj ON pj.user_id = us.id 
+                            LEFT JOIN pinjaman pj1 ON pj1.user_id = us.id AND pj1.status = 'approve' and pj1.status_pinjaman != 'lunas' and COALESCE(PERIOD_DIFF(". DB::select("
+                            select 
+                                case 
+                                    when a.date is null then DATE_FORMAT(sysdate(),'%Y%m')
+                                    else DATE_FORMAT(a.date,'%Y%m')
+                                end as dates
+                            from datenow a
+                        ")[0]->dates.",DATE_FORMAT(pj1.tgl_approve, '%Y%m')),0) < pj1.tenor $wherefdate1
+                            LEFT JOIN (
+                                    select 
+                                        user_id,
+                                        CASE
+                                            WHEN DATE_ADD(tgl_awal, INTERVAL durasi MONTH) >= CURRENT_DATE() THEN 
+                                                amount * COALESCE(PERIOD_DIFF(". DB::select("
+                                                select 
+                                                    case 
+                                                        when a.date is null then DATE_FORMAT(sysdate(),'%Y%m')
+                                                        else DATE_FORMAT(a.date,'%Y%m')
+                                                    end as dates
+                                                from datenow a
+                                            ")[0]->dates.",
+                                                DATE_FORMAT(tgl_awal, '%Y%m')),0) 
+                                            ELSE 
+                                                amount * durasi
+                                        END amount,
+                                        durasi
+                                    from 
+                                        simpanan_sukarela su 
+                                    where su.jenis = 'potong gaji' and su.status = 'approve' $wherefdate4
+                            ) as su ON su.user_id = us.id                          
+                            LEFT JOIN simpanan st ON st.user_id = us.id AND st.jenis = 'tarik' AND (st.status is not null or st.status != '') $wherefdate2
+                            LEFT JOIN (
+                                select 
+                                    ss.user_id,sum(amount) as amount
+                                from
+                                    simpanan_sukarela ss
+                                where
+                                    ss.jenis = 'manual' and ss.status = 'approve' $wherefdate3
+                                group by
+                                    ss.user_id
+                            ) ss ON ss.user_id = us.id
+                        ";
+                        
+                        $where = "
+                             us.role_id in (select id from users_roles where role_name  like '%anggota%')
+                        ";
+                        
+                        if($role == 'anggota'){
+                            $where .= "
+                                 AND us.id = $userid  
+                            ";
+                        }
+
+                        if($fkeanggotaan){
+                            if($fkeanggotaan == 'pindah'){
+                                $where .= "
+                                     AND lower(us.status) = '2'
+                                ";
+                            }else{
+                                $where .= "
+                                     AND lower(us.tgl_dinas) $fkeanggotaan
+                                ";
+                            }
+                        }
+                        if($fstatuspinjam == '1'){
+                            $where .= "
+                                 AND (lower(pj.status_pinjaman) = 'lunas' OR COALESCE(pj.tenor,0) = PERIOD_DIFF(". DB::select("
+                            select 
+                                case 
+                                    when a.date is null then DATE_FORMAT(sysdate(),'%Y%m')
+                                    else DATE_FORMAT(a.date,'%Y%m')
+                                end as dates
+                            from datenow a
+                        ")[0]->dates.",DATE_FORMAT(us.tgl_dinas, '%Y%m')))
+                            ";
+                        }elseif($fstatuspinjam == '2'){
+                            $where .= "
+                                 AND pj.status_pinjaman != 'lunas' AND COALESCE(pj.tenor,0) != PERIOD_DIFF(". DB::select("
+                            select 
+                                case 
+                                    when a.date is null then DATE_FORMAT(sysdate(),'%Y%m')
+                                    else DATE_FORMAT(a.date,'%Y%m')
+                                end as dates
+                            from datenow a
+                        ")[0]->dates.",DATE_FORMAT(us.tgl_dinas, '%Y%m'))
+                            ";
+                        }
+
+                        $where.="
+                            GROUP BY 
+                                us.name,us.id,us.nrp,us.tgl_dinas,us.is_active,us.status,
+                                ur.role_name,
+                                pj.amount,pj1.amount,pj1.tenor,pj1.tgl_approve
+                        ";
+                        $result      = $MasterClass->selectGlobal($select,$table,$where);
+                        $selectcount = " 
+                            sum(a.pinjaman) as pinjaman,
+                            sum(a.wajib) as wajib,
+                            sum(a.sukarela) as sukarela
+                            from (select
+                        " ;
+                          
+                        $ressum = $MasterClass->selectGlobal($selectcount.$select,$table,$where.') as a');
+
+                        if($result['data']){
+                            $datas = [
+                                'data' => $result['data'],
+                                'sum' => $ressum['data'],
+                            ];
+                        }else{
+                            $datas = null ;
+                        }
+
+                        $results = [
+                            'code'  => $result['code'],
+                            'info'  => $result['info'],
+                            'data'  => $datas
                         ];
                             
             
