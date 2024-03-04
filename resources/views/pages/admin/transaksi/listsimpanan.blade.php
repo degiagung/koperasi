@@ -209,6 +209,7 @@
                             </tbody>
                             <tfoot>
                                 <td>Total</td>
+                                <td></td>
                                 <td class="totalbukti"></td>
                                 <td></td>
                             </tfoot>

@@ -1,3 +1,21 @@
+
+
+$(document).ready(function() {
+  var $table = $('#table-list');
+  $table.DataTable();
+  $('.datatable-print').click(function() {
+    var css = '<link href="https://cdn.datatables.net/1.10.12/css/jquery.dataTables.min.css" rel="stylesheet" />',
+      table = $('<div>').append($table.clone()).html(),
+      html = css + table,
+      printWin = window.open("about:blank", "_blank");
+    printWin.document.write(html);
+    printWin.focus();
+		setTimeout(function () { printWin.print(); }, 500);
+    printWin.onfocus = function () { setTimeout(function () { printWin.close(); }, 500); };
+  });
+});
+
+
 $("#filter-btn").on('click',function(e){
     $('#table-list').dataTable().fnClearTable();
     $('#table-list').dataTable().fnDraw();
@@ -8,6 +26,7 @@ $("#filter-btn").on('click',function(e){
 
 getListData();
 function getListData() {
+    $("#periodejudul").html('Periode '+$('#periode').val());
     $(".total").empty();
     dtpr = $("#table-list").DataTable({
         ajax: {
@@ -55,7 +74,8 @@ function getListData() {
                     $('#table-list').DataTable().ajax.reload();
                 }
             },
-            { footer: true, text: ' ', extend: 'excel',  className: 'btndownload iconexcel',  title:'Laporan transaksi_date'+datenow(new Date), exportOptions: {columns:[':not(.notdown)']}},
+            { text: ' ', extend: 'excel',  className: 'btndownload iconexcel',  title:'Laporan Potong gaji('+$('#periode').val()+')_date'+datenow(new Date), exportOptions: {columns:[':not(.notdown)']}},
+            { text: 'PRINT',  className: 'btndownload datatable-print',  },
         ],
         columns: [
             {

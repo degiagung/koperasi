@@ -485,7 +485,7 @@ function getlistbukti(rowData){
                             idtrans = response.data[j]['id'];
                             if(response.data[j]['nota'] == 'terkirim'){
                                 varnota = `
-                                    <td style="text-align:center;"><a onclick="showbill('`+no+`','`+rowData.name+`','`+rowData.nrp+`','`+tgl+`  ','50000','PINJAMAN','PJ','`+idtrans+`')" style="cursor:pointer;color:red;">Nota</a></td>
+                                    <td style="text-align:center;"><a onclick="showbill('`+no+`','`+rowData.name+`','`+rowData.nrp+`','`+tgl+`  ','`+jumlah+`','PINJAMAN','PJ','`+idtrans+`')" style="cursor:pointer;color:red;">Nota</a></td>
                                 `;
                                 terkirim = `
                                     
@@ -505,7 +505,7 @@ function getlistbukti(rowData){
                     }else{
                         content += `
                             <td style="text-align:center;"><a onclick="bukti('`+file+`',`+no+`)" style="cursor:pointer;color:red;">`+jenis+`</a></td>
-                            <td style="text-align:center;"><a onclick="showbill('`+no+`','`+rowData.name+`','`+rowData.nrp+`','`+tgl+`  ','50000','PINJAMAN','PJ','`+idtrans+`')" style="cursor:pointer;color:red;">Nota</a></td>
+                            <td style="text-align:center;"><a onclick="showbill('`+no+`','`+rowData.name+`','`+rowData.nrp+`','`+tgl+`  ','`+jumlah+`','PINJAMAN','PJ','`+idtrans+`')" style="cursor:pointer;color:red;">Nota</a></td>
                         `+terkirim;
                     }
                     
@@ -720,8 +720,8 @@ function showbill(id,name,nrp,tgl,rp,jenis,kode,idtrans) {
                     <br>
                     <br>
                         Bandung, `+datetostring2('yymmdd',tgl)+`<br>
-                        &ensp;&ensp;&ensp;<img src="`+baseURL+`/template/admin/images/ttd.jpg" style="width:100px" alt=""><br>
-                        BENDAHARA PRIMKOPAU
+                        &ensp;&ensp;&ensp;<img src="`+baseURL+`/template/admin/images/ttd.jpg" style="width:100px" alt="">
+                        <br>BENDAHARA PRIMKOPAU
 
                     </th>
                 </tr>
@@ -857,7 +857,7 @@ function getlistbukti(rowData){
                             idtrans = response.data[j]['id'];
                             if(response.data[j]['nota'] == 'terkirim'){
                                 varnota = `
-                                    <td style="text-align:center;"><a onclick="showbill('`+no+`','`+rowData.name+`','`+rowData.nrp+`','`+tgl+`  ','50000','PINJAMAN','PJ','`+idtrans+`')" style="cursor:pointer;color:red;">Nota</a></td>
+                                    <td style="text-align:center;"><a onclick="showbill('`+no+`','`+rowData.name+`','`+rowData.nrp+`','`+tgl+`  ','`+jumlah+`','PINJAMAN','PJ','`+idtrans+`')" style="cursor:pointer;color:red;">Nota</a></td>
                                 `;
                                 terkirim = `
                                     
@@ -877,7 +877,7 @@ function getlistbukti(rowData){
                     }else{
                         content += `
                             <td style="text-align:center;"><a onclick="bukti('`+file+`',`+no+`)" style="cursor:pointer;color:red;">`+jenis+`</a></td>
-                            <td style="text-align:center;"><a onclick="showbill('`+no+`','`+rowData.name+`','`+rowData.nrp+`','`+tgl+`  ','50000','PINJAMAN','PJ','`+idtrans+`')" style="cursor:pointer;color:red;">Nota</a></td>
+                            <td style="text-align:center;"><a onclick="showbill('`+no+`','`+rowData.name+`','`+rowData.nrp+`','`+tgl+`  ','`+jumlah+`','PINJAMAN','PJ','`+idtrans+`')" style="cursor:pointer;color:red;">Nota</a></td>
                         `+terkirim;
                     }
                     

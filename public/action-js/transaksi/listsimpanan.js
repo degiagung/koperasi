@@ -207,14 +207,18 @@ async function buktipokok(id) {
             `;
             $(".buktidiv").append(content);
             $("#modal-bukti").modal('show');
+            $(".notapokok").show();
         }else{
-            if (role == 'bendahara koperasi' || role == 'superadmin') {
+            $(".notapokok").hide();
+            // if (role == 'bendahara koperasi' || role == 'superadmin') {
+            if (role == 'anggota') {
                 $("#form-bukti").val('');
                 $("#modal-upload").modal('show');
                 isObject['jenis'] = 'pokok';
             }
 
-            if (role == 'anggota'){
+            // if (role == 'anggota'){
+            if (role != 'anggota'){
                 content =`<center>
                             Bukti Belum diupload
                         <center>
@@ -250,7 +254,8 @@ async function getlistbukti(rowData) {
         for (let i = 0; i < los; i++) {
             no = i+1 ;
             file = '';
-            if (role == 'bendahara koperasi' || role == 'superadmin') {
+            // if (role == 'bendahara koperasi' || role == 'superadmin') {
+            if (role == 'anggota') {
                 jenis= 'Upload Bukti';
             }else{
                 jenis= 'Belum Upload';
@@ -356,7 +361,7 @@ function showbill(id,name,nrp,tgl,rp,jenis,kode) {
                     <br>
                         Bandung, `+datetostring2('yymmdd',tgl)+`<br>
                         &ensp;&ensp;&ensp;<img src="`+baseURL+`/template/admin/images/ttd.jpg" style="width:100px" alt="">
-                        BENDAHARA PRIMKOPAU
+                        <br>BENDAHARA PRIMKOPAU
                     </th>
                 </tr>
             </table>
@@ -399,7 +404,8 @@ function bukti(file,no) {
         $(".buktidiv").append(content);
         $("#modal-bukti").modal('show');
     }else{
-        if (role == 'bendahara koperasi' || role == 'superadmin') {
+        // if (role == 'bendahara koperasi' || role == 'superadmin') {
+        if (role == 'anggota') {
             $("#form-bukti").val('');
             $("#modal-upload").modal('show');
             isObject['nobukti'] = no ;
@@ -644,16 +650,18 @@ async function getlistbuktipotonggaji() {
         for (let i = 0; i < durasi; i++) {
             no = i+1 ;
             file = '';
-            if (role == 'bendahara koperasi' || role == 'superadmin') {
+            // if (role == 'bendahara koperasi' || role == 'superadmin') {
+            if (role == 'anggota') {
                 jenis= 'Upload Bukti';
             }else{
                 jenis= 'Belum Upload';
             }
+            console.log(isObject);
             content += `
                 <tr>
-                    <td>`+datesimpananptgj(isObject['tgl_awal1'],i)+`</td>
+                    <td>`+datesimpanan(isObject['tgl_awal'],no)+`</td>
                     <td>`+no+`</td>
-                    <td>Rp.`+formatRupiah(jumlah)+`</td>
+                    <td>Rp.`+formatRupiah(jumlah/isObject['durasi'])+`</td>
             `;
             for (let j = 0; j < response.data.length; j++) {
                 if(no == response.data[j]['tenor']){

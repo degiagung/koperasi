@@ -13,6 +13,7 @@
             display: none;
         }​
     </style> --}}
+    
     <section class="section dashboard">
          <div class="row">
             <h2>Laporan Potongan Gaji</h2>
@@ -24,7 +25,7 @@
                             <div class="row">
                                 <div class="col-sm-3">
                                     <label>Tanggal Transaksi</label>
-                                    <input type="month" id="periode" style="text-align:center;background:#ffffff" class="form-control from_date"  placeholder = 'MMYY (202011)'>
+                                    <input type="month" id="periode" value="<?=date('Y-m')?>" style="text-align:center;background:#ffffff" class="form-control from_date">
                                 </div>
                                 <div class="col-sm-2">
                                     <button type="submit" id="filter-btn" class="btn btn-sgn" style="color:#e12a2a;width:100%;height:35px;font-size:14px;margin-top: 27px;"><i class="bi bi-search" style="font-size:12px;" ></i> Cari</button>
@@ -42,7 +43,10 @@
                     </div>
                     <div class="card-body">
                         <div class="table-responsive">
+                            <h3 id="periodejudul"></h3>
                             <table id="table-list" class="table table-bordered table-striped table-lgdatatables">
+                                {{-- <button class="btndownload datatable-print">PRINT</button> --}}
+
                                 <thead>
                                     <tr>
                                         <th>No</th>
@@ -51,7 +55,7 @@
                                         <th>Cicilan Pinjaman Per Bulan</th>
                                         <th>Simpanan Wajib Per Bulan</th>
                                         <th>Simpanan Sukarela Per Bulan</th>
-                                        <th>Total Potongsn</th>
+                                        <th>Total Potongan</th>
                                     </tr>
                                 </thead>
                                 <tfoot>
