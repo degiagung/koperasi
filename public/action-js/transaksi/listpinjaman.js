@@ -709,7 +709,7 @@ function showbill(id,name,nrp,tgl,rp,jenis,kode,idtrans) {
                                 JUMLAH
                             </div>
                             <div class="col-sm-6">
-                                : `+formatRupiah(rp)+`<br>
+                                : `+rp+`<br>
                             </div>
                         </div>
                     </th>

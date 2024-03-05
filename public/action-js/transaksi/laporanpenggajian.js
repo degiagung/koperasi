@@ -75,7 +75,11 @@ function getListData() {
                 }
             },
             { text: ' ', extend: 'excel',  className: 'btndownload iconexcel',  title:'Laporan Potong gaji('+$('#periode').val()+')_date'+datenow(new Date), exportOptions: {columns:[':not(.notdown)']}},
-            { text: 'PRINT',  className: 'btndownload datatable-print',  },
+            { text: 'PRINT', extend: 'print',  className: 'btndownload',
+                title: function(){
+                    return 'Laporan Potong Gaji Periode '+datetostring2('yymm',$('#periode').val().replaceAll('-',''));
+                }
+            },
         ],
         columns: [
             {
