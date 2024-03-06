@@ -155,14 +155,14 @@
             </div>
         </div>
         <div class="modal fade" id="modal-detail-sukarela" style="display: none;" aria-hidden="true">
-            <div class="modal-dialog modal-lg" role="document">
+            <div class="modal-dialog modal-xl" role="document">
                 <div class="modal-content">
                     <div class="modal-header headermodal">
                         <h5 class="modal-title">Detail Sukarela</h5>
                         <button type="button" class="btn-close" data-bs-dismiss="modal">
                         </button>
                     </div>
-                    <div class="modal-body">
+                    <div class="modal-body" style="width:75%;margin-left:120px">
                         <table id="table-detail-sukarela" class="table table-bordered table-striped table-lgdatatables">
                             <thead>
                                 <tr>
@@ -173,6 +173,7 @@
                                     <th>tgl awal potong gaji</th>
                                     <th>durasi potong gaji</th>
                                     <th>Nota</th>
+                                    <th>#</th>
                                 </tr>
                             </thead>
                             {{-- <tfoot>
@@ -233,6 +234,8 @@
                     <div class="modal-body">
                         <center class="notapokok">
                             <button type="submit" onclick="showbill('pokok')">Lihat Nota</button>
+                            <br>
+                            <a class="statusnotapokok" style="display:none;color:green;">NOTA TERKIRIM</a>
                         </center><br>
                         <div class="basic-form buktidiv">
                             
@@ -288,6 +291,7 @@
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    <button type="button" class="btn btn-primary btnkirimnota" onClick="kirimnota()">Kirim Ke Anggota</button>
                     <button type="button" class="btn btn-primary btndownloadsert">Download PDF</button>
                 </div>
                 </div>

@@ -3149,7 +3149,7 @@ class JsonDataController extends Controller
                                 DATE_ADD(sm.tgl_awal, INTERVAL 1 MONTH) as tgl_awal1
                             FROM
                                 simpanan_sukarela sm
-                                LEFT JOIN users u ON u.id = sm.user_id  
+                                LEFT JOIN users u ON u.id = sm.user_id
                             WHERE
                                 sm.status = 'approve'
                                 AND sm.user_id = $id
@@ -4699,12 +4699,18 @@ class JsonDataController extends Controller
                         $attributes     = [
                             'nota' => 'terkirim'
                         ];
+                        // dd($request);
                         $where     = [
                             'id' => $request->id
                         ];
 
-                        $saved      = $MasterClass->updateGlobal('bukti_transaksi', $attributes,$where );
-                        $status = $saved;
+                        if ($request->kode == 'SMS') {
+                            $table = 'simpanan_sukarela';
+                        }else{
+                            $table = 'bukti_transaksi';
+                        }
+                        $saved      = $MasterClass->updateGlobal($table, $attributes,$where );
+                        $status     = $saved;
     
                         if($status['code'] == $MasterClass::CODE_SUCCESS){
                             DB::commit();

@@ -4,6 +4,11 @@ let dtpr;
 
 $(document).ready(function () {
     calllistdata();
+    if(role == 'superadmin' || role == 'bendahara koperasi'){
+        $(".btnkirimnota").show();
+    }else{
+        $(".btnkirimnota").hide();
+    }
 });
 
 function calllistdata(){
@@ -183,8 +188,10 @@ function detail(rowData) {
     $("#modal-data").modal("show");
 }
 async function buktipokok(id) {
+    
     $(".buktidiv").empty();
     $(".notapokok").show();
+    $(".statusnotapokok").hide();
     try {
         const response = await $.ajax({
             url: baseURL + "/getbuktipokok",
@@ -199,6 +206,7 @@ async function buktipokok(id) {
         });
         
         if( response.data.length >=1){
+            idtransjakarta = response.data[0].id; 
             file = response.data[0].file ;
             file = baseURL+file.replaceAll('../public','');
             content =`<center>
@@ -207,7 +215,18 @@ async function buktipokok(id) {
             `;
             $(".buktidiv").append(content);
             $("#modal-bukti").modal('show');
-            $(".notapokok").show();
+
+            if (role == 'anggota') {
+                if(response.data[0].nota == 'terkirim'){
+                    $(".notapokok").show();
+                }else{
+                    $(".notapokok").hide();
+                }
+            }else{
+                if(response.data[0].nota == 'terkirim'){
+                    $(".statusnotapokok").show();
+                }
+            }
         }else{
             $(".notapokok").hide();
             // if (role == 'bendahara koperasi' || role == 'superadmin') {
@@ -266,20 +285,41 @@ async function getlistbukti(rowData) {
                     <td>`+no+`</td>
                     <td>Rp. 50.000.00</td>
             `;
-            for (let j = 0; j < response.data.length; j++) {
-                if(no == response.data[j]['tenor']){
-                    file = response.data[j]['file'];
-                    jenis= 'Lihat Bukti';
-                }
-            }
             var threeMonthsAgo = moment(rowData.tgl_dinas, "YYYY-MM-DD").add(no, 'months');
             var mm2     = threeMonthsAgo.format('MM');
             var yyyy2   = threeMonthsAgo.format('YYYY');
             tgl = yyyy2+''+mm2+'01' ;
-            content += `
-                <td style="text-align:center;"><a onclick="bukti('`+file+`',`+no+`)" style="cursor:pointer;color:red;">`+jenis+`</a></td>
-                <td style="text-align:center;"><a onclick="showbill('`+no+`','`+rowData.name+`','`+rowData.nrp+`','`+tgl+`  ','50000','SIMPANAN WAJIB','SM')" style="cursor:pointer;color:red;">Nota</a></td>
-            `;
+            terkirim= '';
+            varnota = '';
+            idtrans = '';
+            for (let j = 0; j < response.data.length; j++) {
+                if(no == response.data[j]['tenor']){
+                    idtrans = response.data[j]['id'];
+                    file = response.data[j]['file'];
+                    jenis= 'Lihat Bukti';
+
+                    if(response.data[j]['nota'] == 'terkirim'){
+                        varnota = `
+                            <td style="text-align:center;"><a onclick="showbill('`+no+`','`+rowData.name+`','`+rowData.nrp+`','`+tgl+`  ','50000','SIMPANAN WAJIB','SM','`+idtrans+`')" style="cursor:pointer;color:red;">Nota</a></td>
+                        `;
+                        terkirim = `
+                            <td style="text-align:center;"><a style="color:green;">TERKIRIM</a></td>
+                        `;
+                    }
+                }
+            }
+
+            if(role == 'anggota'){
+                content += `
+                    <td style="text-align:center;"><a onclick="bukti('`+file+`',`+no+`)" style="cursor:pointer;color:red;">`+jenis+`</a></td>
+                `+varnota;
+            }else{
+                content += `
+                    <td style="text-align:center;"><a onclick="bukti('`+file+`',`+no+`)" style="cursor:pointer;color:red;">`+jenis+`</a></td>
+                    <td style="text-align:center;"><a onclick="showbill('`+no+`','`+rowData.name+`','`+rowData.nrp+`','`+tgl+`  ','50000','SIMPANAN WAJIB','SM','`+idtrans+`')" style="cursor:pointer;color:red;">Nota</a></td>
+                `+terkirim;
+            }
+
             content += `</tr>`;   
         }
         
@@ -292,7 +332,19 @@ async function getlistbukti(rowData) {
     }
 }
 
-function showbill(id,name,nrp,tgl,rp,jenis,kode) {
+var idtransjakarta = '';
+var kodes = '';
+function showbill(id,name,nrp,tgl,rp,jenis,kode,idtrans) {
+    if(idtrans != null){
+        idtransjakarta = idtrans ;
+    }
+
+    if(idtransjakarta == null || idtransjakarta == 'undefined' || idtransjakarta == ''){
+        window.swalwarning('Ooopss ,Bukti Belum diupload');
+        return false ;
+    }
+    kodes = kode ;
+    
     if(id == 'pokok'){
         jenis   = 'SIMPANAN POKOK';
         name    = isObject.name;
@@ -556,8 +608,27 @@ function detailsukarela() {
                 else
                     return '';
             } },
-             { sClass:"notdown",render:function (data,type,row) {
-                return `<a class="nota" style="cursor:pointer;">Nota</a>`;
+            { sClass:"notdown",render:function (data,type,row) {
+                if(role == 'anggota'){
+                    if (row.nota == 'terkirim') {
+                        return `<a class="nota" style="cursor:pointer;">Nota</a>`;
+                    }else{
+                        return '';   
+                    }
+                }else{
+                    return `<a class="nota" style="cursor:pointer;">Nota</a>`;
+                }
+            } },
+            { sClass:"notdown",render:function (data,type,row) {
+                if(role != 'anggota'){
+                    if (row.nota == 'terkirim') {
+                        return `<a class="nota" style="color:green;cursor:pointer;">TERKIRIM</a>`;
+                    }else{
+                        return '';   
+                    }
+                }else{
+                    return '';
+                }
             } },
 
         ],
@@ -588,7 +659,9 @@ function detailsukarela() {
                 .on("click", function () {
                     var tr = $(this).closest("tr");
                     var rowData = tblskrl.row(tr).data();
-                    showbill(rowData.id,rowData.name,rowData.nrp,rowData.tgl_approve,rowData.amount,'SIMPANAN SUKARELA','SMS');
+                    isObject = {};
+                    isObject = rowData ;
+                    showbill(rowData.id,rowData.name,rowData.nrp,rowData.tgl_approve,rowData.amount,'SIMPANAN SUKARELA','SMS',rowData.id);
                 });
         },
     });
@@ -650,13 +723,19 @@ async function getlistbuktipotonggaji() {
         for (let i = 0; i < durasi; i++) {
             no = i+1 ;
             file = '';
+            idtrans = '';
+            varnota = '';
+            terkirim = '';
+            var threeMonthsAgo = moment(isObject['tgl_awal'], "YYYY-MM-DD").add(no, 'months');
+            var mm2     = threeMonthsAgo.format('MM');
+            var yyyy2   = threeMonthsAgo.format('YYYY');
+            tgl = yyyy2+''+mm2+'01' ;
             // if (role == 'bendahara koperasi' || role == 'superadmin') {
             if (role == 'anggota') {
                 jenis= 'Upload Bukti';
             }else{
                 jenis= 'Belum Upload';
             }
-            console.log(isObject);
             content += `
                 <tr>
                     <td>`+datesimpanan(isObject['tgl_awal'],no)+`</td>
@@ -667,10 +746,30 @@ async function getlistbuktipotonggaji() {
                 if(no == response.data[j]['tenor']){
                     file = response.data[j]['file'];
                     jenis= 'Lihat Bukti';
+                    idtrans = response.data[j]['id'] ;
+                    if(response.data[j]['nota'] == 'terkirim'){
+                        varnota = `
+                            <td style="text-align:center;"><a onclick="showbill('`+no+`','`+isObject['name']+`','`+isObject['nrp']+`','`+tgl+`  ','`+formatRupiah(jumlah/isObject['durasi'])+`','SIMPANAN SUKARELA','SMS','`+idtrans+`')" style="cursor:pointer;color:red;">Nota</a></td>
+                        `;
+                        terkirim = `
+                            <td style="text-align:center;"><a style="color:green;">TERKIRIM</a></td>
+                        `;
+                    }
                 }
             }
+
+            if(role == 'anggota'){
+                content += `
+                    <td style="text-align:center;"><a onclick="bukti('`+file+`',`+no+`)" style="cursor:pointer;color:red;">`+jenis+`</a></td>
+                `+varnota;
+            }else{
+                content += `
+                    <td style="text-align:center;"><a onclick="bukti('`+file+`',`+no+`)" style="cursor:pointer;color:red;">`+jenis+`</a></td>
+                    <td style="text-align:center;"><a onclick="showbill('`+no+`','`+isObject['name']+`','`+isObject['nrp']+`','`+tgl+`  ','`+formatRupiah(jumlah/isObject['durasi'])+`','SIMPANAN SUKARELA','SMS','`+idtrans+`')" style="cursor:pointer;color:red;">Nota</a></td>
+                `+terkirim;
+            }
+
             content += `
-                <td style="text-align:center;"><a onclick="bukti('`+file+`',`+no+`)" style="cursor:pointer;color:red;">`+jenis+`</a></td>
             `;
             content += `</tr>`;   
         }
@@ -683,4 +782,57 @@ async function getlistbuktipotonggaji() {
         sweetAlert("Oops...", error.responseText, "ERROR");
     }
 }
-
+function kirimnota(){
+   
+    swal({
+        title: "Yakin untuk kirim nota ke anggota ?",
+        type: "warning",
+        showCancelButton: !0,
+        confirmButtonColor: "#DD6B55",
+        confirmButtonText: "Ya, Kirim ",
+        cancelButtonText: "Tidak, Batalkan !!",
+        closeOnConfirm: !1,
+        closeOnCancel: !1,
+    }).then(function (e) {
+        if (e.value) {
+            $.ajax({
+                url: baseURL + "/kirimnota",
+                type: "POST",
+                dataType: "json",
+                data:{
+                    id      : idtransjakarta,
+                    kode    : kodes,
+                },
+                beforeSend: function () {
+                    Swal.fire({
+                        title: "Loading",
+                        text: "Please wait...",
+                    });
+                },
+                complete: function () {
+                },
+                success: function (response) {
+                    // Handle response sukses
+                    if (response.code == 0) {
+                        swal("BERHASIL !", response.message, "success");
+                        $("#modal-bill").modal('hide');
+                        $("#modal-bukti").modal('hide');
+                        $("#modal-detail").modal('hide');
+                        $("#modal-detail-sukarela").modal('hide');
+                    } else {
+                        sweetAlert("Oops...", response.message, "ERROR");
+                    }
+                },
+                error: function (xhr, status, error) {
+                    // Handle error response
+                    // console.log("ERROR");
+                    sweetAlert("Oops...", "ERROR", "ERROR");
+                },
+            });
+        } else {
+            swal(
+                "BATAL !!",
+            );
+        }
+    });
+}

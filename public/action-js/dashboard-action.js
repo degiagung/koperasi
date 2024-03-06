@@ -174,7 +174,7 @@ function getListDataAnggota() {
                 return formatRupiah(row.sisapinjaman1) ;
             } },
         ],
-        drawCallback: function (settings) {
+        fnInitComplete: function (settings) {
             var api = this.api();
             var rows = api.rows({ page: "current" }).nodes();
             var last = null;
